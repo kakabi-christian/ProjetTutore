@@ -1,16 +1,17 @@
-name: Laravel
+name: CI-CD ExchaPay
 
 on:
   push:
-    branches: [ "main","develop" ]
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: [ "main","develop" ]
+    branches: [ "main", "develop" ]
 
 jobs:
+  # --- PARTIE 1 : CI (INTEGRATION CONTINUE) ---
   laravel-tests:
+    name: "Qualité & Tests"
     runs-on: ubuntu-latest
 
-    # Définition du service MySQL pour les tests
     services:
       mysql:
         image: mysql:8.0
@@ -22,27 +23,30 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Récupération du code
+        uses: actions/checkout@v4
 
-      - name: Setup PHP
+      - name: Installation de PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.0'
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, pdo_mysql
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql
 
-      - name: Copy .env
-        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
-
-      - name: Install Dependencies
+      - name: Installation des dépendances (Composer)
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-      - name: Generate key
-        run: php artisan key:generate
+      # ÉTAPE CLEAN CODE : Vérifie si le code est bien formaté
+      - name: Vérification du Clean Code (Pint)
+        run: ./vendor/bin/pint --test
 
-      - name: Directory Permissions
-        run: chmod -R 777 storage bootstrap/cache
+      - name: Préparation de l'environnement
+        run: |
+          php -r "file_exists('.env') || copy('.env.example', '.env');"
+          php artisan key:generate
+          chmod -R 777 storage bootstrap/cache
 
-      - name: Execute tests via PHPUnit/Pest
+      # ÉTAPE TESTS : Lance les tests unitaires et fonctionnels
+      - name: Exécution des Tests (MySQL)
         env:
           DB_CONNECTION: mysql
           DB_HOST: 127.0.0.1
@@ -51,3 +55,39 @@ jobs:
           DB_USERNAME: root
           DB_PASSWORD: ''
         run: php artisan test
+
+      # ÉTAPE ARTEFACT : Sauvegarde le projet pour le job suivant
+      - name: Archivage de l'artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: exchapay-build
+          path: .
+
+  # --- PARTIE 2 : CD (DEPLOIEMENT CONTINU) ---
+  build-and-push-docker:
+    name: "Build & Push Docker"
+    needs: laravel-tests # Ne se lance que si les tests réussissent
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+
+    steps:
+      - name: Récupération de l'artefact
+        uses: actions/download-artifact@v4
+        with:
+          name: exchapay-build
+
+      - name: Connexion à Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Construction et envoi de l'image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # On crée deux tags : 'latest' pour la dernière version et un tag avec le numéro du commit
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/exchapay-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/exchapay-backend:${{ github.sha }}
