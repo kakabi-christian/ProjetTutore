@@ -1,0 +1,44 @@
+services:
+  # 1. Base de données MySQL
+  db:
+    image: mysql:8.0
+    container_name: ExchaPay-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ExchaPay_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - excha_db_data:/var/lib/mysql
+
+  # 2. Backend Laravel
+  backend:
+    build: 
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: ExchaPay-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=ExchaPay_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+
+  # 3. Frontend React (Vite)
+  frontend:
+    build: 
+      context: ./Frontend
+      dockerfile: Dockerfile # Il faudra créer ce fichier !
+    container_name: ExchaPay-ui
+    ports:
+      - "4200:5173" # Vite utilise par défaut le port 5173
+    depends_on:
+      - backend
+
+volumes:
+  excha_db_data:
