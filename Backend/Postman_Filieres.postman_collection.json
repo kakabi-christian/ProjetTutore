@@ -1,0 +1,174 @@
+{
+  "info": {
+    "name": "Filieres API",
+    "description": "Collection pour tester l'API Filieres",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Créer une Filiere",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code_filiere\": \"FIL001\",\n  \"label_filiere\": \"Informatique\",\n  \"desc_filiere\": \"Filière Informatique et Systèmes d'Information\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/filieres",
+          "host": ["{{base_url}}"],
+          "path": ["api", "filieres"]
+        },
+        "description": "Créer une nouvelle filiere"
+      }
+    },
+    {
+      "name": "2. Lister toutes les Filieres",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/filieres",
+          "host": ["{{base_url}}"],
+          "path": ["api", "filieres"]
+        },
+        "description": "Récupérer la liste de toutes les filieres"
+      }
+    },
+    {
+      "name": "3. Voir une Filiere spécifique",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/filieres/FIL001",
+          "host": ["{{base_url}}"],
+          "path": ["api", "filieres", "FIL001"]
+        },
+        "description": "Récupérer les détails d'une filiere spécifique"
+      }
+    },
+    {
+      "name": "4. Modifier une Filiere",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"label_filiere\": \"Informatique - Mise à jour\",\n  \"desc_filiere\": \"Filière Informatique - Version modifiée\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/filieres/FIL001",
+          "host": ["{{base_url}}"],
+          "path": ["api", "filieres", "FIL001"]
+        },
+        "description": "Modifier une filiere existante"
+      }
+    },
+    {
+      "name": "5. Supprimer une Filiere",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/filieres/FIL001",
+          "host": ["{{base_url}}"],
+          "path": ["api", "filieres", "FIL001"]
+        },
+        "description": "Supprimer une filiere"
+      }
+    },
+    {
+      "name": "6. Créer une 2e Filiere",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code_filiere\": \"FIL002\",\n  \"label_filiere\": \"Gestion\",\n  \"desc_filiere\": \"Filière Gestion et Administration des Entreprises\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/filieres",
+          "host": ["{{base_url}}"],
+          "path": ["api", "filieres"]
+        },
+        "description": "Créer une deuxième filiere"
+      }
+    },
+    {
+      "name": "7. Créer une 3e Filiere",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code_filiere\": \"FIL003\",\n  \"label_filiere\": \"Réseaux\",\n  \"desc_filiere\": \"Filière Réseaux et Télécommunications\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/filieres",
+          "host": ["{{base_url}}"],
+          "path": ["api", "filieres"]
+        },
+        "description": "Créer une troisième filiere"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ]
+}

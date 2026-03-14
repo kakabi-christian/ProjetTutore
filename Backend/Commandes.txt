@@ -1,0 +1,122 @@
+1️⃣ Installer Sanctum via Composer
+
+composer require laravel/sanctum
+
+2️⃣ Publier la configuration et la migration
+php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+Cela va créer:config/sanctum.php
+une migration pour la table personal_access_tokens
+3️⃣ Exécuter la migration
+Pour créer la table personal_access_tokens :
+php artisan migrate
+
+//ISO9126 : Norme de definition d'un logiciel 
+php artisan make:factory NiveauFactory --model=Niveau
+php artisan db:seed
+
+
+🚀 1. Optimisation de performance des API
+🧠 Architecture et logique
+
+Conception RESTful stateless – garder chaque requête indépendante pour faciliter le scaling horizontal. 
+Online Scientific Research
+
+Éviter les traitements lourds en ligne – déplace les travaux longs (ex : envoi d’emails, traitement d’images) vers des queues asynchrones comme RabbitMQ ou Kafka. 
+Online Scientific Research
+
+Écrire un code efficace – optimiser la logique interne pour réduire les opérations inutiles (boucles, calculs redondants). 
+DEV Community
+
+📊 Réponses plus rapides
+
+Pagination & filtres — limite la quantité de données renvoyées sur des appels de masse. 
+Online Scientific Research
+
+Compression des données (gzip / Brotli) — réduit la taille des réponses HTTP. 
+Medium
+
+Formats efficaces — envisager Protobuf ou MessagePack quand JSON devient trop lourd. 
+MoldStud
+
+🗄️ Accès aux données
+
+Optimiser les requêtes DB :
+
+indexation des champs les plus utilisés ;
+
+éviter les joins complexes si possible ;
+
+utiliser des lectures en batch plutôt que lignes par ligne. 
+Online Scientific Research
+
+Connection pooling — réutiliser les connexions DB pour réduire l’overhead. 
+Endgrate
+
+📈 2. Gestion de la charge et scalabilité
+⚖️ Répartition de charge
+
+Load balancers (équilibreur de charge) répartissent le trafic entre plusieurs serveurs.
+
+Weighted load balancing pour des serveurs avec capacités différentes.
+
+Global load balancing pour une répartition multi-régions. 
+Zuplo
+
+🤝 Mise à l’échelle horizontale
+
+Horizontal scaling — ajouter plus d’instances de serveurs plutôt que d’augmenter la puissance d’une seule machine (scaling up). 
+Online Scientific Research
+
+Autoscaling — configurer des règles qui augmentent / diminuent automatiquement le nombre d’instances selon la charge. 
+Zuplo
+
+🧰 3. Techniques pour supporter des pics de trafic
+⚠️ Limiter la pression
+
+Rate Limiting (throttling) — empêche une surcharge en limitant les requêtes par utilisateur ou IP. 
+MoldStud
+
+Traffic shaping & circuits breakers — rejeter ou dégrader les services non essentiels pour maintenir la stabilité globale. 
+DEV Community
+
+🧠 Mise en cache intelligente
+
+Mécanismes de cache :
+
+Cache HTTP (avec headers Cache-Control, ETag);
+
+Cache serveur (Redis, Memcached);
+
+CDN pour servir des réponses plus proches des utilisateurs. 
+Online Scientific Research
+
+📊 4. Observabilité et surveillance
+
+Monitoring continu — suivre latence, taux d’erreur, débit (RPS: requêtes par seconde), saturation CPU/mémoire.
+
+Outils communs : Prometheus, Grafana, New Relic, Datadog.
+
+Logging centralisé + alertes pour détecter tôt les problèmes. 
+MoldStud
+
+🧩 5. Autres bonnes pratiques importantes
+🆕 Versioning
+
+Maintenir plusieurs versions de votre API évite les ruptures clients lors de nouvelles évolutions. 
+MoldStud
+
+🧪 Tests de charge
+
+Simulez des pics de trafic (via JMeter, Locust, Gatling…) pour comprendre les limites de votre API et vos points de rupture.
+
+🌍 Déploiement régional
+
+Déployer votre API dans plusieurs régions (ou en edge) réduit la latence pour les utilisateurs éloignés. 
+Zuplo
+
+📌 Résumé rapide
+Domaine	Techniques clés
+Performance	Pagination, compression, code optimisé, requêtes rapides
+Charge	Load balancing, autoscaling, stateless API
+Scalabilité	Horizontal scaling, caching, rate limiting
+Obs/Monitoring	Metrics, logs, alertes
