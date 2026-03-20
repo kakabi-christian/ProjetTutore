@@ -1,0 +1,303 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Suivie Academique",
+        "description": "Documentation API de suivi académique",
+        "contact": {
+            "email": "ton.email@example.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000/api",
+            "description": "API Server"
+        }
+    ],
+    "paths": {
+        "/api/filieres": {
+            "get": {
+                "tags": [
+                    "Filieres"
+                ],
+                "summary": "Get list of filieres",
+                "operationId": "1240bef162bd6966348eec9968e7d0ca",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "code_filiere": {
+                                                "type": "string",
+                                                "example": "FIL001"
+                                            },
+                                            "label_filiere": {
+                                                "type": "string",
+                                                "example": "Informatique"
+                                            },
+                                            "desc_filiere": {
+                                                "type": "string",
+                                                "example": "Description"
+                                            },
+                                            "created_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "updated_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Filieres"
+                ],
+                "summary": "Create a new filiere",
+                "operationId": "e5313008bb0405f32bc0d40c3b634aec",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "code_filiere",
+                                    "label_filiere"
+                                ],
+                                "properties": {
+                                    "code_filiere": {
+                                        "type": "string",
+                                        "example": "FIL001"
+                                    },
+                                    "label_filiere": {
+                                        "type": "string",
+                                        "example": "Informatique"
+                                    },
+                                    "desc_filiere": {
+                                        "type": "string",
+                                        "example": "Description",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Filiere created successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                }
+            }
+        },
+        "/api/filieres/{code_filiere}": {
+            "get": {
+                "tags": [
+                    "Filieres"
+                ],
+                "summary": "Get a filiere by code",
+                "operationId": "eb4ed6f8dca370f4fb6531f1df040dd3",
+                "parameters": [
+                    {
+                        "name": "code_filiere",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Filiere found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code_filiere": {
+                                            "type": "string"
+                                        },
+                                        "label_filiere": {
+                                            "type": "string"
+                                        },
+                                        "desc_filiere": {
+                                            "type": "string"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Filieres"
+                ],
+                "summary": "Update a filiere",
+                "operationId": "74f53571e10f465a36576bde07588807",
+                "parameters": [
+                    {
+                        "name": "code_filiere",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "label_filiere": {
+                                        "type": "string"
+                                    },
+                                    "desc_filiere": {
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated successfully"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Filieres"
+                ],
+                "summary": "Delete a filiere",
+                "operationId": "38b0ce4ef018399a2c2555594d2a7060",
+                "parameters": [
+                    {
+                        "name": "code_filiere",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted successfully"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/filieres/search": {
+            "get": {
+                "tags": [
+                    "Filieres"
+                ],
+                "summary": "Search filieres by label or description",
+                "operationId": "7c9a5f1b3ff5bf8d57b2b0d7d089a0cc",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Search term",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Search results",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "code_filiere": {
+                                                "type": "string"
+                                            },
+                                            "label_filiere": {
+                                                "type": "string"
+                                            },
+                                            "desc_filiere": {
+                                                "type": "string"
+                                            },
+                                            "created_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "updated_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No results found"
+                    },
+                    "422": {
+                        "description": "No search term provided"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Filieres",
+            "description": "Filieres"
+        }
+    ]
+}
