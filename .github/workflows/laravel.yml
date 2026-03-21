@@ -66,8 +66,9 @@ jobs:
     name: "Build & Push Docker Hub"
     needs: laravel-tests
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
-
+    if: |
+      (github.event_name == 'push' || github.event_name == 'pull_request') &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.base_ref == 'main' || github.base_ref == 'develop')
     steps:
       - name: Récupération du code
         uses: actions/checkout@v4
