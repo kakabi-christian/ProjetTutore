@@ -26,33 +26,32 @@ jobs:
       - name: Récupération du code
         uses: actions/checkout@v4
 
-      # ÉTAPE DE DIAGNOSTIC : Pour vérifier la présence du dossier Backend
-      - name: Vérifier la structure des dossiers
-        run: ls -R
-
       - name: Installation de PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2' # Aligné sur ton Dockerfile
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql
+          php-version: '8.4' # Mis à jour pour correspondre à tes dépendances Symfony 8.0
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, bcmath
+          coverage: none
 
       - name: Installation des dépendances (Composer)
-        # On spécifie le dossier Backend car c'est là que se trouve composer.json
         working-directory: ./Backend 
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Vérification du Clean Code (Pint)
         working-directory: ./Backend
-        run: ./vendor/bin/pint --test || echo "Problèmes de style détectés"
+        # On utilise continue-on-error pour ne pas bloquer si c'est juste un espace en trop
+        run: ./vendor/bin/pint --test
+        continue-on-error: true 
 
       - name: Préparation de l'environnement
         working-directory: ./Backend
         run: |
-          php -r "file_exists('.env') || copy('.env.example', '.env');"
+          cp .env.example .env
           php artisan key:generate
-          chmod -R 777 storage bootstrap/cache
+          # Création d'une base SQLite temporaire si besoin ou utilisation du service MySQL
+          touch database/testing.sqlite 
 
-      - name: Exécution des Tests (MySQL)
+      - name: Exécution des Tests
         working-directory: ./Backend
         env:
           DB_CONNECTION: mysql
@@ -60,27 +59,18 @@ jobs:
           DB_PORT: 3306
           DB_DATABASE: laravel_test
           DB_USERNAME: root
-          DB_PASSWORD: ''
         run: php artisan test
 
-      - name: Archivage de l'artefact
-        uses: actions/upload-artifact@v4
-        with:
-          name: exchapay-build
-          path: .
-
-  # --- PARTIE 2 : CD (DEPLOIEMENT CONTINU) ---
+  # --- PARTIE 2 : CD (BUILD DOCKER) ---
   build-and-push-docker:
-    name: "Build & Push Docker"
+    name: "Build & Push Docker Hub"
     needs: laravel-tests
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
 
     steps:
-      - name: Récupération de l'artefact
-        uses: actions/download-artifact@v4
-        with:
-          name: exchapay-build
+      - name: Récupération du code
+        uses: actions/checkout@v4
 
       - name: Connexion à Docker Hub
         uses: docker/login-action@v3
@@ -91,7 +81,8 @@ jobs:
       - name: Construction et envoi de l'image Backend
         uses: docker/build-push-action@v5
         with:
-          context: ./Backend # On pointe vers le dossier du code source
+          context: ./Backend
+          file: ./Backend/Dockerfile # Assure-toi que le chemin vers le Dockerfile est correct
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/exchapay-backend:latest
