@@ -3,8 +3,8 @@
 namespace Tests\Traits;
 
 use App\Models\Utilisateur;
-use Laravel\Sanctum\Sanctum;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\Sanctum;
 
 trait ApiTokenTrait
 {
@@ -18,14 +18,14 @@ trait ApiTokenTrait
 
         // 2. Création d'un utilisateur de test conforme à ton modèle Utilisateur
         $user = Utilisateur::create([
-            'lastname'   => 'Test',
-            'firstname'  => 'Admin',
-            'email'      => 'test@exchapay.com',
-            'password'   => Hash::make('password123'),
-            'telephone'  => '+237600000000',
-            'country'    => 'Cameroun',
-            'type'       => 'admin', // Selon ta méthode isAdmin()
-            'isactive'   => true,
+            'lastname' => 'Test',
+            'firstname' => 'Admin',
+            'email' => 'test@exchapay.com',
+            'password' => Hash::make('password123'),
+            'telephone' => '+237600000000',
+            'country' => 'Cameroun',
+            'type' => 'admin', // Selon ta méthode isAdmin()
+            'isactive' => true,
             'isverified' => true,
         ]);
 

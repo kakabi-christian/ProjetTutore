@@ -2,17 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable; 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class Utilisateur extends Authenticatable 
+class Utilisateur extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'utilisateurs';
+
     protected $primaryKey = 'user_id';
+
     public $incrementing = true;
 
     protected $fillable = [
@@ -23,7 +25,7 @@ class Utilisateur extends Authenticatable
         'password',
         'telephone',
         'country',
-        'lastlogin', 
+        'lastlogin',
         'isactive',
         'isverified',
     ];
@@ -47,10 +49,11 @@ class Utilisateur extends Authenticatable
     {
         return $this->type === 'admin';
     }
+
     public function roles()
     {
         return $this->belongsToMany(
-            Role::class, 
+            Role::class,
             'user_roles', // Nom de ta table pivot
             'user_id',   // Clé étrangère dans la pivot vers 'utilisateurs'
             'role_id'    // Clé étrangère dans la pivot vers 'roles'

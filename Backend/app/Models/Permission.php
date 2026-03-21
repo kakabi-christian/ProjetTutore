@@ -2,18 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Permission extends Model
 {
     use HasFactory;
 
-    
     protected $table = 'permissions';
 
-   
     protected $primaryKey = 'permission_id';
 
     /**
@@ -31,7 +29,7 @@ class Permission extends Model
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(
-            Role::class, 
+            Role::class,
             'user_permissions', // Table pivot
             'permission_id',    // Clé étrangère dans la pivot vers 'permissions'
             'role_id'           // Clé étrangère dans la pivot vers 'roles'

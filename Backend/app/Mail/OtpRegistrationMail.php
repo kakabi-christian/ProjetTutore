@@ -14,6 +14,7 @@ class OtpRegistrationMail extends Mailable
 
     // On définit les variables publiques pour qu'elles soient accessibles dans la vue Blade
     public $name;
+
     public $otp;
 
     /**

@@ -16,7 +16,7 @@ class AuthRequest extends FormRequest
         // 1. Validation LOGIN
         if ($this->is('api/login')) {
             return [
-                'email'    => 'required|email|exists:utilisateurs,email',
+                'email' => 'required|email|exists:utilisateurs,email',
                 'password' => 'required|string',
             ];
         }
@@ -24,12 +24,12 @@ class AuthRequest extends FormRequest
         // 2. Validation REGISTER
         if ($this->is('api/register')) {
             return [
-                'lastname'  => 'required|string|max:100',
+                'lastname' => 'required|string|max:100',
                 'firstname' => 'required|string|max:100',
-                'email'     => 'required|email|unique:utilisateurs,email',
-                'password'  => 'required|string|min:8|confirmed',
+                'email' => 'required|email|unique:utilisateurs,email',
+                'password' => 'required|string|min:8|confirmed',
                 'telephone' => 'required|string|unique:utilisateurs,telephone',
-                'country'   => 'required|string', // Mis à jour ici
+                'country' => 'required|string', // Mis à jour ici
             ];
         }
 
@@ -37,7 +37,7 @@ class AuthRequest extends FormRequest
         if ($this->is('api/verify-otp')) {
             return [
                 'email' => 'required|email|exists:utilisateurs,email',
-                'otp'   => 'required|string|size:6', // Supposant un code à 6 chiffres
+                'otp' => 'required|string|size:6', // Supposant un code à 6 chiffres
             ];
         }
 
@@ -51,8 +51,8 @@ class AuthRequest extends FormRequest
         // 5. Validation RESET PASSWORD (Nouveau mot de passe)
         if ($this->is('api/reset-password')) {
             return [
-                'email'    => 'required|email|exists:utilisateurs,email',
-                'otp'      => 'required|string',
+                'email' => 'required|email|exists:utilisateurs,email',
+                'otp' => 'required|string',
                 'password' => 'required|string|min:8|confirmed',
             ];
         }
@@ -63,11 +63,11 @@ class AuthRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.exists'     => "Aucun compte n'est associé à cette adresse email.",
-            'email.unique'     => "Cette adresse email est déjà utilisée.",
-            'telephone.unique' => "Ce numéro de téléphone est déjà utilisé.",
-            'otp.size'         => "Le code de vérification doit comporter 6 chiffres.",
-            'password.confirmed' => "La confirmation du mot de passe ne correspond pas.",
+            'email.exists' => "Aucun compte n'est associé à cette adresse email.",
+            'email.unique' => 'Cette adresse email est déjà utilisée.',
+            'telephone.unique' => 'Ce numéro de téléphone est déjà utilisé.',
+            'otp.size' => 'Le code de vérification doit comporter 6 chiffres.',
+            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
         ];
     }
 }
