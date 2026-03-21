@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('user_permissions', function (Blueprint $table) {
             $table->id('user_permission_id');
-            
+
             // Définition des colonnes pour les clés étrangères
             $table->unsignedBigInteger('role_id');
             $table->unsignedBigInteger('permission_id');

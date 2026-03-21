@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
 use Mailjet\Client;
 use Mailjet\Resources;
-use Illuminate\Support\Facades\Log;
 
 class MailjetService
 {
@@ -26,7 +26,7 @@ class MailjetService
     {
         Log::info("🚀 [OTP] Préparation de l'envoi pour : $to");
 
-        $subject = "🔐 Code de vérification - ExchaPay";
+        $subject = '🔐 Code de vérification - ExchaPay';
         $htmlContent = "
             <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;'>
                 <h2 style='color: #2c3e50;'>Bienvenue Christian !</h2>
@@ -49,18 +49,18 @@ class MailjetService
                 [
                     'From' => [
                         'Email' => config('mail.from.address'),
-                        'Name' => config('mail.from.name')
+                        'Name' => config('mail.from.name'),
                     ],
                     'To' => [
                         [
                             'Email' => $toEmail,
-                            'Name' => $toName
-                        ]
+                            'Name' => $toName,
+                        ],
                     ],
                     'Subject' => $subject,
                     'HTMLPart' => $htmlContent,
-                ]
-            ]
+                ],
+            ],
         ];
 
         try {
@@ -68,18 +68,21 @@ class MailjetService
 
             if ($response->success()) {
                 Log::info("✅ [SUCCÈS] Email envoyé à $toEmail");
+
                 return true;
             }
 
             // Log détaillé comme dans l'exemple qui marche
-            Log::error("❌ [API ERROR] Mailjet a rejeté la requête", [
+            Log::error('❌ [API ERROR] Mailjet a rejeté la requête', [
                 'status' => $response->getStatus(),
-                'cause' => $response->getData()
+                'cause' => $response->getData(),
             ]);
+
             return false;
 
         } catch (\Exception $e) {
-            Log::error("❌ [EXCEPTION] Échec critique : " . $e->getMessage());
+            Log::error('❌ [EXCEPTION] Échec critique : '.$e->getMessage());
+
             return false;
         }
     }
