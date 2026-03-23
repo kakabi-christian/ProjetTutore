@@ -1,0 +1,36 @@
+services:
+  # Prometheus : La base de données des métriques
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - exchapay_network
+
+  # Grafana : L'interface visuelle
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - exchapay_network
+
+  # Le capteur pour CPU/RAM (BIEN ALIGNÉ SOUS GRAFANA)
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    expose:
+      - 9100
+    networks:
+      - exchapay_network
+
+networks:
+  exchapay_network:
+    external: true
