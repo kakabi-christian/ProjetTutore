@@ -3,17 +3,19 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  # 1. Prometheus se surveille lui-même (Utilise le nom du service Docker)
+  # 1. Prometheus se surveille lui-même
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['prometheus:9090']
+      - targets: ['localhost:9090']
 
   # 2. Surveillance de ton application Laravel (ExchaPay API)
   - job_name: 'laravel-backend'
+    metrics_path: '/prometheus' 
     static_configs:
-      - targets: ['backend:8000']
+      # MODIFICATION ICI : On utilise host.docker.internal pour atteindre ton Windows
+      - targets: ['host.docker.internal:8000'] 
 
   # 3. Le capteur pour les ressources système (CPU, RAM, Réseau)
   - job_name: 'node-exporter'
     static_configs:
-      - targets: ['node-exporter:9100']
+      - targets: ['node-exporter:9100'] 

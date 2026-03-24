@@ -10,7 +10,9 @@
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
-        "mailjet/mailjet-apiv3-php": "^1.6"
+        "mailjet/mailjet-apiv3-php": "^1.6",
+        "monolog/monolog": "^3.10",
+        "spatie/laravel-prometheus": "^1.5"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

@@ -1,6 +1,8 @@
 <?php
 
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\NullHandler;
+use Monolog\Handler\SocketHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
@@ -54,8 +56,19 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            // On ajoute 'logstash' dans la pile pour loguer dans le fichier ET dans ELK
+            'channels' => ['single', 'logstash'],
             'ignore_exceptions' => false,
+        ],
+
+        'logstash' => [
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'debug'),
+            'handler' => SocketHandler::class,
+            'handler_with' => [
+                'connectionString' => 'tcp://127.0.0.1:5044',
+            ],
+            'formatter' => JsonFormatter::class,
         ],
 
         'single' => [
