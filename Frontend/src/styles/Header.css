@@ -1,0 +1,75 @@
+/* styles/Header.css  */
+/* ---- NAV CUSTOM ---- */
+.navbar-custom {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 60px;
+  height: 72px;
+  background: rgba(10,37,64,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+  display: flex; align-items: center; gap: 8px;
+  color: var(--white);
+}
+
+
+.nav-logo img {
+    width:500px; 
+    height: 180px;
+    margin-top: 2%;
+ 
+}
+
+.nav-links {
+  display: flex; gap: 36px; list-style: none;
+  margin: 0; padding: 0;
+}
+
+.nav-links a {
+  color: rgba(248,255,254,0.65);
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--green); }
+
+.nav-cta { display: flex; gap: 12px; align-items: center; }
+
+.btn-ghost {
+  padding: 9px 22px;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--white);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-ghost:hover { border-color: var(--green); color: var(--green); }
+
+.btn-primary-custom {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--green), var(--blue-light));
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,200,150,0.3);
+  transition: all 0.2s;
+}
+
+.btn-primary-custom:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(0,200,150,0.45); }

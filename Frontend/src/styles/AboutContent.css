@@ -1,0 +1,28 @@
+.card-hover {
+    transition: all 0.3s ease-in-out;
+}
+
+.card-hover:hover {
+    background-color: #ffffff !important;
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+.bg-soft-green {
+    background-color: rgba(0, 200, 150, 0.1);
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
+}

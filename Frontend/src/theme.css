@@ -1,0 +1,42 @@
+/* theme.css */
+:root {
+    --green: #00C896;
+    --green-dark: #009E76;
+    --green-light: #00E8AE;
+    --blue: #0A2540;
+    --blue-mid: #1A4B8C;
+    --blue-light: #1E6FD9;
+    --orange: #FF6B2B;
+    --orange-light: #FF8F5A;
+    --white: #F8FFFE;
+    --gray: #8A9BB0;
+    --card-bg: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+}
+
+/* Classes utilitaires personnalisées */
+.bg-excha-blue { background-color: var(--blue) !important; color: var(--white); }
+.text-excha-green { color: var(--green) !important; }
+.text-excha-orange { color: var(--orange) !important; }
+
+.btn-excha-orange { 
+    background-color: var(--orange); 
+    border: none; 
+    color: white; 
+    transition: all 0.3s ease;
+}
+.btn-excha-orange:hover { 
+    background-color: var(--orange-light); 
+    transform: translateY(-2px);
+    color: white;
+}
+
+.btn-excha-outline {
+    border: 2px solid var(--green);
+    color: var(--green);
+    background: transparent;
+}
+.btn-excha-outline:hover {
+    background: var(--green);
+    color: var(--blue);
+}

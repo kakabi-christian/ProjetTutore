@@ -1,0 +1,168 @@
+/* Utilisation des variables de theme.css */
+.register-page-wrapper.light-theme {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--white); /* Fond #F8FFFE */
+    padding: 40px 20px;
+}
+
+.register-card {
+    width: 100%;
+    max-width: 600px; /* Un peu plus large pour le confort du flex */
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 40px;
+    /* Ombre plus douce et pro que le noir pur */
+    box-shadow: 0 0 3px black; 
+    border: 1px solid rgba(138, 155, 176, 0.1);
+}
+
+.register-title {
+    color: var(--blue);
+    font-weight: 800;
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+.brand-text {
+    color: var(--green); /* #00C896 */
+}
+
+.register-subtitle {
+    color: var(--gray);
+    margin-bottom: 30px;
+}
+
+/* ALIGNEMENT DES INPUTS CÔTE À CÔTE */
+.input-group-row {
+    display: flex; /* Passage en flexbox */
+    gap: 20px;     /* Espacement entre les colonnes */
+    margin-bottom: 5px;
+}
+
+/* Chaque bloc de saisie prend la même largeur (50%) */
+.input-group-row .input-field {
+    flex: 1; 
+}
+
+.input-field {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-field label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--blue);
+    margin-bottom: 8px;
+    margin-left: 2px;
+}
+
+.input-field input, 
+.input-field select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1.5px solid rgba(138, 155, 176, 0.2);
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--blue);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.input-field input:focus, 
+.input-field select:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(0, 200, 150, 0.08);
+}
+
+/* BOUTON ORANGE DU THÈME */
+.register-submit-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-top: 10px;
+    cursor: pointer;
+    border: none;
+}
+
+/* GESTION DES MESSAGES */
+.status-message {
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-message.error {
+    background-color: #fff1f1;
+    color: #d32f2f;
+    border: 1px solid #ffcdd2;
+}
+
+.footer-link {
+    text-align: center;
+    margin-top: 25px;
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.footer-link a {
+    text-decoration: none;
+    font-weight: 700;
+    color: var(--green);
+}
+
+.footer-link a:hover {
+    text-decoration: underline;
+}
+
+/* LOADER DANS LE BOUTON */
+.loader {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* RESPONSIVE : On empile sur mobile */
+@media (max-width: 550px) {
+    .input-group-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .register-card {
+        padding: 30px 20px;
+    }
+}
+/* Style pour les champs en erreur */
+.input-field input.input-error {
+    border-color: #ff4d4d; /* Rouge vif mais propre */
+    background-color: #fffafa; /* Très léger fond rouge pour souligner */
+}
+
+/* On change aussi l'ombre au focus quand il y a une erreur */
+.input-field input.input-error:focus {
+    box-shadow: 0 0 0 4px rgba(255, 77, 77, 0.1);
+    border-color: #ff4d4d;
+}
+
+/* Optionnel : changer la couleur du label quand il y a une erreur */
+.input-field input.input-error + label {
+    color: #ff4d4d;
+}
