@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreign('user_id')->references('user_id')->on('utilisateurs')->onDelete('cascade');
 
             $table->integer('current_level')->default(0);
-            $table->string('status')->default('pending');
+            $table->enum('status', ['PENDING', 'APPROVED', 'REJECTED'])->default('PENDING');
             $table->timestamp('completed_at')->nullable();
 
             $table->timestamps();
