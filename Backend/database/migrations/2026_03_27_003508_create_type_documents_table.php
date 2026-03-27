@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->id('role_id');
-            $table->enum('name', ['ADMIN', 'USER', 'MODERATOR']);
-            $table->string('description')->nullable();
+        Schema::create('type_documents', function (Blueprint $table) {
+            $table->id("type_document_id");
+            $table->string("name");
+            $table->string("description");
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('type_documents');
     }
 };
