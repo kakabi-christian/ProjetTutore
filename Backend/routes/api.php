@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\TypeDocumentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,4 +34,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', function (Request $request) {
         return $request->user();
     });
+
+    // --- ROUTES ADMIN ---
+    Route::middleware('role:admin')->group(function () {
+        Route::apiResource('/type-documents', TypeDocumentController::class);
+    });
 });
+

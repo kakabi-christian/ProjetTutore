@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_permissions', function (Blueprint $table) {
-            $table->id('user_permission_id');
+        Schema::create('role_permissions', function (Blueprint $table) {
+            $table->id('role_permission_id');
 
             // Définition des colonnes pour les clés étrangères
             $table->unsignedBigInteger('role_id');
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_permissions');
+        Schema::dropIfExists('role_permissions');
     }
 };
