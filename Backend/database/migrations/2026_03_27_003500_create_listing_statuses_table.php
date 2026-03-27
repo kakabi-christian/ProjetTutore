@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('listing_statuses', function (Blueprint $table) {
             $table->id('listing_status_id');
-            $table->string('title');
+            $table->enum('title', ['active', 'inactive', 'expired', 'completed', 'cancelled']);
             $table->timestamps();
         });
     }

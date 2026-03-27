@@ -23,7 +23,6 @@ class Utilisateur extends Authenticatable
         'lastname',
         'firstname',
         'email',
-        'type',
         'password',
         'telephone',
         'country',
@@ -107,11 +106,6 @@ class Utilisateur extends Authenticatable
         return $this->hasMany(Notification::class, 'user_id', 'user_id');
     }
 
-    public function interactionAis(): HasMany
-    {
-        return $this->hasMany(InteractionAi::class, 'user_id', 'user_id');
-    }
-
     public function methodPayments(): HasMany
     {
         return $this->hasMany(MethodPayment::class, 'user_id', 'user_id');
@@ -120,5 +114,17 @@ class Utilisateur extends Authenticatable
     public function feedbacks(): HasMany
     {
         return $this->hasMany(Feedback::class, 'user_id', 'user_id');
+    }
+
+    public function hasRole($role)
+    {
+        return $this->roles()->where('name', $role)->exists();
+    }
+
+    public function hasPermission($permission)
+    {
+        return $this->roles()->whereHas('permissions', function ($query) use ($permission) {
+            $query->where('name', $permission);
+        })->exists();
     }
 }

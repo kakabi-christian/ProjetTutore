@@ -44,13 +44,13 @@ class Role extends Model
 
     /**
      * Relation Many-to-Many avec les Permissions.
-     * On passe par la table pivot 'user_permissions'.
+     * On passe par la table pivot 'role_permissions'.
      */
     public function permissions(): BelongsToMany
     {
         return $this->belongsToMany(
             Permission::class,
-            'user_permissions', // Table pivot
+            'role_permissions', // Table pivot
             'role_id',          // Clé étrangère vers 'roles'
             'permission_id'     // Clé étrangère vers 'permissions'
         );
