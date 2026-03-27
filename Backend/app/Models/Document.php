@@ -16,7 +16,7 @@ class Document extends Model
 
     protected $fillable = [
         'kyc_id',
-        'type',
+        'type_document_id',
         'file_url',
         'status',
     ];
@@ -27,5 +27,10 @@ class Document extends Model
     public function kyc(): BelongsTo
     {
         return $this->belongsTo(Kyc::class, 'kyc_id', 'kyc_id');
+    }
+
+    public function typeDocument(): BelongsTo
+    {
+        return $this->belongsTo(TypeDocument::class, 'type_document_id', 'type_document_id');
     }
 }
