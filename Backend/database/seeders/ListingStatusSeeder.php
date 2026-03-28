@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\ListingStatus;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ListingStatusSeeder extends Seeder

@@ -67,5 +67,4 @@ class Transaction extends Model
     {
         return $this->hasMany(Payment::class, 'transaction_id', 'transaction_id');
     }
-
 }
