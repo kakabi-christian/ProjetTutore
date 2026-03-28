@@ -19,7 +19,7 @@ return new class extends Migration
 
             $table->unsignedBigInteger('listing_status_id')->nullable();
             $table->foreign('listing_status_id')->references('listing_status_id')->on('listing_statuses')->onDelete('set null');
-            
+
             $table->timestamp('date');
 
             $table->timestamps();

@@ -47,7 +47,6 @@ class Payment extends Model
         return $this->belongsTo(MethodPayment::class, 'method_payment_id', 'method_payment_id');
     }
 
-
     /**
      * Relation vers l'historique des paiements.
      */

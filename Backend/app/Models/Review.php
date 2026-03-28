@@ -29,7 +29,6 @@ class Review extends Model
         return $this->belongsTo(Utilisateur::class, 'reviewer_id', 'user_id');
     }
 
-
     /**
      * Relation vers le listing.
      */

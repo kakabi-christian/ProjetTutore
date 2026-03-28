@@ -23,6 +23,7 @@ class Utilisateur extends Authenticatable
         'lastname',
         'firstname',
         'email',
+        'type',
         'password',
         'telephone',
         'country',

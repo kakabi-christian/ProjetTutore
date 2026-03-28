@@ -23,8 +23,8 @@ class TypeDocumentRequest extends FormRequest
         $prefix = $this->isMethod('post') ? 'required' : 'sometimes|required';
 
         return [
-            'name' => $prefix . '|string|max:255|unique:type_documents,name,' . $id . ',type_document_id',
-            'description' => $prefix . '|string|max:255',
+            'name' => $prefix.'|string|max:255|unique:type_documents,name,'.$id.',type_document_id',
+            // 'description' => $prefix.'|string|max:255',
         ];
     }
 

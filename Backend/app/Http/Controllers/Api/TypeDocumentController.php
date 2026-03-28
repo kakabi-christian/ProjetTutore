@@ -13,19 +13,33 @@ class TypeDocumentController extends Controller
     /**
      * Afficher la liste de tous les types de documents.
      */
+    /**
+     * Afficher la liste des types de documents avec pagination.
+     */
     public function index(): JsonResponse
     {
         try {
-            $typeDocuments = TypeDocument::all();
+            // On récupère le nombre d'éléments par page depuis la requête, sinon 10 par défaut
+            $perPage = request()->get('per_page', 10);
+
+            // paginate() gère automatiquement le paramètre ?page= dans l'URL
+            $typeDocuments = TypeDocument::paginate($perPage);
 
             return response()->json([
                 'message' => 'Liste des types de documents récupérée avec succès.',
-                'data' => $typeDocuments,
+                'data' => $typeDocuments->items(), // Les données réelles
+                'pagination' => [
+                    'total' => $typeDocuments->total(),
+                    'current_page' => $typeDocuments->currentPage(),
+                    'per_page' => $typeDocuments->perPage(),
+                    'last_page' => $typeDocuments->lastPage(),
+                    'from' => $typeDocuments->firstItem(),
+                    'to' => $typeDocuments->lastItem(),
+                ],
             ], 200);
         } catch (\Exception $e) {
             Log::error('Erreur lors de la récupération des types de documents.', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
@@ -69,7 +83,7 @@ class TypeDocumentController extends Controller
         try {
             $typeDocument = TypeDocument::find($id);
 
-            if (!$typeDocument) {
+            if (! $typeDocument) {
                 return response()->json([
                     'message' => 'Type de document non trouvé.',
                 ], 404);
@@ -100,7 +114,7 @@ class TypeDocumentController extends Controller
         try {
             $typeDocument = TypeDocument::find($id);
 
-            if (!$typeDocument) {
+            if (! $typeDocument) {
                 return response()->json([
                     'message' => 'Type de document non trouvé.',
                 ], 404);
@@ -136,7 +150,7 @@ class TypeDocumentController extends Controller
         try {
             $typeDocument = TypeDocument::find($id);
 
-            if (!$typeDocument) {
+            if (! $typeDocument) {
                 return response()->json([
                     'message' => 'Type de document non trouvé.',
                 ], 404);

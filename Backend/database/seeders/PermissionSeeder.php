@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Permission;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PermissionSeeder extends Seeder
@@ -83,7 +82,7 @@ class PermissionSeeder extends Seeder
             ['name' => 'type_documents.create', 'description' => 'Créer un type de document'],
             ['name' => 'type_documents.edit', 'description' => 'Modifier un type de document'],
             ['name' => 'type_documents.delete', 'description' => 'Supprimer un type de document'],
-            
+
             // Documents
             ['name' => 'documents.view', 'description' => 'Voir les documents'],
             ['name' => 'documents.upload', 'description' => 'Téléverser un document'],
