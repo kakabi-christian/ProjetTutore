@@ -15,11 +15,10 @@ return new class extends Migration
             $table->id('document_id');
 
             $table->unsignedBigInteger('kyc_id');
+            $table->string('country_of_issue', 50);
             $table->foreign('kyc_id')->references('kyc_id')->on('kycs')->onDelete('cascade');
-
             $table->unsignedBigInteger('type_document_id');
             $table->foreign('type_document_id')->references('type_document_id')->on('type_documents')->onDelete('cascade');
-
             $table->string('file_url');
             $table->enum('status', ['PENDING', 'APPROVED', 'REJECTED'])->default('PENDING');
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TypeDocumentController;
+use App\Http\Controllers\Api\KycController; // Import du nouveau contrôleur
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,8 +21,7 @@ Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
-// Consultation des types de documents (Public ou Utilisateur connecté selon ton besoin)
-// Je les place ici pour que n'importe qui puisse voir quels documents sont acceptés
+// Consultation des types de documents
 Route::get('/type-documents', [TypeDocumentController::class, 'index']);
 Route::get('/type-documents/{id}', [TypeDocumentController::class, 'show']);
 
@@ -35,13 +35,29 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
+    // --- ESPACE UTILISATEUR (Client) ---
+    
+    // Soumettre un dossier complet (KYC + Documents)
+    Route::post('/kyc/submit', [KycController::class, 'store']);
+    
+    // Consulter son propre statut KYC actuel
+    Route::get('/my-kyc', [KycController::class, 'getUserStatus']);
+
+
     // --- ESPACE ADMINISTRATION (Préfixe admin/) ---
+    
     Route::middleware('is_admin')->prefix('admin')->group(function () {
 
-        // Gestion des types de documents (Actions Admin uniquement)
+        // Gestion des types de documents
         Route::post('/type-documents', [TypeDocumentController::class, 'store']);
         Route::put('/type-documents/{id}', [TypeDocumentController::class, 'update']);
         Route::delete('/type-documents/{id}', [TypeDocumentController::class, 'destroy']);
+
+        // Gestion des dossiers KYC par l'Admin
+        Route::get('/kycs', [KycController::class, 'index']);           // Liste paginée
+        Route::get('/kycs/{id}', [KycController::class, 'show']);       // Détails d'un dossier
+        Route::post('/kycs/{id}/approve', [KycController::class, 'approve']); // Approuver
+        Route::post('/kycs/{id}/reject', [KycController::class, 'reject']);   // Rejeter avec motif
 
     });
 
