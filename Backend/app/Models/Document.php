@@ -17,6 +17,7 @@ class Document extends Model
     protected $fillable = [
         'kyc_id',
         'type_document_id',
+        'country_of_issue',
         'file_url',
         'status',
     ];

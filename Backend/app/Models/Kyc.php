@@ -18,6 +18,7 @@ class Kyc extends Model
     protected $fillable = [
         'user_id',
         'current_level',
+        'rejection_reason',
         'status',
         'completed_at',
     ];

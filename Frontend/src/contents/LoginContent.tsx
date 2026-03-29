@@ -40,8 +40,8 @@ export default function LoginContent() {
       // 2. Si succès, redirection selon le type (admin ou user)
       if (response.user.type === 'admin') {
         navigate("/admin/type-documents"); // Redirection vers ton nouveau dashboard
-      } else {
-        navigate("/"); 
+      } else if(response.user.type === 'user') {
+        navigate("/user/kyc"); 
       }
 
     } catch (error: any) {

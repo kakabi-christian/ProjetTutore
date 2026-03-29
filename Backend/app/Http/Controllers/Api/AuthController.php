@@ -19,73 +19,73 @@ class AuthController extends Controller
      * Inscription (Register)
      */
     public function register(AuthRequest $request)
-{
-    Log::info('>>> REGISTER DÉMARRÉ (GMAIL)');
-    Log::info('Données reçues', ['data' => $request->validated()]);
+    {
+        Log::info('>>> REGISTER DÉMARRÉ (GMAIL)');
+        Log::info('Données reçues', ['data' => $request->validated()]);
 
-    $data = $request->validated();
-    $otpCode = rand(100000, 999999);
-    Log::info('OTP généré', ['otp' => $otpCode]);
+        $data = $request->validated();
+        $otpCode = rand(100000, 999999);
+        Log::info('OTP généré', ['otp' => $otpCode]);
 
-    DB::beginTransaction();
-    Log::info('Transaction DB ouverte');
-
-    try {
-        $data['password'] = Hash::make($data['password']);
-        Log::info('Mot de passe hashé');
-
-        $user = Utilisateur::create($data);
-        Log::info('Utilisateur créé', ['user_id' => $user->id, 'email' => $user->email]);
-
-        // TODO : Enregistrer $otpCode en base de données ici
-
-        DB::commit();
-        Log::info('Transaction DB commitée');
-
-        Log::info('Tentative envoi mail OTP', [
-            'to' => $user->email,
-            'mailer' => config('mail.default'),
-            'host'   => config('mail.mailers.smtp.host'),
-            'port'   => config('mail.mailers.smtp.port'),
-            'username' => config('mail.mailers.smtp.username'),
-        ]);
+        DB::beginTransaction();
+        Log::info('Transaction DB ouverte');
 
         try {
-            Mail::to($user->email)->send(new OtpRegistrationMail(
-                $user->firstname . ' ' . $user->lastname,
-                $otpCode
-            ));
-            Log::info('Mail OTP envoyé avec succès', ['to' => $user->email]);
-        } catch (\Exception $e) {
-            Log::error('Échec envoi OTP Inscription', [
-                'message'   => $e->getMessage(),
-                'exception' => get_class($e),
-                'file'      => $e->getFile(),
-                'line'      => $e->getLine(),
-                'trace'     => $e->getTraceAsString(),
+            $data['password'] = Hash::make($data['password']);
+            Log::info('Mot de passe hashé');
+
+            $user = Utilisateur::create($data);
+            Log::info('Utilisateur créé', ['user_id' => $user->id, 'email' => $user->email]);
+
+            // TODO : Enregistrer $otpCode en base de données ici
+
+            DB::commit();
+            Log::info('Transaction DB commitée');
+
+            Log::info('Tentative envoi mail OTP', [
+                'to' => $user->email,
+                'mailer' => config('mail.default'),
+                'host' => config('mail.mailers.smtp.host'),
+                'port' => config('mail.mailers.smtp.port'),
+                'username' => config('mail.mailers.smtp.username'),
             ]);
+
+            try {
+                Mail::to($user->email)->send(new OtpRegistrationMail(
+                    $user->firstname.' '.$user->lastname,
+                    $otpCode
+                ));
+                Log::info('Mail OTP envoyé avec succès', ['to' => $user->email]);
+            } catch (\Exception $e) {
+                Log::error('Échec envoi OTP Inscription', [
+                    'message' => $e->getMessage(),
+                    'exception' => get_class($e),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Inscription réussie. Vérifiez vos emails.',
+                'user' => $user,
+                'debug_otp' => $otpCode,
+            ], 201);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('REGISTER ERREUR', [
+                'message' => $th->getMessage(),
+                'exception' => get_class($th),
+                'file' => $th->getFile(),
+                'line' => $th->getLine(),
+                'trace' => $th->getTraceAsString(),
+            ]);
+
+            return response()->json(['status' => 'error', 'message' => 'Erreur inscription'], 500);
         }
-
-        return response()->json([
-            'status'    => 'success',
-            'message'   => 'Inscription réussie. Vérifiez vos emails.',
-            'user'      => $user,
-            'debug_otp' => $otpCode,
-        ], 201);
-
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        Log::error('REGISTER ERREUR', [
-            'message'   => $th->getMessage(),
-            'exception' => get_class($th),
-            'file'      => $th->getFile(),
-            'line'      => $th->getLine(),
-            'trace'     => $th->getTraceAsString(),
-        ]);
-
-        return response()->json(['status' => 'error', 'message' => 'Erreur inscription'], 500);
     }
-}
 
     /**
      * Mot de passe oublié (Forgot Password)

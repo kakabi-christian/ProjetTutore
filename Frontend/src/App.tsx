@@ -6,6 +6,9 @@ import Login from './pages/Login';
 import VerifyOtp from './pages/Verify-otp';
 import TypeDocumentPage from './contents/admin/TtpeDocument';
 import AdminDashboard from './pages/AdminDashboard';
+import UserDashboard from './pages/UserDashboard';
+import KycPage from './contents/user/KycPage';
+
 function App() {
   return (
     <Router>
@@ -24,9 +27,13 @@ function App() {
             <Route path="type-documents" element={<TypeDocumentPage />} />
           </Route>
 
+          {/* Routes User (avec enfants) */}
+          <Route path="/user/*" element={<UserDashboard />}>
+            <Route path="kyc" element={<KycPage />} />
+          </Route>
+
         </Routes>
-
-
+        
       </main>
 
     </Router>

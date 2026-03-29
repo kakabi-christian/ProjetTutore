@@ -1,7 +1,7 @@
 // src/pages/AdminDashboard.tsx
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
+import Sidebar from '../contents/Sidebar';
 
 const AdminDashboard: React.FC = () => {
   return (

@@ -111,7 +111,6 @@ const TypeDocumentPage: React.FC = () => {
                         <table className="table table-hover align-middle mb-0">
                             <thead style={{ backgroundColor: '#F1F5F9' }}>
                                 <tr>
-                                    <th className="px-4 py-3 small fw-bold" style={{ color: 'var(--gray)' }}>ID</th>
                                     <th className="py-3 small fw-bold" style={{ color: 'var(--gray)' }}>NOM DU DOCUMENT</th>
                                     <th className="py-3 small fw-bold" style={{ color: 'var(--gray)' }}>DESCRIPTION</th>
                                     <th className="py-3 text-end px-4 small fw-bold" style={{ color: 'var(--gray)' }}>ACTIONS</th>
@@ -123,7 +122,6 @@ const TypeDocumentPage: React.FC = () => {
                                 ) : documents.length > 0 ? (
                                     documents.map((doc) => (
                                         <tr key={doc.type_document_id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                                            <td className="px-4 text-muted font-monospace">#{doc.type_document_id}</td>
                                             <td className="fw-bold" style={{ color: 'var(--blue-mid)' }}>{doc.name}</td>
                                             <td className="text-muted text-truncate" style={{ maxWidth: '350px' }}>{doc.description}</td>
                                             <td className="text-end px-4">
