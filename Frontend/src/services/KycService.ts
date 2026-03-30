@@ -4,6 +4,14 @@ import api from "./api";
 
 const KycService = {
   /**
+   * Récupérer le nombre de dossiers KYC en attente (Admin - Sidebar)
+   */
+  getPendingCount: async (): Promise<{ count: number }> => {
+    const response = await api.get('/admin/kycs/pending-count');
+    return response.data;
+  },
+
+  /**
    * Soumettre un dossier KYC complet (User)
    * Utilise FormData pour gérer l'upload des fichiers
    */
@@ -12,7 +20,6 @@ const KycService = {
     formData.append('country_of_issue', payload.country_of_issue);
 
     // On boucle sur les documents pour les ajouter au FormData
-    // La structure 'documents[index][champ]' correspond à la validation Laravel
     payload.documents.forEach((doc, index) => {
       formData.append(`documents[${index}][file]`, doc.file);
       formData.append(`documents[${index}][type_document_id]`, doc.type_document_id.toString());

@@ -19,7 +19,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('kycs', function (Blueprint $table) { 
+        Schema::table('kycs', function (Blueprint $table) {
             $table->dropColumn('rejection_reason');
         });
     }

@@ -71,13 +71,16 @@ export default function KycAdmin() {
         if (page >= 1 && page <= totalPages) setCurrentPage(page);
     };
 
-    // ... (handleApprove et handleReject restent identiques)
     const handleApprove = async (id: number) => {
         if (!window.confirm("Approuver ce dossier ?")) return;
         setProcessing(true);
         try {
             await KycService.approveKyc(id);
             toast.success("Dossier approuvé !");
+            
+            // Notification pour mettre à jour le compteur dans la Sidebar
+            window.dispatchEvent(new Event('kyc-status-changed'));
+            
             fetchKycs();
             setSelectedKyc(null);
         } catch (error) {
@@ -93,6 +96,10 @@ export default function KycAdmin() {
         try {
             await KycService.rejectKyc(id, rejectionReason);
             toast.info("Dossier rejeté");
+            
+            // Notification pour mettre à jour le compteur dans la Sidebar
+            window.dispatchEvent(new Event('kyc-status-changed'));
+            
             fetchKycs();
             setSelectedKyc(null);
             setRejectionReason('');
@@ -227,7 +234,6 @@ export default function KycAdmin() {
                     </table>
                 </div>
 
-                {/* Pagination reste la même, elle utilise filteredKycs.length pour totalPages */}
                 <div className="card-footer bg-white border-top-0 p-3 d-flex justify-content-between align-items-center">
                     <div className="text-muted small fw-medium">
                         Page {currentPage} sur {totalPages || 1}
@@ -269,7 +275,6 @@ export default function KycAdmin() {
             </div>
 
             {/* --- MODAL D'EXAMEN --- */}
-            {/* ... (Reste identique à la version précédente) */}
             {selectedKyc && (
                 <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(10, 37, 64, 0.85)', backdropFilter: 'blur(4px)' }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered">
