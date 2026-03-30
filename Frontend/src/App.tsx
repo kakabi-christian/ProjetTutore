@@ -8,7 +8,7 @@ import TypeDocumentPage from './contents/admin/TtpeDocument';
 import AdminDashboard from './pages/AdminDashboard';
 import UserDashboard from './pages/UserDashboard';
 import KycPage from './contents/user/KycPage';
-
+import KycAdmin from './contents/admin/KycAdmin';
 function App() {
   return (
     <Router>
@@ -25,6 +25,7 @@ function App() {
           {/* Routes Admin (avec enfants) */}
           <Route path="/admin/*" element={<AdminDashboard />}>
             <Route path="type-documents" element={<TypeDocumentPage />} />
+            <Route path="kyc" element={<KycAdmin />} />
           </Route>
 
           {/* Routes User (avec enfants) */}
@@ -33,7 +34,7 @@ function App() {
           </Route>
 
         </Routes>
-        
+
       </main>
 
     </Router>

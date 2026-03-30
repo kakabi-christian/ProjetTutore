@@ -70,6 +70,27 @@ const Sidebar: React.FC = () => {
             </NavLink>
           </li>
         </ul>
+        {/* Menu Gestion de KYC */}
+        <ul className="nav nav-pills flex-column mb-auto">
+          <li className="nav-item mb-2">
+            <NavLink
+              to="/admin/kyc"
+              className={({ isActive }) =>
+                isActive
+                  ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
+                  : "nav-link text-white opacity-75 hover-opacity-100"
+              }
+              style={({ isActive }) => ({
+                  borderRadius: '10px',
+                  transition: 'all 0.3s ease',
+                  backgroundColor: isActive ? 'var(--orange)' : 'transparent'
+              })}
+            >
+              <MdDescription className="me-2" size={22} />
+              Gestion des KYC
+            </NavLink>
+          </li>
+        </ul>
 
         <hr style={{ backgroundColor: "rgba(255,255,255,0.1)", height: '1px', border: 'none' }} />
 
