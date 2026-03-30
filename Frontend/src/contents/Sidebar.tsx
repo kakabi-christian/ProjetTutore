@@ -1,16 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { 
   MdDescription, 
   MdSwapHorizontalCircle, 
   MdLogout,
+  MdNotificationsActive
 } from "react-icons/md";
 import { authService } from "../services/authService";
+import KycService from "../services/KycService";
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
-  // État pour gérer l'affichage du modal de déconnexion
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  
+  // État pour le compteur de KYC en attente
+  const [pendingCount, setPendingCount] = useState<number>(0);
+
+  // Fonction pour récupérer le nombre de KYC en attente
+  const fetchPendingCount = async () => {
+    try {
+      const response = await KycService.getPendingCount();
+      setPendingCount(response.count);
+    } catch (error) {
+      console.error("Erreur lors de la récupération du compteur KYC", error);
+    }
+  };
+
+  useEffect(() => {
+    // Chargement initial
+    fetchPendingCount();
+
+    // Écouter l'événement personnalisé pour mettre à jour le compteur
+    // cet événement sera déclenché depuis ta page de gestion KYC
+    window.addEventListener('kyc-status-changed', fetchPendingCount);
+
+    // Nettoyage de l'écouteur
+    return () => {
+      window.removeEventListener('kyc-status-changed', fetchPendingCount);
+    };
+  }, []);
 
   const confirmLogout = async () => {
     try {
@@ -51,13 +79,14 @@ const Sidebar: React.FC = () => {
 
         {/* Menu Navigation */}
         <ul className="nav nav-pills flex-column mb-auto">
+          {/* Types de Documents */}
           <li className="nav-item mb-2">
             <NavLink
               to="/admin/type-documents"
               className={({ isActive }) =>
                 isActive
                   ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
-                  : "nav-link text-white opacity-75 hover-opacity-100"
+                  : "nav-link text-excha-green fw-bold opacity-75 hover-opacity-100 "
               }
               style={({ isActive }) => ({
                   borderRadius: '10px',
@@ -67,6 +96,46 @@ const Sidebar: React.FC = () => {
             >
               <MdDescription className="me-2" size={22} />
               Types de Documents
+            </NavLink>
+          </li>
+
+          {/* Gestion des KYC avec Badge */}
+          <li className="nav-item mb-2">
+            <NavLink
+              to="/admin/kyc"
+              className={({ isActive }) =>
+                isActive
+                  ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
+                  : "nav-link text-excha-green fw-bold opacity-75 hover-opacity-100"
+              }
+              style={({ isActive }) => ({
+                  borderRadius: '10px',
+                  transition: 'all 0.3s ease',
+                  backgroundColor: isActive ? 'var(--orange)' : 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+              })}
+            >
+              <div className="d-flex align-items-center">
+                <MdNotificationsActive className="me-2" size={22} />
+                Gestion des KYC
+              </div>
+
+              {/* Badge Dynamique */}
+              {pendingCount > 0 && (
+                <span 
+                  className="badge rounded-pill bg-white text-excha-orange shadow-sm d-flex align-items-center justify-content-center"
+                  style={{ 
+                    minWidth: '22px', 
+                    height: '22px', 
+                    fontSize: '0.75rem',
+                    border: '1px solid var(--orange)'
+                  }}
+                >
+                  {pendingCount}
+                </span>
+              )}
             </NavLink>
           </li>
         </ul>
@@ -96,7 +165,7 @@ const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* MODAL DE DÉCONNEXION (Inspiré de ton TypeDocumentPage) */}
+      {/* MODAL DE DÉCONNEXION */}
       {showLogoutModal && (
         <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(10, 37, 64, 0.6)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>

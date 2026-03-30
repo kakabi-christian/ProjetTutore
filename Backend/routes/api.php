@@ -41,10 +41,10 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // --- ESPACE UTILISATEUR (Client) ---
-    
+
     // Soumettre un dossier complet (KYC + Documents)
     Route::post('/kyc/submit', [KycController::class, 'store']);
-    
+
     // Consulter son propre statut KYC actuel
     Route::get('/my-kyc', [KycController::class, 'getUserStatus']);
 
@@ -55,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // --- ESPACE ADMINISTRATION (Préfixe admin/) ---
-    
+
     Route::middleware('is_admin')->prefix('admin')->group(function () {
 
         // Gestion des types de documents
@@ -64,7 +64,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/type-documents/{id}', [TypeDocumentController::class, 'destroy']);
 
         // Gestion des dossiers KYC par l'Admin
-        Route::get('/kycs', [KycController::class, 'index']);           // Liste paginée
+        Route::get('/kycs', [KycController::class, 'index']);
+        Route::get('/kycs/pending-count', [KycController::class, 'getPendingCount']);
         Route::get('/kycs/{id}', [KycController::class, 'show']);       // Détails d'un dossier
         Route::post('/kycs/{id}/approve', [KycController::class, 'approve']); // Approuver
         Route::post('/kycs/{id}/reject', [KycController::class, 'reject']);   // Rejeter avec motif
