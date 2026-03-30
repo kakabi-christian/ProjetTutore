@@ -43,4 +43,4 @@ class KycRequest extends FormRequest
             'documents.*.type_document_id.exists' => 'Le type de document sélectionné est invalide.',
         ];
     }
-}   
+}
