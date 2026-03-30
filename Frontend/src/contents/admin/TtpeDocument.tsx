@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { typeDocumentService, type PaginationMeta } from '../../services/TypeDocumentService';
 import type { TypeDocument, CreateTypeDocument } from '../../models/TypeDocument';
-import { MdAdd, MdEdit, MdDelete, MdRefresh } from 'react-icons/md';
+import { MdAdd, MdEdit, MdDelete, MdRefresh, MdWarning } from 'react-icons/md';
 
 const TypeDocumentPage: React.FC = () => {
     // États pour les données
@@ -10,12 +10,17 @@ const TypeDocumentPage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [currentPage, setCurrentPage] = useState<number>(1);
 
-    // États pour le Modal
+    // États pour le Modal Formulaire (Ajout/Edition)
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [currentDocId, setCurrentDocId] = useState<number | null>(null);
     const [formData, setFormData] = useState<CreateTypeDocument>({ name: '', description: '' });
     const [submitting, setSubmitting] = useState(false);
+
+    // États pour le Modal de Suppression
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [docToDelete, setDocToDelete] = useState<TypeDocument | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Charger les données
     const loadData = useCallback(async (page: number) => {
@@ -35,6 +40,7 @@ const TypeDocumentPage: React.FC = () => {
         loadData(currentPage);
     }, [currentPage, loadData]);
 
+    // Handlers pour le Formulaire
     const handleCreateClick = () => {
         setFormData({ name: '', description: '' });
         setIsEditing(false);
@@ -66,14 +72,24 @@ const TypeDocumentPage: React.FC = () => {
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (window.confirm("Supprimer ce type de document ?")) {
-            try {
-                await typeDocumentService.delete(id);
-                loadData(currentPage);
-            } catch (error) {
-                alert("Erreur lors de la suppression.");
-            }
+    // Handlers pour la Suppression
+    const handleDeleteClick = (doc: TypeDocument) => {
+        setDocToDelete(doc);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!docToDelete) return;
+        setIsDeleting(true);
+        try {
+            await typeDocumentService.delete(docToDelete.type_document_id);
+            setShowDeleteModal(false);
+            setDocToDelete(null);
+            loadData(currentPage);
+        } catch (error) {
+            alert("Erreur lors de la suppression.");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -126,7 +142,7 @@ const TypeDocumentPage: React.FC = () => {
                                             <td className="text-muted text-truncate" style={{ maxWidth: '350px' }}>{doc.description}</td>
                                             <td className="text-end px-4">
                                                 <button onClick={() => handleEditClick(doc)} className="btn btn-sm me-2 border-0" style={{ backgroundColor: '#E0F2FE', color: 'var(--blue-light)' }}><MdEdit /></button>
-                                                <button onClick={() => handleDelete(doc.type_document_id)} className="btn btn-sm border-0" style={{ backgroundColor: '#FEE2E2', color: 'var(--orange)' }}><MdDelete /></button>
+                                                <button onClick={() => handleDeleteClick(doc)} className="btn btn-sm border-0" style={{ backgroundColor: '#FEE2E2', color: 'var(--orange)' }}><MdDelete /></button>
                                             </td>
                                         </tr>
                                     ))
@@ -173,7 +189,7 @@ const TypeDocumentPage: React.FC = () => {
                 </small>
             </div>
 
-            {/* MODAL PERSONNALISÉ */}
+            {/* --- MODAL DE FORMULAIRE (AJOUT / EDIT) --- */}
             {showModal && (
                 <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(10, 37, 64, 0.6)', backdropFilter: 'blur(4px)' }}>
                     <div className="modal-dialog modal-dialog-centered">
@@ -217,6 +233,43 @@ const TypeDocumentPage: React.FC = () => {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* --- MODAL DE CONFIRMATION DE SUPPRESSION --- */}
+            {showDeleteModal && (
+                <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(10, 37, 64, 0.6)', backdropFilter: 'blur(4px)' }}>
+                    <div className="modal-dialog modal-dialog-centered modal-sm">
+                        <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '20px' }}>
+                            <div className="modal-body p-4 text-center">
+                                <div className="mb-3 text-danger">
+                                    <MdWarning size={50} />
+                                </div>
+                                <h5 className="fw-bold mb-2">Confirmation</h5>
+                                <p className="text-muted small">
+                                    Voulez-vous vraiment supprimer le type <strong>{docToDelete?.name}</strong> ? Cette action est irréversible.
+                                </p>
+                            </div>
+                            <div className="modal-footer border-0 p-4 pt-0 d-flex justify-content-center gap-2">
+                                <button 
+                                    type="button" 
+                                    className="btn btn-light fw-bold px-4 shadow-sm" 
+                                    onClick={() => setShowDeleteModal(false)}
+                                    disabled={isDeleting}
+                                >
+                                    Annuler
+                                </button>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-danger fw-bold px-4 shadow-sm"
+                                    onClick={confirmDelete}
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? <span className="spinner-border spinner-border-sm"></span> : 'Supprimer'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

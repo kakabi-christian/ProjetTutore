@@ -1,9 +1,12 @@
 import axios from 'axios';
 
+// Ici, API_BASE_URL récupère "http://localhost:8000" depuis ton .env
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  // On concatène manuellement '/api' pour que toutes les requêtes 
+  // vers Laravel utilisent le bon préfixe de route.
+  baseURL: `${API_BASE_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
