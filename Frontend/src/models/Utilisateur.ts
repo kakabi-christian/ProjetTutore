@@ -25,3 +25,4 @@ export interface User {
   lastlogin?: string;
   created_at?: string;
 }
+// models/User.ts

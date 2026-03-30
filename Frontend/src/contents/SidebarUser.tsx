@@ -1,16 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { 
   MdDescription, 
   MdSwapHorizontalCircle, 
   MdLogout,
+  MdNotifications,
+  MdRateReview, // Nouvelle icône pour le Feedback
+  MdAccountCircle
 } from "react-icons/md";
 import { authService } from "../services/authService";
+import notificationService from "../services/NotificationService";
 
 const SidebarUser: React.FC = () => {
   const navigate = useNavigate();
-  // État pour gérer l'affichage du modal de déconnexion
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  // Récupération du compteur de notifications au chargement
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const count = await notificationService.getUnreadCount();
+        setUnreadCount(count);
+      } catch (error) {
+        console.error("Erreur compteur notifications:", error);
+      }
+    };
+
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 120000);
+    return () => clearInterval(interval);
+  }, []);
 
   const confirmLogout = async () => {
     try {
@@ -42,6 +62,7 @@ const SidebarUser: React.FC = () => {
           <div className="d-flex flex-column">
             <span className="fs-4 fw-bold text-white" style={{ lineHeight: '1.2' }}>ExchaPay</span>
             <small className="text-excha-green fw-bold text-uppercase" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
+              Utilisateur
             </small>
           </div>
         </div>
@@ -50,6 +71,7 @@ const SidebarUser: React.FC = () => {
 
         {/* Menu Navigation */}
         <ul className="nav nav-pills flex-column mb-auto">
+          {/* Item KYC */}
           <li className="nav-item mb-2">
             <NavLink
               to="/user/kyc"
@@ -58,14 +80,68 @@ const SidebarUser: React.FC = () => {
                   ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
                   : "nav-link text-white opacity-75 hover-opacity-100"
               }
-              style={({ isActive }) => ({
-                  borderRadius: '10px',
-                  transition: 'all 0.3s ease',
-                  backgroundColor: isActive ? 'var(--orange)' : 'transparent'
-              })}
+              style={{ borderRadius: '10px', transition: 'all 0.3s ease' }}
             >
               <MdDescription className="me-2" size={22} />
-                KYC
+              KYC
+            </NavLink>
+          </li>
+
+          {/* Item Notifications avec Badge */}
+          <li className="nav-item mb-2">
+            <NavLink
+              to="/user/notifications-user"
+              className={({ isActive }) =>
+                isActive
+                  ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm d-flex justify-content-between align-items-center"
+                  : "nav-link text-white opacity-75 hover-opacity-100 d-flex justify-content-between align-items-center"
+              }
+              style={{ borderRadius: '10px', transition: 'all 0.3s ease' }}
+            >
+              <div className="d-flex align-items-center">
+                <MdNotifications className="me-2" size={22} />
+                Notifications
+              </div>
+              
+              {unreadCount > 0 && (
+                <span 
+                  className="badge rounded-pill bg-danger shadow-sm" 
+                  style={{ fontSize: '0.7rem', padding: '0.4em 0.6em' }}
+                >
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </NavLink>
+          </li>
+
+          {/* NOUVEAU : Item Feedback */}
+          <li className="nav-item mb-2">
+            <NavLink
+              to="/user/feedback"
+              className={({ isActive }) =>
+                isActive
+                  ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
+                  : "nav-link text-white opacity-75 hover-opacity-100"
+              }
+              style={{ borderRadius: '10px', transition: 'all 0.3s ease' }}
+            >
+              <MdRateReview className="me-2" size={22} />
+              Avis & Feedback
+            </NavLink>
+          </li>
+
+          <li className="nav-item mb-2">
+            <NavLink
+              to="/user/profile-user"
+              className={({ isActive }) =>
+                isActive
+                  ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
+                  : "nav-link text-white opacity-75 hover-opacity-100"
+              }
+              style={{ borderRadius: '10px', transition: 'all 0.3s ease' }}
+            >
+                <MdAccountCircle className="me-2" size={22} />
+              Mon Profil
             </NavLink>
           </li>
         </ul>
@@ -95,7 +171,7 @@ const SidebarUser: React.FC = () => {
         </div>
       </div>
 
-      {/* MODAL DE DÉCONNEXION (Inspiré de ton TypeDocumentPage) */}
+      {/* MODAL DE DÉCONNEXION */}
       {showLogoutModal && (
         <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(10, 37, 64, 0.6)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>
@@ -105,7 +181,7 @@ const SidebarUser: React.FC = () => {
                     <MdLogout size={50} className="text-excha-orange" />
                 </div>
                 <h5 className="fw-bold mb-3" style={{ color: 'var(--blue)' }}>Déconnexion</h5>
-                <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session administrateur ?</p>
+                <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session ?</p>
                 
                 <div className="d-flex gap-2 mt-4">
                   <button 

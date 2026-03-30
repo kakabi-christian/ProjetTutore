@@ -4,7 +4,9 @@ import {
   MdDescription, 
   MdSwapHorizontalCircle, 
   MdLogout,
-  MdNotificationsActive
+  MdNotificationsActive,
+  MdSend,
+  MdAccountCircle // NOUVEAU : Icône pour le profil
 } from "react-icons/md";
 import { authService } from "../services/authService";
 import KycService from "../services/KycService";
@@ -12,11 +14,8 @@ import KycService from "../services/KycService";
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  
-  // État pour le compteur de KYC en attente
   const [pendingCount, setPendingCount] = useState<number>(0);
 
-  // Fonction pour récupérer le nombre de KYC en attente
   const fetchPendingCount = async () => {
     try {
       const response = await KycService.getPendingCount();
@@ -27,14 +26,8 @@ const Sidebar: React.FC = () => {
   };
 
   useEffect(() => {
-    // Chargement initial
     fetchPendingCount();
-
-    // Écouter l'événement personnalisé pour mettre à jour le compteur
-    // cet événement sera déclenché depuis ta page de gestion KYC
     window.addEventListener('kyc-status-changed', fetchPendingCount);
-
-    // Nettoyage de l'écouteur
     return () => {
       window.removeEventListener('kyc-status-changed', fetchPendingCount);
     };
@@ -48,10 +41,25 @@ const Sidebar: React.FC = () => {
     } catch (error) {
       console.error("Erreur lors de la déconnexion", error);
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_data'); // Nettoyage propre
       setShowLogoutModal(false);
       navigate("/login");
     }
   };
+
+  const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
+    isActive
+      ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
+      : "nav-link text-excha-green fw-bold opacity-75 hover-opacity-100";
+
+  const navLinkStyle = ({ isActive }: { isActive: boolean }) => ({
+    borderRadius: '10px',
+    transition: 'all 0.3s ease',
+    backgroundColor: isActive ? 'var(--orange)' : 'transparent',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  });
 
   return (
     <>
@@ -79,50 +87,25 @@ const Sidebar: React.FC = () => {
 
         {/* Menu Navigation */}
         <ul className="nav nav-pills flex-column mb-auto">
+          
           {/* Types de Documents */}
           <li className="nav-item mb-2">
-            <NavLink
-              to="/admin/type-documents"
-              className={({ isActive }) =>
-                isActive
-                  ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
-                  : "nav-link text-excha-green fw-bold opacity-75 hover-opacity-100 "
-              }
-              style={({ isActive }) => ({
-                  borderRadius: '10px',
-                  transition: 'all 0.3s ease',
-                  backgroundColor: isActive ? 'var(--orange)' : 'transparent'
-              })}
-            >
-              <MdDescription className="me-2" size={22} />
-              Types de Documents
+            <NavLink to="/admin/type-documents" className={navLinkClasses} style={navLinkStyle}>
+              <div className="d-flex align-items-center">
+                <MdDescription className="me-2" size={22} />
+                Types de Documents
+              </div>
             </NavLink>
           </li>
 
           {/* Gestion des KYC avec Badge */}
           <li className="nav-item mb-2">
-            <NavLink
-              to="/admin/kyc"
-              className={({ isActive }) =>
-                isActive
-                  ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
-                  : "nav-link text-excha-green fw-bold opacity-75 hover-opacity-100"
-              }
-              style={({ isActive }) => ({
-                  borderRadius: '10px',
-                  transition: 'all 0.3s ease',
-                  backgroundColor: isActive ? 'var(--orange)' : 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-              })}
-            >
+            <NavLink to="/admin/kyc" className={navLinkClasses} style={navLinkStyle}>
               <div className="d-flex align-items-center">
                 <MdNotificationsActive className="me-2" size={22} />
                 Gestion des KYC
               </div>
 
-              {/* Badge Dynamique */}
               {pendingCount > 0 && (
                 <span 
                   className="badge rounded-pill bg-white text-excha-orange shadow-sm d-flex align-items-center justify-content-center"
@@ -138,6 +121,27 @@ const Sidebar: React.FC = () => {
               )}
             </NavLink>
           </li>
+
+          {/* Envoi de Notifications */}
+          <li className="nav-item mb-2">
+            <NavLink to="/admin/notifications-admin" className={navLinkClasses} style={navLinkStyle}>
+              <div className="d-flex align-items-center">
+                <MdSend className="me-2" size={22} />
+                Notifications
+              </div>
+            </NavLink>
+          </li>
+
+          {/* NOUVEAU : Mon Profil */}
+          <li className="nav-item mb-2">
+            <NavLink to="/admin/profile-admin" className={navLinkClasses} style={navLinkStyle}>
+              <div className="d-flex align-items-center">
+                <MdAccountCircle className="me-2" size={22} />
+                Mon Profil
+              </div>
+            </NavLink>
+          </li>
+
         </ul>
 
         <hr style={{ backgroundColor: "rgba(255,255,255,0.1)", height: '1px', border: 'none' }} />
@@ -175,7 +179,7 @@ const Sidebar: React.FC = () => {
                     <MdLogout size={50} className="text-excha-orange" />
                 </div>
                 <h5 className="fw-bold mb-3" style={{ color: 'var(--blue)' }}>Déconnexion</h5>
-                <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session administrateur ?</p>
+                <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session ?</p>
                 
                 <div className="d-flex gap-2 mt-4">
                   <button 
