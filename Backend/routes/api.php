@@ -6,6 +6,10 @@ use App\Http\Controllers\Api\KycController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\TypeDocumentController;
 use App\Http\Controllers\Api\UtilisateurController;
+use App\Http\Controllers\Api\TypeDocumentController;
+use App\Http\Controllers\Api\KycController; // Import du nouveau contrôleur
+use App\Http\Controllers\Api\ListingController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,6 +30,10 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 // Consultation des types de documents
 Route::get('/type-documents', [TypeDocumentController::class, 'index']);
 Route::get('/type-documents/{id}', [TypeDocumentController::class, 'show']);
+
+// Consultation des offres (Listings)
+Route::get('/listings', [ListingController::class, 'index']);
+Route::get('/listings/{id}', [ListingController::class, 'show']);
 
 // --- ROUTES PROTÉGÉES (auth:sanctum) ---
 
@@ -55,6 +63,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Feedback
     Route::post('/feedback', [FeedbackController::class, 'store']);
+    // Gestion de ses propres offres
+    Route::post('/listings', [ListingController::class, 'store']);
+    Route::put('/listings/{id}', [ListingController::class, 'update']);
+    Route::delete('/listings/{id}', [ListingController::class, 'destroy']);
+
 
     // --- ESPACE ADMINISTRATION (Préfixe admin/) ---
 
