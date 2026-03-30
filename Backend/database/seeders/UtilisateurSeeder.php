@@ -20,6 +20,7 @@ class UtilisateurSeeder extends Seeder
             [
                 'lastname' => 'Kakabi',
                 'firstname' => 'Talla',
+                'type' => 'admin',
                 'password' => Hash::make('password'),
                 'telephone' => '+237699554433',
                 'country' => 'Cameroun',
@@ -56,6 +57,7 @@ class UtilisateurSeeder extends Seeder
             [
                 'lastname' => 'Pitou',
                 'firstname' => 'Tagne',
+                'type' => 'user',
                 'password' => Hash::make('password'),
                 'telephone' => '+237699554411',
                 'country' => 'Cameroun',

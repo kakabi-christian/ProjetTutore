@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\KycController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\TypeDocumentController;
 use App\Http\Controllers\Api\UtilisateurController;
+use App\Http\Controllers\Api\ListingController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,6 +29,10 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/type-documents', [TypeDocumentController::class, 'index']);
 Route::get('/type-documents/{id}', [TypeDocumentController::class, 'show']);
 
+// Consultation des offres (Listings) - Public
+Route::get('/listings', [ListingController::class, 'index']);
+Route::get('/listings/{id}', [ListingController::class, 'show']);
+
 // --- ROUTES PROTÉGÉES (auth:sanctum) ---
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -34,27 +40,29 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // --- GESTION DU COMPTE & PROFIL ---
-    // Utilise le contrôleur pour une réponse uniforme
     Route::get('/me', [UtilisateurController::class, 'profile']);
     Route::put('/profile/update', [UtilisateurController::class, 'updateProfile']);
     Route::post('/profile/password', [UtilisateurController::class, 'updatePassword']);
 
     // --- ESPACE UTILISATEUR (Client) ---
 
-    // Soumettre un dossier complet (KYC + Documents)
+    // KYC
     Route::post('/kyc/submit', [KycController::class, 'store']);
-
-    // Consulter son propre statut KYC actuel
     Route::get('/my-kyc', [KycController::class, 'getUserStatus']);
 
     // Notifications Utilisateur
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::patch('notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
-    Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
+    // Optionnel : Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
 
     // Feedback
     Route::post('/feedback', [FeedbackController::class, 'store']);
+
+    // Gestion de ses propres offres (Listings)
+    Route::post('/listings', [ListingController::class, 'store']);
+    Route::put('/listings/{id}', [ListingController::class, 'update']);
+    Route::delete('/listings/{id}', [ListingController::class, 'destroy']);
 
     // --- ESPACE ADMINISTRATION (Préfixe admin/) ---
 
@@ -62,7 +70,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Gestion des utilisateurs
         Route::get('/users-list', [UtilisateurController::class, 'getUsersList']);
-        // Tu pourras ajouter ici : Route::get('/users/{id}', [UtilisateurController::class, 'show']);
 
         // Gestion des types de documents
         Route::post('/type-documents', [TypeDocumentController::class, 'store']);
@@ -77,10 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/kycs/{id}/reject', [KycController::class, 'reject']);
 
         // Gestion des Notifications (Admin)
-        Route::get('notifications', [NotificationController::class, 'index']);
-        Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
-        Route::patch('notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
-        Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
+        Route::get('admin-notifications', [NotificationController::class, 'index']); // Changé le nom pour éviter conflit si besoin
         Route::delete('notifications/{id}', [NotificationController::class, 'destroy']);
         Route::post('notifications', [NotificationController::class, 'store']);
 
