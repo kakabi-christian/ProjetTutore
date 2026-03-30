@@ -4,10 +4,13 @@ import {
   MdDescription, 
   MdSwapHorizontalCircle, 
   MdLogout,
-  MdNotifications // Import de l'icône notification
+  MdNotifications,
+  MdRateReview, // Nouvelle icône pour le Feedback
+  MdAccountCircle
 } from "react-icons/md";
 import { authService } from "../services/authService";
 import notificationService from "../services/NotificationService";
+
 const SidebarUser: React.FC = () => {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -25,7 +28,6 @@ const SidebarUser: React.FC = () => {
     };
 
     fetchUnreadCount();
-    // Optionnel : Rafraîchir toutes les 2 minutes
     const interval = setInterval(fetchUnreadCount, 120000);
     return () => clearInterval(interval);
   }, []);
@@ -109,6 +111,37 @@ const SidebarUser: React.FC = () => {
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
+            </NavLink>
+          </li>
+
+          {/* NOUVEAU : Item Feedback */}
+          <li className="nav-item mb-2">
+            <NavLink
+              to="/user/feedback"
+              className={({ isActive }) =>
+                isActive
+                  ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
+                  : "nav-link text-white opacity-75 hover-opacity-100"
+              }
+              style={{ borderRadius: '10px', transition: 'all 0.3s ease' }}
+            >
+              <MdRateReview className="me-2" size={22} />
+              Avis & Feedback
+            </NavLink>
+          </li>
+
+          <li className="nav-item mb-2">
+            <NavLink
+              to="/user/profile-user"
+              className={({ isActive }) =>
+                isActive
+                  ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
+                  : "nav-link text-white opacity-75 hover-opacity-100"
+              }
+              style={{ borderRadius: '10px', transition: 'all 0.3s ease' }}
+            >
+                <MdAccountCircle className="me-2" size={22} />
+              Mon Profil
             </NavLink>
           </li>
         </ul>

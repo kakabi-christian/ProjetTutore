@@ -5,7 +5,8 @@ import {
   MdSwapHorizontalCircle, 
   MdLogout,
   MdNotificationsActive,
-  MdSend // Ajout de l'icône pour l'envoi
+  MdSend,
+  MdAccountCircle // NOUVEAU : Icône pour le profil
 } from "react-icons/md";
 import { authService } from "../services/authService";
 import KycService from "../services/KycService";
@@ -13,11 +14,8 @@ import KycService from "../services/KycService";
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  
-  // État pour le compteur de KYC en attente
   const [pendingCount, setPendingCount] = useState<number>(0);
 
-  // Fonction pour récupérer le nombre de KYC en attente
   const fetchPendingCount = async () => {
     try {
       const response = await KycService.getPendingCount();
@@ -43,12 +41,12 @@ const Sidebar: React.FC = () => {
     } catch (error) {
       console.error("Erreur lors de la déconnexion", error);
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_data'); // Nettoyage propre
       setShowLogoutModal(false);
       navigate("/login");
     }
   };
 
-  // Helper pour éviter la répétition des styles complexes
   const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
     isActive
       ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
@@ -124,12 +122,22 @@ const Sidebar: React.FC = () => {
             </NavLink>
           </li>
 
-          {/* NOUVEAU : Envoi de Notifications */}
+          {/* Envoi de Notifications */}
           <li className="nav-item mb-2">
             <NavLink to="/admin/notifications-admin" className={navLinkClasses} style={navLinkStyle}>
               <div className="d-flex align-items-center">
                 <MdSend className="me-2" size={22} />
                 Notifications
+              </div>
+            </NavLink>
+          </li>
+
+          {/* NOUVEAU : Mon Profil */}
+          <li className="nav-item mb-2">
+            <NavLink to="/admin/profile-admin" className={navLinkClasses} style={navLinkStyle}>
+              <div className="d-flex align-items-center">
+                <MdAccountCircle className="me-2" size={22} />
+                Mon Profil
               </div>
             </NavLink>
           </li>
@@ -171,7 +179,7 @@ const Sidebar: React.FC = () => {
                     <MdLogout size={50} className="text-excha-orange" />
                 </div>
                 <h5 className="fw-bold mb-3" style={{ color: 'var(--blue)' }}>Déconnexion</h5>
-                <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session administrateur ?</p>
+                <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session ?</p>
                 
                 <div className="d-flex gap-2 mt-4">
                   <button 

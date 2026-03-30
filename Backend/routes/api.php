@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\KycController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\TypeDocumentController;
-use App\Http\Controllers\Api\UtilisateurController; // Import du contrôleur utilisateur
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\UtilisateurController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,9 +33,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::get('/me', function (Request $request) {
-        return $request->user();
-    });
+    // --- GESTION DU COMPTE & PROFIL ---
+    // Utilise le contrôleur pour une réponse uniforme
+    Route::get('/me', [UtilisateurController::class, 'profile']);
+    Route::put('/profile/update', [UtilisateurController::class, 'updateProfile']);
+    Route::post('/profile/password', [UtilisateurController::class, 'updatePassword']);
 
     // --- ESPACE UTILISATEUR (Client) ---
 
@@ -51,12 +53,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
     Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
 
+    // Feedback
+    Route::post('/feedback', [FeedbackController::class, 'store']);
+
     // --- ESPACE ADMINISTRATION (Préfixe admin/) ---
 
     Route::middleware('is_admin')->prefix('admin')->group(function () {
 
-        // Gestion des utilisateurs (Pour le ciblage des notifications)
+        // Gestion des utilisateurs
         Route::get('/users-list', [UtilisateurController::class, 'getUsersList']);
+        // Tu pourras ajouter ici : Route::get('/users/{id}', [UtilisateurController::class, 'show']);
 
         // Gestion des types de documents
         Route::post('/type-documents', [TypeDocumentController::class, 'store']);
@@ -76,7 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
         Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
         Route::delete('notifications/{id}', [NotificationController::class, 'destroy']);
-        Route::post('notifications', [NotificationController::class, 'store']); // Envoi (Broadcast ou ciblé)
+        Route::post('notifications', [NotificationController::class, 'store']);
 
     });
 

@@ -11,6 +11,8 @@ import KycPage from './contents/user/KycPage';
 import NotificationUser from './contents/user/NotificationUser';
 import KycAdmin from './contents/admin/KycAdmin';
 import NotificationAdmin from './contents/admin/NotificationAdmin';
+import FeedbackPage from './contents/user/FeedbackPage';
+import ProfilePage from './components/ProfilePage';
 function App() {
   return (
     <Router>
@@ -23,18 +25,22 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/login" element={<Login />} />
-
           {/* Routes Admin (avec enfants) */}
+
           <Route path="/admin/*" element={<AdminDashboard />}>
             <Route path="type-documents" element={<TypeDocumentPage />} />
             <Route path="notifications-admin" element={<NotificationAdmin />} />
             <Route path="kyc" element={<KycAdmin />} />
+            <Route path="profile-admin" element={<ProfilePage />} />
           </Route>
 
           {/* Routes User (avec enfants) */}
           <Route path="/user/*" element={<UserDashboard />}>
             <Route path="kyc" element={<KycPage />} />
             <Route path="notifications-user" element={<NotificationUser />} />
+            <Route path="feedback" element={<FeedbackPage />} />
+            <Route path="profile-user" element={<ProfilePage />} />
+
 
           </Route>
 

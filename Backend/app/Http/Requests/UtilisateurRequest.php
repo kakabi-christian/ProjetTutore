@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UtilisateurRequest extends FormRequest
 {
@@ -12,26 +12,42 @@ class UtilisateurRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // À modifier selon ta logique (ex: return auth()->user()->isAdmin();)
         return true;
     }
 
     /**
      * Obtenez les règles de validation qui s'appliquent à la requête.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
+        // On récupère l'ID de l'utilisateur connecté pour l'exclure de la vérification unique
+        $userId = auth()->id();
+
         return [
             'lastname' => 'required|string|max:100',
             'firstname' => 'required|string|max:100',
-            'email' => 'required|email|unique:utilisateurs,email,'.$this->user_id.',user_id',
-            'telephone' => 'required|string|unique:utilisateurs,telephone,'.$this->user_id.',user_id',
+
+            // ✅ Correction Unicité Email : ignore l'ID de l'utilisateur actuel
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('utilisateurs', 'email')->ignore($userId, 'user_id'),
+            ],
+
+            // ✅ Correction Unicité Téléphone : ignore l'ID de l'utilisateur actuel
+            'telephone' => [
+                'required',
+                'string',
+                Rule::unique('utilisateurs', 'telephone')->ignore($userId, 'user_id'),
+            ],
+
+            // Le mot de passe est requis seulement à la création (POST)
             'password' => $this->isMethod('post') ? 'required|string|min:8' : 'nullable|string|min:8',
-            'type' => 'required|in:user,admin',
+
+            // Le type et l'état sont souvent gérés par l'admin, on les met en nullable pour le profil simple
+            'type' => 'nullable|in:user,admin',
             'country' => 'required|string',
-            'isactive' => 'boolean',
+            'isactive' => 'nullable|boolean',
         ];
     }
 
@@ -48,9 +64,8 @@ class UtilisateurRequest extends FormRequest
             'email.unique' => 'Cette adresse email est déjà utilisée par un autre compte.',
             'telephone.required' => 'Le numéro de téléphone est obligatoire.',
             'telephone.unique' => 'Ce numéro de téléphone est déjà enregistré.',
-            'password.required' => 'Le mot de passe est obligatoire pour un nouvel utilisateur.',
+            'password.required' => 'Le mot de passe est obligatoire.',
             'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
-            'type.in' => 'Le type d\'utilisateur doit être "user" ou "admin".',
             'country.required' => 'Le pays de résidence est obligatoire.',
         ];
     }
