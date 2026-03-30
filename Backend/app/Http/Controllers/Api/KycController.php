@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\KycRequest;
+use App\Mail\KycStatusMail;
 use App\Models\Document;
-use App\Models\Kyc;
-use App\Mail\KycStatusMail; // Import du Mailable
+use App\Models\Kyc; // Import du Mailable
+use App\Models\Notification;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log; // À ajouter avec les autres imports
 use Illuminate\Support\Facades\Mail; // Import de la Facade Mail
 
 class KycController extends Controller
@@ -104,6 +105,7 @@ class KycController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Erreur KYC Store: '.$e->getMessage());
+
             return response()->json(['message' => 'Échec de la soumission du dossier.'], 500);
         }
     }
@@ -127,7 +129,6 @@ class KycController extends Controller
      */
     public function approve(int $id): JsonResponse
     {
-        // On récupère le KYC avec l'utilisateur pour l'email
         $kyc = Kyc::with('utilisateur')->find($id);
 
         if (! $kyc) {
@@ -140,8 +141,15 @@ class KycController extends Controller
             'completed_at' => now(),
         ]);
 
-        // On approuve aussi tous les documents rattachés
         $kyc->documents()->update(['status' => 'APPROVED']);
+
+        // --- CRÉATION DE LA NOTIFICATION DASHBOARD ---
+        Notification::create([
+            'user_id' => $kyc->user_id,
+            'type' => Notification::TYPE_SUCCESS,
+            'title' => 'Félicitations ! KYC Approuvé ✅',
+            'message' => 'Votre identité a été vérifiée avec succès. Vous avez désormais accès à toutes les fonctionnalités.',
+        ]);
 
         // --- ENVOI DU MAIL ---
         try {
@@ -149,10 +157,10 @@ class KycController extends Controller
                 new KycStatusMail($kyc->utilisateur->name, 'APPROVED')
             );
         } catch (\Exception $e) {
-            Log::error("Erreur Mail KYC Approve: " . $e->getMessage());
+            Log::error('Erreur Mail KYC Approve: '.$e->getMessage());
         }
 
-        return response()->json(['message' => 'Le dossier KYC a été approuvé et le mail envoyé.']);
+        return response()->json(['message' => 'Le dossier KYC a été approuvé, notifié et le mail envoyé.']);
     }
 
     /**
@@ -176,8 +184,15 @@ class KycController extends Controller
             'completed_at' => now(),
         ]);
 
-        // On marque les documents comme rejetés
         $kyc->documents()->update(['status' => 'REJECTED']);
+
+        // --- CRÉATION DE LA NOTIFICATION DASHBOARD ---
+        Notification::create([
+            'user_id' => $kyc->user_id,
+            'type' => Notification::TYPE_ERROR,
+            'title' => 'Action requise : KYC Rejeté ❌',
+            'message' => 'Votre dossier KYC a été refusé pour le motif suivant : '.$request->reason,
+        ]);
 
         // --- ENVOI DU MAIL ---
         try {
@@ -185,10 +200,10 @@ class KycController extends Controller
                 new KycStatusMail($kyc->utilisateur->name, 'REJECTED', $request->reason)
             );
         } catch (\Exception $e) {
-            Log::error("Erreur Mail KYC Reject: " . $e->getMessage());
+            Log::error('Erreur Mail KYC Reject: '.$e->getMessage());
         }
 
-        return response()->json(['message' => 'Le dossier KYC a été rejeté et le mail envoyé.']);
+        return response()->json(['message' => 'Le dossier KYC a été rejeté, notifié et le mail envoyé.']);
     }
 
     /**
@@ -214,6 +229,7 @@ class KycController extends Controller
         try {
             if (! class_exists('App\Models\Kyc')) {
                 Log::error("[KYC_COUNT] Erreur Critique : Le modèle App\Models\Kyc n'existe pas.");
+
                 return response()->json(['message' => 'Modèle introuvable.'], 500);
             }
 
@@ -228,10 +244,12 @@ class KycController extends Controller
 
         } catch (QueryException $e) {
             Log::error('[KYC_COUNT] Erreur SQL : '.$e->getMessage());
+
             return response()->json(['message' => 'Erreur de base de données.'], 500);
 
         } catch (\Exception $e) {
             Log::error('[KYC_COUNT] Exception Générale : '.$e->getMessage());
+
             return response()->json(['message' => 'Erreur lors du comptage.'], 500);
         }
     }
