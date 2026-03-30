@@ -4,7 +4,8 @@ import {
   MdDescription, 
   MdSwapHorizontalCircle, 
   MdLogout,
-  MdNotificationsActive
+  MdNotificationsActive,
+  MdSend // Ajout de l'icône pour l'envoi
 } from "react-icons/md";
 import { authService } from "../services/authService";
 import KycService from "../services/KycService";
@@ -27,14 +28,8 @@ const Sidebar: React.FC = () => {
   };
 
   useEffect(() => {
-    // Chargement initial
     fetchPendingCount();
-
-    // Écouter l'événement personnalisé pour mettre à jour le compteur
-    // cet événement sera déclenché depuis ta page de gestion KYC
     window.addEventListener('kyc-status-changed', fetchPendingCount);
-
-    // Nettoyage de l'écouteur
     return () => {
       window.removeEventListener('kyc-status-changed', fetchPendingCount);
     };
@@ -52,6 +47,21 @@ const Sidebar: React.FC = () => {
       navigate("/login");
     }
   };
+
+  // Helper pour éviter la répétition des styles complexes
+  const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
+    isActive
+      ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
+      : "nav-link text-excha-green fw-bold opacity-75 hover-opacity-100";
+
+  const navLinkStyle = ({ isActive }: { isActive: boolean }) => ({
+    borderRadius: '10px',
+    transition: 'all 0.3s ease',
+    backgroundColor: isActive ? 'var(--orange)' : 'transparent',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  });
 
   return (
     <>
@@ -79,50 +89,25 @@ const Sidebar: React.FC = () => {
 
         {/* Menu Navigation */}
         <ul className="nav nav-pills flex-column mb-auto">
+          
           {/* Types de Documents */}
           <li className="nav-item mb-2">
-            <NavLink
-              to="/admin/type-documents"
-              className={({ isActive }) =>
-                isActive
-                  ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
-                  : "nav-link text-excha-green fw-bold opacity-75 hover-opacity-100 "
-              }
-              style={({ isActive }) => ({
-                  borderRadius: '10px',
-                  transition: 'all 0.3s ease',
-                  backgroundColor: isActive ? 'var(--orange)' : 'transparent'
-              })}
-            >
-              <MdDescription className="me-2" size={22} />
-              Types de Documents
+            <NavLink to="/admin/type-documents" className={navLinkClasses} style={navLinkStyle}>
+              <div className="d-flex align-items-center">
+                <MdDescription className="me-2" size={22} />
+                Types de Documents
+              </div>
             </NavLink>
           </li>
 
           {/* Gestion des KYC avec Badge */}
           <li className="nav-item mb-2">
-            <NavLink
-              to="/admin/kyc"
-              className={({ isActive }) =>
-                isActive
-                  ? "nav-link active bg-excha-orange text-white fw-bold shadow-sm"
-                  : "nav-link text-excha-green fw-bold opacity-75 hover-opacity-100"
-              }
-              style={({ isActive }) => ({
-                  borderRadius: '10px',
-                  transition: 'all 0.3s ease',
-                  backgroundColor: isActive ? 'var(--orange)' : 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-              })}
-            >
+            <NavLink to="/admin/kyc" className={navLinkClasses} style={navLinkStyle}>
               <div className="d-flex align-items-center">
                 <MdNotificationsActive className="me-2" size={22} />
                 Gestion des KYC
               </div>
 
-              {/* Badge Dynamique */}
               {pendingCount > 0 && (
                 <span 
                   className="badge rounded-pill bg-white text-excha-orange shadow-sm d-flex align-items-center justify-content-center"
@@ -138,6 +123,17 @@ const Sidebar: React.FC = () => {
               )}
             </NavLink>
           </li>
+
+          {/* NOUVEAU : Envoi de Notifications */}
+          <li className="nav-item mb-2">
+            <NavLink to="/admin/notifications-admin" className={navLinkClasses} style={navLinkStyle}>
+              <div className="d-flex align-items-center">
+                <MdSend className="me-2" size={22} />
+                Notifications
+              </div>
+            </NavLink>
+          </li>
+
         </ul>
 
         <hr style={{ backgroundColor: "rgba(255,255,255,0.1)", height: '1px', border: 'none' }} />

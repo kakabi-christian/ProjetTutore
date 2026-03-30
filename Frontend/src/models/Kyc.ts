@@ -1,5 +1,5 @@
 import type { Document } from './Documents';
-import type { User } from './User';
+import type { User } from './Utilisateur';
 
 /**
  * Interface représentant le dossier KYC (Know Your Customer)

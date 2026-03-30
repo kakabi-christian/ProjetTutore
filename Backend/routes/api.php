@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\KycController;
-use App\Http\Controllers\Api\TypeDocumentController; // Import du nouveau contrôleur
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\TypeDocumentController;
+use App\Http\Controllers\Api\UtilisateurController; // Import du contrôleur utilisateur
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -43,9 +45,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // Consulter son propre statut KYC actuel
     Route::get('/my-kyc', [KycController::class, 'getUserStatus']);
 
+    // Notifications Utilisateur
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::patch('notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
+    Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
+
     // --- ESPACE ADMINISTRATION (Préfixe admin/) ---
 
     Route::middleware('is_admin')->prefix('admin')->group(function () {
+
+        // Gestion des utilisateurs (Pour le ciblage des notifications)
+        Route::get('/users-list', [UtilisateurController::class, 'getUsersList']);
 
         // Gestion des types de documents
         Route::post('/type-documents', [TypeDocumentController::class, 'store']);
@@ -55,9 +66,17 @@ Route::middleware('auth:sanctum')->group(function () {
         // Gestion des dossiers KYC par l'Admin
         Route::get('/kycs', [KycController::class, 'index']);
         Route::get('/kycs/pending-count', [KycController::class, 'getPendingCount']);
-        Route::get('/kycs/{id}', [KycController::class, 'show']);       // Détails d'un dossier
-        Route::post('/kycs/{id}/approve', [KycController::class, 'approve']); // Approuver
-        Route::post('/kycs/{id}/reject', [KycController::class, 'reject']);   // Rejeter avec motif
+        Route::get('/kycs/{id}', [KycController::class, 'show']);
+        Route::post('/kycs/{id}/approve', [KycController::class, 'approve']);
+        Route::post('/kycs/{id}/reject', [KycController::class, 'reject']);
+
+        // Gestion des Notifications (Admin)
+        Route::get('notifications', [NotificationController::class, 'index']);
+        Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::patch('notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
+        Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
+        Route::delete('notifications/{id}', [NotificationController::class, 'destroy']);
+        Route::post('notifications', [NotificationController::class, 'store']); // Envoi (Broadcast ou ciblé)
 
     });
 

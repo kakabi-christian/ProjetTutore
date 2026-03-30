@@ -1,5 +1,5 @@
 import api from './api';
-import type { User, UserRegistration } from '../models/User';
+import type { User, UserRegistration } from '../models/Utilisateur';
 // Interface pour la réponse typique du backend
 interface AuthResponse {
   status: string;

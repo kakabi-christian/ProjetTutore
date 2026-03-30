@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
-import type { UserRegistration } from "../models/User";
+import type { UserRegistration } from "../models/Utilisateur";
 import "../styles/RegisterContent.css";
 
 export default function RegisterContent() {
