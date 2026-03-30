@@ -3,11 +3,10 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\KycController;
+use App\Http\Controllers\Api\ListingController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\TypeDocumentController;
 use App\Http\Controllers\Api\UtilisateurController;
-use App\Http\Controllers\Api\ListingController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -54,7 +53,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::patch('notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
-    // Optionnel : Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
 
     // Feedback
     Route::post('/feedback', [FeedbackController::class, 'store']);
@@ -84,7 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/kycs/{id}/reject', [KycController::class, 'reject']);
 
         // Gestion des Notifications (Admin)
-        Route::get('admin-notifications', [NotificationController::class, 'index']); // Changé le nom pour éviter conflit si besoin
+        Route::get('admin-notifications', [NotificationController::class, 'index']);
         Route::delete('notifications/{id}', [NotificationController::class, 'destroy']);
         Route::post('notifications', [NotificationController::class, 'store']);
 
