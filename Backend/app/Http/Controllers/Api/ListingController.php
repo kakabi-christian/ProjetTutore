@@ -3,15 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Kyc;
 use App\Models\Listing;
 use App\Models\ListingHistory;
 use App\Models\ListingStatus;
-use App\Models\Kyc;
-use App\Models\Transaction;
 use App\Models\Utilisateur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class ListingController extends Controller
 {
@@ -32,9 +30,9 @@ class ListingController extends Controller
                     ->whereColumn('listing_id', 'listings.listing_id');
             });
         })->where('amount_available', '>', 0)
-          ->with(['utilisateur:user_id,nom,prenom,email,pseudonyme', 'histories' => function ($historyQuery) {
-              $historyQuery->latest('date')->take(1)->with('listingStatus');
-          }]);
+            ->with(['utilisateur:user_id,nom,prenom,email,pseudonyme', 'histories' => function ($historyQuery) {
+                $historyQuery->latest('date')->take(1)->with('listingStatus');
+            }]);
 
         // Filtrage
         if ($request->has('currency_from')) {
@@ -83,8 +81,8 @@ class ListingController extends Controller
          * L'authentification par défaut de Laravel/Sanctum (Auth::user()) retourne généralement le modèle natif App\Models\User
          * mais ici nous utilisons le modèle Utilisateur.
          */
-        
-        /** @var \App\Models\Utilisateur $utilisateur */
+
+        /** @var Utilisateur $utilisateur */
         $utilisateur = Utilisateur::find(Auth::id());
 
         // Vérification KYC
@@ -92,7 +90,7 @@ class ListingController extends Controller
             ->where('status', 'APPROVED')
             ->first();
 
-        if (!$kyc) {
+        if (! $kyc) {
             return response()->json(['message' => 'Un KYC approuvé est obligatoire pour créer une annonce.'], 403);
         }
 
@@ -123,7 +121,7 @@ class ListingController extends Controller
 
         return response()->json([
             'message' => 'Annonce créée avec succès',
-            'listing' => $listing->load('histories.listingStatus')
+            'listing' => $listing->load('histories.listingStatus'),
         ], 201);
     }
 
@@ -139,11 +137,11 @@ class ListingController extends Controller
          * mais ici nous utilisons le modèle Utilisateur.
          */
 
-        /** @var \App\Models\Utilisateur $utilisateur */
+        /** @var Utilisateur $utilisateur */
         $utilisateur = Utilisateur::find(Auth::id());
 
         // Droits : créateur ou admin
-        if ($listing->user_id !== $utilisateur->user_id && !$utilisateur->hasRole('admin')) {
+        if ($listing->user_id !== $utilisateur->user_id && ! $utilisateur->hasRole('admin')) {
             return response()->json(['message' => 'Non autorisé à modifier cette annonce.'], 403);
         }
 
@@ -168,7 +166,7 @@ class ListingController extends Controller
 
         return response()->json([
             'message' => 'Annonce mise à jour avec succès',
-            'listing' => $listing->load('histories.listingStatus')
+            'listing' => $listing->load('histories.listingStatus'),
         ]);
     }
 
@@ -184,20 +182,20 @@ class ListingController extends Controller
          * mais ici nous utilisons le modèle Utilisateur.
          */
 
-        /** @var \App\Models\Utilisateur $utilisateur */
+        /** @var Utilisateur $utilisateur */
         $utilisateur = Utilisateur::find(Auth::id());
 
         // Droits : créateur ou admin
-        if ($listing->user_id !== $utilisateur->user_id && !$utilisateur->hasRole('admin')) {
+        if ($listing->user_id !== $utilisateur->user_id && ! $utilisateur->hasRole('admin')) {
             return response()->json(['message' => 'Non autorisé à supprimer cette annonce.'], 403);
         }
 
         // Vérification des transactions en cours (PENDING)
         $hasPendingTransactions = $listing->transactions()->where('status', 'PENDING')->exists();
-        
+
         if ($hasPendingTransactions) {
             return response()->json([
-                'message' => 'Impossible de supprimer cette annonce car des transactions sont en cours dessus.'
+                'message' => 'Impossible de supprimer cette annonce car des transactions sont en cours dessus.',
             ], 422);
         }
 

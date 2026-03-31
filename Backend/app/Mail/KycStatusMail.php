@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -15,7 +14,9 @@ class KycStatusMail extends Mailable
     use Queueable, SerializesModels;
 
     public $userName;
+
     public $status; // 'APPROVED' ou 'REJECTED'
+
     public $reason; // Sera null en cas d'approbation
 
     /**
@@ -34,8 +35,8 @@ class KycStatusMail extends Mailable
     public function envelope(): Envelope
     {
         // Le sujet change selon le statut pour être plus pro
-        $subject = $this->status === 'APPROVED' 
-            ? '✅ Félicitations ! Votre KYC ExchaPay est validé' 
+        $subject = $this->status === 'APPROVED'
+            ? '✅ Félicitations ! Votre KYC ExchaPay est validé'
             : '❌ Information importante concernant votre KYC ExchaPay';
 
         return new Envelope(

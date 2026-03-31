@@ -1,5 +1,5 @@
 import api from './api';
-import type { User, UserRegistration } from '../models/User';
+import type { User, UserRegistration } from '../models/Utilisateur';
 // Interface pour la réponse typique du backend
 interface AuthResponse {
   status: string;
@@ -24,12 +24,21 @@ export const authService = {
    * 2. Connexion (Login) 🔑
    * Envoie l'email et le password vers POST /api/login
    */
+  /**
+   * 2. Connexion (Login) 🔑
+   */
   login: async (credentials: Pick<UserRegistration, 'email' | 'password'>): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>('/login', credentials);
     
-    // Si on reçoit un token, on le stocke pour l'intercepteur 💾
+    // 💾 Stockage du Token
     if (response.data.access_token) {
       localStorage.setItem('auth_token', response.data.access_token);
+    }
+
+    // 👤 NOUVEAU : Stockage des données utilisateur
+    // On transforme l'objet user en chaîne JSON pour le localStorage
+    if (response.data.user) {
+      localStorage.setItem('user_data', JSON.stringify(response.data.user));
     }
     
     return response.data;
@@ -37,11 +46,15 @@ export const authService = {
 
   /**
    * 3. Déconnexion (Logout) 🚪
-   * Utilise le token via l'intercepteur pour révoquer l'accès
    */
   logout: async () => {
-    await api.post('/logout');
-    localStorage.removeItem('auth_token');
+    try {
+      await api.post('/logout');
+    } finally {
+      // On nettoie TOUT, même si la requête API échoue
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_data'); // On nettoie aussi le user_data
+    }
   },
 
   /**
