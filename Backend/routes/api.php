@@ -5,9 +5,9 @@ use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\KycController;
 use App\Http\Controllers\Api\ListingController;
 use App\Http\Controllers\Api\NotificationController;
-use App\Http\Controllers\Api\RoleController; 
-use App\Http\Controllers\Api\PermissionController; // Ajouté
-use App\Http\Controllers\Api\RolePermissionController; // Ajouté
+use App\Http\Controllers\Api\PermissionController;
+use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\RolePermissionController;
 use App\Http\Controllers\Api\TypeDocumentController;
 use App\Http\Controllers\Api\UtilisateurController;
 use Illuminate\Support\Facades\Route;
@@ -58,16 +58,20 @@ Route::middleware('auth:sanctum')->group(function () {
     // --- ESPACE ADMINISTRATION (Préfixe admin/) ---
     Route::middleware('is_admin')->prefix('admin')->group(function () {
 
+        // ✅ Gestion des Administrateurs / Collaborateurs
+        Route::get('/collaborators', [UtilisateurController::class, 'getAdminsList']);
+        Route::post('/collaborators', [UtilisateurController::class, 'storeAdmin']);
+        Route::put('/collaborators/{id}', [UtilisateurController::class, 'updateAdmin']);
+        Route::delete('/collaborators/{id}', [UtilisateurController::class, 'destroyAdmin']);
+
         // ✅ Gestion des Rôles
         Route::apiResource('roles', RoleController::class);
 
-        // ✅ Gestion des Permissions & Assignations (Ajouté)
-        // Pour afficher la liste des permissions existantes (avec pagination)
-        Route::get('permissions', [PermissionController::class, 'index']); 
-        // Pour assigner les permissions au rôle (la fameuse clé dans ton frontend)
+        // ✅ Gestion des Permissions & Assignations
+        Route::get('permissions', [PermissionController::class, 'index']);
         Route::post('roles/assign-permissions', [RolePermissionController::class, 'assignPermissions']);
 
-        // Gestion des utilisateurs
+        // Gestion des utilisateurs (Liste simple type 'user')
         Route::get('/users-list', [UtilisateurController::class, 'getUsersList']);
 
         // Gestion des types de documents

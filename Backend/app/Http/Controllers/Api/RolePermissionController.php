@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\RolePermission;
 use App\Http\Requests\RolePermissionRequest;
+use App\Models\RolePermission;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -26,15 +26,15 @@ class RolePermissionController extends Controller
             $newPermissions = [];
             foreach ($request->permissions as $permissionId) {
                 $newPermissions[] = [
-                    'role_id'       => $request->role_id,
+                    'role_id' => $request->role_id,
                     'permission_id' => $permissionId,
-                    'created_at'    => now(),
-                    'updated_at'    => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ];
             }
 
             // 3. Insérer les nouvelles permissions en une seule requête SQL
-            if (!empty($newPermissions)) {
+            if (! empty($newPermissions)) {
                 RolePermission::insert($newPermissions);
             }
 
@@ -42,16 +42,16 @@ class RolePermissionController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Les permissions ont été assignées avec succès.'
+                'message' => 'Les permissions ont été assignées avec succès.',
             ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de l\'assignation : ' . $e->getMessage()
+                'message' => 'Erreur lors de l\'assignation : '.$e->getMessage(),
             ], 500);
         }
     }
-
 }

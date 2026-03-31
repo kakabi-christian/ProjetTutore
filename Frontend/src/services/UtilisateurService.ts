@@ -1,9 +1,10 @@
-// services/UtilisateurService.ts
 import api from "./api";
 import type { User } from "../models/Utilisateur";
 
 /**
- * Interfaces pour les payloads de mise à jour
+ * Interfaces pour les payloads
+ * On utilise 'export type' ou 'export interface' 
+ * pour faciliter les imports type-only
  */
 export interface UpdateProfilePayload {
   lastname: string;
@@ -19,16 +20,39 @@ export interface UpdatePasswordPayload {
   new_password_confirmation: string;
 }
 
+export interface CreateCollaboratorPayload {
+  lastname: string;
+  firstname: string;
+  email: string;
+  telephone: string;
+  country: string;
+  role_id: number;
+}
+
+// Payload pour la modification (inclut le statut actif/inactif)
+export interface UpdateCollaboratorPayload extends CreateCollaboratorPayload {
+  isactive: boolean;
+}
+
+/**
+ * Interface pour la réponse paginée de Laravel
+ */
+export interface PaginatedAdmins {
+  data: User[];
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+}
+
 const UtilisateurService = {
   
   /**
    * 👤 RÉCUPÉRER LE PROFIL (ME)
-   * Récupère les infos de l'utilisateur connecté depuis le serveur
    */
   async getProfile(): Promise<User> {
     try {
       const response = await api.get<{status: string, user: User}>('/me');
-      // On met à jour le localStorage pour être sûr d'avoir les infos fraîches
       localStorage.setItem('user_data', JSON.stringify(response.data.user));
       return response.data.user;
     } catch (error) {
@@ -39,12 +63,10 @@ const UtilisateurService = {
 
   /**
    * 📝 METTRE À JOUR LE PROFIL
-   * Met à jour les infos de base de l'utilisateur
    */
   async updateProfile(data: UpdateProfilePayload): Promise<User> {
     try {
       const response = await api.put<{status: string, message: string, user: User}>('/profile/update', data);
-      // Très important pour ExchaPay : mettre à jour les données locales après modification
       localStorage.setItem('user_data', JSON.stringify(response.data.user));
       return response.data.user;
     } catch (error) {
@@ -55,7 +77,6 @@ const UtilisateurService = {
 
   /**
    * 🔑 CHANGER LE MOT DE PASSE
-   * Envoie l'ancien et le nouveau mot de passe pour modification
    */
   async updatePassword(data: UpdatePasswordPayload): Promise<{message: string}> {
     try {
@@ -68,8 +89,62 @@ const UtilisateurService = {
   },
 
   /**
-   * 🛡️ ADMIN : LISTE DES UTILISATEURS
-   * Récupère la liste simplifiée (Type 'user') pour les notifications
+   * 🛡️ ADMIN : CRÉER UN COLLABORATEUR (ADMIN)
+   */
+  async adminCreateCollaborator(data: CreateCollaboratorPayload): Promise<{status: string, message: string, user: User}> {
+    try {
+      const response = await api.post<{status: string, message: string, user: User}>('/admin/collaborators', data);
+      return response.data;
+    } catch (error) {
+      console.error("Erreur création collaborateur:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * 🛡️ ADMIN : MODIFIER UN COLLABORATEUR
+   */
+  async adminUpdateCollaborator(id: number, data: UpdateCollaboratorPayload): Promise<{status: string, message: string, user: User}> {
+    try {
+      const response = await api.put<{status: string, message: string, user: User}>(`/admin/collaborators/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Erreur modification collaborateur:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * 🛡️ ADMIN : SUPPRIMER UN COLLABORATEUR
+   */
+  async adminDeleteCollaborator(id: number): Promise<{status: string, message: string}> {
+    try {
+      const response = await api.delete<{status: string, message: string}>(`/admin/collaborators/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erreur suppression collaborateur:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * 🛡️ ADMIN : LISTE DES ADMINISTRATEURS (PAGINÉE)
+   */
+  async adminGetAdminsList(page: number = 1, perPage: number = 10): Promise<PaginatedAdmins> {
+    try {
+      // On s'assure que le typage de la réponse correspond à l'interface PaginatedAdmins
+      const response = await api.get<PaginatedAdmins>(`/admin/collaborators`, {
+        params: { page, per_page: perPage }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erreur récupération liste admins:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * 🛡️ ADMIN : LISTE DES UTILISATEURS (TYPE 'USER')
    */
   async adminGetUsersList(): Promise<User[]> {
     try {
