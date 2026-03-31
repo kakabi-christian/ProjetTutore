@@ -13,6 +13,7 @@ import KycAdmin from './contents/admin/KycAdmin';
 import NotificationAdmin from './contents/admin/NotificationAdmin';
 import FeedbackPage from './contents/user/FeedbackPage';
 import ProfilePage from './components/ProfilePage';
+import RolePage from './contents/admin/RolePage';
 function App() {
   return (
     <Router>
@@ -32,6 +33,7 @@ function App() {
             <Route path="notifications-admin" element={<NotificationAdmin />} />
             <Route path="kyc" element={<KycAdmin />} />
             <Route path="profile-admin" element={<ProfilePage />} />
+            <Route path="roles" element={<RolePage />} />
           </Route>
 
           {/* Routes User (avec enfants) */}

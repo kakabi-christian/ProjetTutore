@@ -5,6 +5,9 @@ use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\KycController;
 use App\Http\Controllers\Api\ListingController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\RoleController; 
+use App\Http\Controllers\Api\PermissionController; // Ajouté
+use App\Http\Controllers\Api\RolePermissionController; // Ajouté
 use App\Http\Controllers\Api\TypeDocumentController;
 use App\Http\Controllers\Api\UtilisateurController;
 use Illuminate\Support\Facades\Route;
@@ -16,24 +19,19 @@ use Illuminate\Support\Facades\Route;
 */
 
 // --- ROUTES PUBLIQUES ---
-
-// Authentification & OTP
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
-// Consultation des types de documents
 Route::get('/type-documents', [TypeDocumentController::class, 'index']);
 Route::get('/type-documents/{id}', [TypeDocumentController::class, 'show']);
 
-// Consultation des offres (Listings) - Public
 Route::get('/listings', [ListingController::class, 'index']);
 Route::get('/listings/{id}', [ListingController::class, 'show']);
 
 // --- ROUTES PROTÉGÉES (auth:sanctum) ---
-
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -44,27 +42,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/password', [UtilisateurController::class, 'updatePassword']);
 
     // --- ESPACE UTILISATEUR (Client) ---
-
-    // KYC
     Route::post('/kyc/submit', [KycController::class, 'store']);
     Route::get('/my-kyc', [KycController::class, 'getUserStatus']);
 
-    // Notifications Utilisateur
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::patch('notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
 
-    // Feedback
     Route::post('/feedback', [FeedbackController::class, 'store']);
 
-    // Gestion de ses propres offres (Listings)
     Route::post('/listings', [ListingController::class, 'store']);
     Route::put('/listings/{id}', [ListingController::class, 'update']);
     Route::delete('/listings/{id}', [ListingController::class, 'destroy']);
 
     // --- ESPACE ADMINISTRATION (Préfixe admin/) ---
-
     Route::middleware('is_admin')->prefix('admin')->group(function () {
+
+        // ✅ Gestion des Rôles
+        Route::apiResource('roles', RoleController::class);
+
+        // ✅ Gestion des Permissions & Assignations (Ajouté)
+        // Pour afficher la liste des permissions existantes (avec pagination)
+        Route::get('permissions', [PermissionController::class, 'index']); 
+        // Pour assigner les permissions au rôle (la fameuse clé dans ton frontend)
+        Route::post('roles/assign-permissions', [RolePermissionController::class, 'assignPermissions']);
 
         // Gestion des utilisateurs
         Route::get('/users-list', [UtilisateurController::class, 'getUsersList']);
@@ -74,18 +75,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/type-documents/{id}', [TypeDocumentController::class, 'update']);
         Route::delete('/type-documents/{id}', [TypeDocumentController::class, 'destroy']);
 
-        // Gestion des dossiers KYC par l'Admin
+        // Gestion des dossiers KYC
         Route::get('/kycs', [KycController::class, 'index']);
         Route::get('/kycs/pending-count', [KycController::class, 'getPendingCount']);
         Route::get('/kycs/{id}', [KycController::class, 'show']);
         Route::post('/kycs/{id}/approve', [KycController::class, 'approve']);
         Route::post('/kycs/{id}/reject', [KycController::class, 'reject']);
 
-        // Gestion des Notifications (Admin)
+        // Gestion des Notifications
         Route::get('admin-notifications', [NotificationController::class, 'index']);
         Route::delete('notifications/{id}', [NotificationController::class, 'destroy']);
         Route::post('notifications', [NotificationController::class, 'store']);
 
     });
-
 });
