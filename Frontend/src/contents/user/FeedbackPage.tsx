@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MdStar, MdSend, MdRateReview, MdCheckCircle } from 'react-icons/md';
 import type { User } from '../../models/Utilisateur';
 import FeedbackService from '../../services/FeedbacService';
+import TopBarUser from '../../components/TopBarUser';
 
 export default function FeedbackPage() {
   // États pour l'utilisateur et le formulaire
@@ -63,6 +64,7 @@ export default function FeedbackPage() {
   if (submitted) {
     return (
       <div className="container-fluid d-flex align-items-center justify-content-center" style={{ minHeight: '80vh' }}>
+        <TopBarUser />
         <div className="text-center p-5 shadow-lg" style={{ backgroundColor: 'var(--blue)', borderRadius: '20px', maxWidth: '500px' }}>
           <MdCheckCircle size={80} className="text-excha-green mb-4" />
           <h2 className="fw-bold text-white mb-3">Merci pour votre avis !</h2>
