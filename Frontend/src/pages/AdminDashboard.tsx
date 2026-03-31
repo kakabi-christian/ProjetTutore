@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../contents/Sidebar';
-import TopBarUser from '../components/TopBarUser';
-
+import TopBarAdmin from '../components/TopBarAdmin';
 const AdminDashboard: React.FC = () => {
     // État pour la réduction de la sidebar admin
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -26,7 +25,7 @@ const AdminDashboard: React.FC = () => {
                 }}
             >
                 {/* TOPBAR (Toujours visible en haut) */}
-                <TopBarUser />
+                <TopBarAdmin />
 
                 {/* CONTENU DYNAMIQUE DES PAGES ADMIN */}
                 <main className="p-4 flex-grow-1">
