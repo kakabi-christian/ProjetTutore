@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TypeDocumentController;
 use App\Http\Controllers\Api\KycController; // Import du nouveau contrôleur
 use App\Http\Controllers\Api\ListingController;
+use App\Http\Controllers\Api\ReviewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +31,9 @@ Route::get('/type-documents/{id}', [TypeDocumentController::class, 'show']);
 Route::get('/listings', [ListingController::class, 'index']);
 Route::get('/listings/{id}', [ListingController::class, 'show']);
 
+// Consultation des avis d'une offre (Publique)
+Route::get('/listings/{listing_id}/reviews', [ReviewController::class, 'index']);
+
 // --- ROUTES PROTÉGÉES (auth:sanctum) ---
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -52,6 +56,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/listings', [ListingController::class, 'store']);
     Route::put('/listings/{id}', [ListingController::class, 'update']);
     Route::delete('/listings/{id}', [ListingController::class, 'destroy']);
+
+    // Gestion de ses avis (Reviews)
+    Route::post('/listings/{listing_id}/reviews', [ReviewController::class, 'store']);
+    Route::put('/reviews/{id}', [ReviewController::class, 'update']);
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
 
 
     // --- ESPACE ADMINISTRATION (Préfixe admin/) ---
