@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PermissionRequest extends FormRequest
@@ -18,7 +19,7 @@ class PermissionRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -30,7 +31,7 @@ class PermissionRequest extends FormRequest
                 'string',
                 'max:100',
                 // Unique sauf pour la permission actuelle si on modifie
-                'unique:permissions,name,' . $permissionId . ',permission_id'
+                'unique:permissions,name,'.$permissionId.',permission_id',
             ],
             'description' => 'nullable|string|max:255',
         ];
@@ -43,12 +44,12 @@ class PermissionRequest extends FormRequest
     {
         return [
             'name.required' => 'Le nom de la permission est obligatoire.',
-            'name.string'   => 'Le nom doit être une chaîne de caractères.',
-            'name.max'      => 'Le nom ne doit pas dépasser 100 caractères.',
-            'name.unique'   => 'Cette permission existe déjà dans le système.',
-            
+            'name.string' => 'Le nom doit être une chaîne de caractères.',
+            'name.max' => 'Le nom ne doit pas dépasser 100 caractères.',
+            'name.unique' => 'Cette permission existe déjà dans le système.',
+
             'description.string' => 'La description doit être un texte.',
-            'description.max'    => 'La description ne doit pas dépasser 255 caractères.',
+            'description.max' => 'La description ne doit pas dépasser 255 caractères.',
         ];
     }
 }

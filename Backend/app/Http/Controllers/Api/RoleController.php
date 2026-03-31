@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Role;
 use App\Http\Requests\RoleRequest;
+use App\Models\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -17,12 +17,12 @@ class RoleController extends Controller
     {
         // On récupère le nombre d'éléments par page (par défaut 10)
         $perPage = $request->query('per_page', 10);
-        
+
         $roles = Role::orderBy('created_at', 'desc')->paginate($perPage);
 
         return response()->json([
             'status' => 'success',
-            'data' => $roles
+            'data' => $roles,
         ], 200);
     }
 
@@ -36,7 +36,7 @@ class RoleController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Rôle créé avec succès.',
-            'data' => $role
+            'data' => $role,
         ], 201);
     }
 
@@ -47,7 +47,7 @@ class RoleController extends Controller
     {
         return response()->json([
             'status' => 'success',
-            'data' => $role
+            'data' => $role,
         ], 200);
     }
 
@@ -61,7 +61,7 @@ class RoleController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Rôle mis à jour avec succès.',
-            'data' => $role
+            'data' => $role,
         ], 200);
     }
 
@@ -74,7 +74,7 @@ class RoleController extends Controller
         if ($role->utilisateurs()->exists()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Impossible de supprimer ce rôle car il est attribué à des utilisateurs.'
+                'message' => 'Impossible de supprimer ce rôle car il est attribué à des utilisateurs.',
             ], 422);
         }
 
@@ -82,7 +82,7 @@ class RoleController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Rôle supprimé avec succès.'
+            'message' => 'Rôle supprimé avec succès.',
         ], 200);
     }
 }

@@ -31,8 +31,7 @@ class PermissionController extends Controller
                 'per_page' => $permissions->perPage(),
                 'current_page' => $permissions->currentPage(),
                 'total_pages' => $permissions->lastPage(),
-            ]
+            ],
         ], 200);
     }
-
 }

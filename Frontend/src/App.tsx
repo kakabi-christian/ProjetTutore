@@ -14,6 +14,7 @@ import NotificationAdmin from './contents/admin/NotificationAdmin';
 import FeedbackPage from './contents/user/FeedbackPage';
 import ProfilePage from './components/ProfilePage';
 import RolePage from './contents/admin/RolePage';
+import UserPage from './contents/admin/UserPage';
 function App() {
   return (
     <Router>
@@ -34,6 +35,7 @@ function App() {
             <Route path="kyc" element={<KycAdmin />} />
             <Route path="profile-admin" element={<ProfilePage />} />
             <Route path="roles" element={<RolePage />} />
+            <Route path="users-list" element={<UserPage />} />
           </Route>
 
           {/* Routes User (avec enfants) */}
