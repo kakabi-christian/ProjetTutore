@@ -1,12 +1,14 @@
-// AJOUTE CETTE LIGNE EN HAUT 
 import React, { useState } from 'react'; 
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom'; // Import de useLocation
 import SidebarUser from '../contents/SidebarUser';
 import TopBarUser from '../components/TopBarUser';
 
 export default function UserDashboard() {
-  // Maintenant useState sera reconnu
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const location = useLocation();
+
+  // Détection de la page "Réseau" pour éviter le double Header
+  const isMarketPage = location.pathname.includes('/user/market');
 
   return (
     <div className="d-flex" style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
@@ -14,7 +16,7 @@ export default function UserDashboard() {
       {/* 1. SIDEBAR */}
       <SidebarUser isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
-      {/* 2. ZONE DE DROITE */}
+      {/* 2. ZONE DE DROITE (Contenu principal) */}
       <div 
         className="d-flex flex-column flex-grow-1" 
         style={{ 
@@ -24,9 +26,13 @@ export default function UserDashboard() {
           width: '100%'
         }}
       >
-        <TopBarUser />
+        {/* On affiche la TopBar globale UNIQUEMENT si on n'est PAS sur le marché */}
+        {!isMarketPage && <TopBarUser />}
 
-        <main className="p-4 flex-grow-1">
+        {/* Le main retire son padding (p-0) sur le marché pour que 
+            le Header du MarketContent colle parfaitement aux bords.
+        */}
+        <main className={`${isMarketPage ? 'p-0' : 'p-4'} flex-grow-1`}>
           <div className="container-fluid p-0 animate__animated animate__fadeIn">
             <Outlet />
           </div>
@@ -40,6 +46,8 @@ export default function UserDashboard() {
       <style>{`
         body { overflow-x: hidden; }
         .animate__fadeIn { animation-duration: 0.5s; }
+        /* Optionnel : cacher le footer sur le market pour un look plus "App" */
+        ${isMarketPage ? 'footer { display: none; }' : ''}
       `}</style>
     </div>
   );

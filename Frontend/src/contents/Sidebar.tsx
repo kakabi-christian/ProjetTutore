@@ -9,12 +9,11 @@ import {
   MdAccountCircle,
   MdShield,
   MdPeople,
-  MdMenu // Import de l'icône Hamburger
+  MdMenu 
 } from "react-icons/md";
 import { authService } from "../services/authService";
 import KycService from "../services/KycService";
 
-// Définition des props pour recevoir l'état du parent (AdminDashboard)
 interface SidebarProps {
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
@@ -69,12 +68,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
     alignItems: 'center',
     justifyContent: isCollapsed ? 'center' : 'space-between',
     padding: isCollapsed ? '10px 0' : '10px 15px',
+    position: 'relative' as const, // Important pour le positionnement du tooltip
   });
 
   return (
     <>
       <div
-        className="d-flex flex-column flex-shrink-0 p-3 shadow"
+        className={`d-flex flex-column flex-shrink-0 p-3 shadow sidebar-container ${isCollapsed ? "collapsed" : ""}`}
         style={{ 
           width: isCollapsed ? "80px" : "280px", 
           minHeight: "100vh", 
@@ -87,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           zIndex: 1000
         }}
       >
-        {/* Header : Logo + Bouton Hamburger */}
+        {/* Header */}
         <div className={`d-flex align-items-center mb-4 mt-2 ${isCollapsed ? 'justify-content-center' : 'justify-content-between'}`}>
           {!isCollapsed && (
             <div className="d-flex align-items-center text-decoration-none">
@@ -115,7 +115,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
         <ul className="nav nav-pills flex-column mb-auto">
           
           <li className="nav-item mb-2">
-            <NavLink to="/admin/roles" className={navLinkClasses} style={navLinkStyle} title={isCollapsed ? "Rôles" : ""}>
+            <NavLink to="/admin/roles" className={navLinkClasses} style={navLinkStyle} data-label="Gestion des Rôles">
               <div className="d-flex align-items-center">
                 <MdShield className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Gestion des Rôles</span>}
@@ -124,7 +124,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           </li>
 
           <li className="nav-item mb-2">
-            <NavLink to="/admin/users-list" className={navLinkClasses} style={navLinkStyle} title={isCollapsed ? "Utilisateurs" : ""}>
+            <NavLink to="/admin/users-list" className={navLinkClasses} style={navLinkStyle} data-label="Utilisateurs">
               <div className="d-flex align-items-center">
                 <MdPeople className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Utilisateurs</span>}
@@ -133,7 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           </li>
 
           <li className="nav-item mb-2">
-            <NavLink to="/admin/type-documents" className={navLinkClasses} style={navLinkStyle} title={isCollapsed ? "Documents" : ""}>
+            <NavLink to="/admin/type-documents" className={navLinkClasses} style={navLinkStyle} data-label="Documents">
               <div className="d-flex align-items-center">
                 <MdDescription className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Types de Documents</span>}
@@ -142,7 +142,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           </li>
 
           <li className="nav-item mb-2">
-            <NavLink to="/admin/kyc" className={navLinkClasses} style={navLinkStyle} title={isCollapsed ? "KYC" : ""}>
+            <NavLink to="/admin/kyc" className={navLinkClasses} style={navLinkStyle} data-label="Gestion des KYC">
               <div className="d-flex align-items-center">
                 <MdNotificationsActive className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Gestion des KYC</span>}
@@ -165,7 +165,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           </li>
 
           <li className="nav-item mb-2">
-            <NavLink to="/admin/notifications-admin" className={navLinkClasses} style={navLinkStyle} title={isCollapsed ? "Notifications" : ""}>
+            <NavLink to="/admin/notifications-admin" className={navLinkClasses} style={navLinkStyle} data-label="Notifications">
               <div className="d-flex align-items-center">
                 <MdSend className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Notifications</span>}
@@ -174,19 +174,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           </li>
 
           <li className="nav-item mb-2">
-            <NavLink to="/admin/profile-admin" className={navLinkClasses} style={navLinkStyle} title={isCollapsed ? "Profil" : ""}>
+            <NavLink to="/admin/profile-admin" className={navLinkClasses} style={navLinkStyle} data-label="Mon Profil">
               <div className="d-flex align-items-center">
                 <MdAccountCircle className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Mon Profil</span>}
               </div>
             </NavLink>
           </li>
-
         </ul>
 
         <hr style={{ backgroundColor: "rgba(255,255,255,0.1)", height: '1px', border: 'none' }} />
 
-        {/* Bouton de Déconnexion */}
+        {/* Déconnexion */}
         <div className="mt-auto">
           <button
             onClick={() => setShowLogoutModal(true)}

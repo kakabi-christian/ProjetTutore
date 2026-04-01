@@ -1,11 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
+import type { SingleValue } from "react-select";
 import { authService } from "../services/authService";
 import type { UserRegistration } from "../models/Utilisateur";
 import "../styles/RegisterContent.css";
 
+// Interface pour les options du sélecteur de pays
+interface CountryOption {
+  value: string;
+  label: React.JSX.Element;
+  dialCode: string;
+}
+
 export default function RegisterContent() {
   const navigate = useNavigate();
+  
+  const [countries, setCountries] = useState<CountryOption[]>([]);
   const [formData, setFormData] = useState<UserRegistration>({
     lastname: "",
     firstname: "",
@@ -18,14 +29,53 @@ export default function RegisterContent() {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  
-  // État pour suivre les champs en erreur
   const [errors, setErrors] = useState<Record<string, boolean>>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // Récupération des pays avec images et indicatifs
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const response = await fetch("https://restcountries.com/v3.1/all?fields=name,flags,idd,translations,cca2");
+        const data = await response.json();
+        
+        const formatted = data.map((c: any) => ({
+          value: c.translations?.fra?.common || c.name.common,
+          dialCode: (c.idd.root || "") + (c.idd.suffixes ? c.idd.suffixes[0] : ""),
+          label: (
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <img 
+                src={c.flags.png} 
+                alt={`Drapeau ${c.name.common}`} 
+                style={{ width: "22px", height: "15px", borderRadius: "2px", objectFit: "cover" }} 
+              />
+              <span>{c.translations?.fra?.common || c.name.common}</span>
+            </div>
+          ),
+        })).sort((a: any, b: any) => a.value.localeCompare(b.value));
+
+        setCountries(formatted);
+      } catch (err) {
+        console.error("Erreur lors du chargement des pays:", err);
+      }
+    };
+    fetchCountries();
+  }, []);
+
+  // Gestion du changement de pays (met à jour l'indicatif tel)
+  const handleCountryChange = (selectedOption: SingleValue<CountryOption>) => {
+    if (selectedOption) {
+      setFormData((prev) => ({ 
+        ...prev, 
+        country: selectedOption.value,
+        telephone: selectedOption.dialCode 
+      }));
+      setErrors((prev) => ({ ...prev, country: false }));
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // On retire l'erreur dès que l'utilisateur recommence à saisir
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: false }));
     }
@@ -37,7 +87,6 @@ export default function RegisterContent() {
     setMessage(null);
     setErrors({});
 
-    // Exemple de validation locale : vérification des mots de passe
     if (formData.password !== formData.password_confirmation) {
       setErrors({ password: true, password_confirmation: true });
       setMessage({ type: "error", text: "Les mots de passe ne correspondent pas." });
@@ -51,17 +100,31 @@ export default function RegisterContent() {
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || "Une erreur est survenue.";
       setMessage({ type: "error", text: errorMsg });
-      
-      // Si l'API renvoie des erreurs spécifiques aux champs (ex: email déjà pris)
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors); 
-      } else {
-        // Optionnel : marquer tous les champs en erreur si c'est une erreur globale
-        setErrors({ email: true, telephone: true }); 
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  // Styles personnalisés pour react-select pour correspondre à ton design
+  const customSelectStyles = {
+    control: (base: any, state: any) => ({
+      ...base,
+      background: "#fff",
+      borderColor: errors.country ? "#ff4d4f" : state.isFocused ? "#ff9800" : "#ddd",
+      borderRadius: "8px",
+      padding: "2px",
+      boxShadow: state.isFocused ? "0 0 0 1px #ff9800" : "none",
+      "&:hover": { borderColor: "#ff9800" }
+    }),
+    option: (base: any, state: any) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#fff3e0" : "#fff",
+      color: "#333",
+      cursor: "pointer"
+    })
   };
 
   return (
@@ -89,7 +152,7 @@ export default function RegisterContent() {
                 name="firstname"
                 value={formData.firstname}
                 onChange={handleChange}
-                
+                required
               />
             </div>
             <div className="input-field">
@@ -100,7 +163,7 @@ export default function RegisterContent() {
                 name="lastname"
                 value={formData.lastname}
                 onChange={handleChange}
-                
+                required
               />
             </div>
           </div>
@@ -113,20 +176,19 @@ export default function RegisterContent() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              
+              required
             />
           </div>
 
           <div className="input-group-row">
             <div className="input-field">
               <label>Pays</label>
-              <input
-                className={errors.country ? "input-error" : ""}
-                type="text"
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-                
+              <Select
+                options={countries}
+                onChange={handleCountryChange}
+                placeholder="Choisir..."
+                styles={customSelectStyles}
+                required
               />
             </div>
             <div className="input-field">
@@ -135,8 +197,10 @@ export default function RegisterContent() {
                 className={errors.telephone ? "input-error" : ""}
                 type="tel"
                 name="telephone"
+                placeholder="+237..."
                 value={formData.telephone}
                 onChange={handleChange}
+                required
               />
             </div>
           </div>
@@ -150,7 +214,7 @@ export default function RegisterContent() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                
+                required
               />
             </div>
             <div className="input-field">
@@ -161,6 +225,7 @@ export default function RegisterContent() {
                 name="password_confirmation"
                 value={formData.password_confirmation}
                 onChange={handleChange}
+                required
               />
             </div>
           </div>

@@ -15,6 +15,7 @@ import FeedbackPage from './contents/user/FeedbackPage';
 import ProfilePage from './components/ProfilePage';
 import RolePage from './contents/admin/RolePage';
 import UserPage from './contents/admin/UserPage';
+import MarketContentPage from './contents/user/MarketContent';
 function App() {
   return (
     <Router>
@@ -44,6 +45,7 @@ function App() {
             <Route path="notifications-user" element={<NotificationUser />} />
             <Route path="feedback" element={<FeedbackPage />} />
             <Route path="profile-user" element={<ProfilePage />} />
+            <Route path="market" element={<MarketContentPage />} />
 
 
           </Route>
