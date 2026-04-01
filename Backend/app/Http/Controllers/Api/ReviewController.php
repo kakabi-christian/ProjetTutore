@@ -13,6 +13,23 @@ use Illuminate\Support\Facades\Auth;
 class ReviewController extends Controller
 {
     /**
+     * @OA\Get(
+     *      path="/reviews/{listing_id}",
+     *      summary="Liste les avis pour une annonce spécifique",
+     *      tags={"Reviews"},
+     *      @OA\Parameter(
+     *          name="listing_id",
+     *          in="path",
+     *          required=true,
+     *          description="ID de l'annonce",
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Liste des avis"
+     *      )
+     * )
+     *
      * Liste les avis pour une annonce spécifique
      */
     public function index($listing_id)
@@ -30,6 +47,24 @@ class ReviewController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *      path="/listings/{listing_id}/reviews",
+     *      summary="Ajouter un nouvel avis à une annonce",
+     *      tags={"Reviews"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Parameter(name="listing_id", in="path", required=true, @OA\Schema(type="integer")),
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              required={"rating"},
+     *              @OA\Property(property="rating", type="integer", example=5),
+     *              @OA\Property(property="comment", type="string", example="Très bon échange")
+     *          )
+     *      ),
+     *      @OA\Response(response=201, description="Avis ajouté avec succès"),
+     *      @OA\Response(response=403, description="Interdit (auto-évaluation ou pas de transaction)")
+     * )
+     *
      * Ajouter un nouvel avis à une annonce
      */
     public function store(Request $request, $listing_id)
@@ -92,6 +127,23 @@ class ReviewController extends Controller
     }
 
     /**
+     * @OA\Put(
+     *      path="/reviews/{id}",
+     *      summary="Modifier son avis",
+     *      tags={"Reviews"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              @OA\Property(property="rating", type="integer", example=4),
+     *              @OA\Property(property="comment", type="string", example="Un peu lent mais correct")
+     *          )
+     *      ),
+     *      @OA\Response(response=200, description="Avis mis à jour avec succès"),
+     *      @OA\Response(response=403, description="Non autorisé")
+     * )
+     *
      * Modifier son avis
      */
     public function update(Request $request, $id)
@@ -120,6 +172,16 @@ class ReviewController extends Controller
     }
 
     /**
+     * @OA\Delete(
+     *      path="/reviews/{id}",
+     *      summary="Supprimer un avis (Auteur ou Admin)",
+     *      tags={"Reviews"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *      @OA\Response(response=200, description="Avis supprimé avec succès"),
+     *      @OA\Response(response=403, description="Non autorisé")
+     * )
+     *
      * Supprimer un avis (Auteur ou Admin)
      */
     public function destroy($id)

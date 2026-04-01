@@ -24,11 +24,20 @@ class ListingController extends Controller
     }
 
     /**
-     * Liste des annonces actives avec Pagination.
+     * @OA\Get(
+     * path="/listings",
+     * summary="Liste des annonces actives avec Pagination",
+     * tags={"Listings"},
+     * @OA\Parameter(name="currency_from", in="query", required=false, @OA\Schema(type="string")),
+     * @OA\Parameter(name="currency_to", in="query", required=false, @OA\Schema(type="string")),
+     * @OA\Parameter(name="sort_by", in="query", required=false, @OA\Schema(type="string", enum={"user_rate", "amount_available", "created_at"})),
+     * @OA\Parameter(name="sort_order", in="query", required=false, @OA\Schema(type="string", enum={"asc", "desc"})),
+     * @OA\Response(response=200, description="Liste des annonces")
+     * )
      */
     public function index(Request $request)
     {
-        Log::info("[ExchaPay] --- Début de la requête index ---");
+        Log::info('[ExchaPay] --- Début de la requête index ---');
 
         try {
             $query = Listing::whereHas('histories', function ($q) {
@@ -40,10 +49,7 @@ class ListingController extends Controller
                         ->whereColumn('listing_id', 'listings.listing_id');
                 });
             })->where('amount_available', '>', 0)
-              /* CORRECTION : Utilisation des colonnes réelles de ta migration 
-                 'lastname' et 'firstname' au lieu de 'nom' et 'prenom'.
-              */
-              ->with(['utilisateur:user_id,lastname,firstname,email']);
+                ->with(['utilisateur:user_id,lastname,firstname,email']);
 
             // Filtres de devises
             if ($request->filled('currency_from')) {
@@ -71,27 +77,45 @@ class ListingController extends Controller
                     $listing->append('discount_percentage');
                     return $listing;
                 } catch (\Exception $e) {
-                    Log::warning("[ExchaPay] Impossible de calculer le discount pour ID " . $listing->listing_id);
+                    Log::warning('[ExchaPay] Impossible de calculer le discount pour ID '.$listing->listing_id);
                     return $listing;
                 }
             });
 
-            Log::info("[ExchaPay] Requête index réussie - " . $listings->count() . " résultats.");
+            Log::info('[ExchaPay] Requête index réussie - '.$listings->count().' résultats.');
+
             return response()->json($listings);
 
         } catch (\Exception $e) {
-            Log::error("[ExchaPay] CRITICAL - Erreur dans ListingController@index");
-            Log::error("[ExchaPay] Message : " . $e->getMessage());
-            
+            Log::error('[ExchaPay] CRITICAL - Erreur dans ListingController@index');
+            Log::error('[ExchaPay] Message : '.$e->getMessage());
+
             return response()->json([
                 'message' => 'Erreur lors du chargement des annonces.',
-                'error' => $e->getMessage() 
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
-     * Publier une nouvelle annonce.
+     * @OA\Post(
+     * path="/listings",
+     * summary="Publier une nouvelle annonce",
+     * tags={"Listings"},
+     * security={{"bearerAuth":{}}},
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"currency_from", "currency_to", "amount_available", "user_rate"},
+     * @OA\Property(property="currency_from", type="string", example="USD"),
+     * @OA\Property(property="currency_to", type="string", example="EUR"),
+     * @OA\Property(property="amount_available", type="number", example=100.50),
+     * @OA\Property(property="user_rate", type="number", example=0.92)
+     * )
+     * ),
+     * @OA\Response(response=201, description="Annonce créée avec succès"),
+     * @OA\Response(response=403, description="KYC requis")
+     * )
      */
     public function store(ListingRequest $request)
     {
@@ -103,7 +127,7 @@ class ListingController extends Controller
             ->where('status', 'APPROVED')
             ->exists();
 
-        if (!$isKycApproved) {
+        if (! $isKycApproved) {
             return response()->json(['message' => 'Un KYC approuvé est obligatoire pour publier.'], 403);
         }
 
@@ -114,11 +138,11 @@ class ListingController extends Controller
         // 2. Récupération du taux officiel (Resilience Mode)
         try {
             $officialRate = $this->exchangeRateService->getLiveRate($currencyFrom, $currencyTo);
-            if (!$officialRate) {
+            if (! $officialRate) {
                 $officialRate = $validatedData['user_rate'];
             }
         } catch (\Exception $e) {
-            Log::warning("[ExchaPay] API Taux externe indisponible, utilisation du taux utilisateur.");
+            Log::warning('[ExchaPay] API Taux externe indisponible, utilisation du taux utilisateur.');
             $officialRate = $validatedData['user_rate'];
         }
 
@@ -150,34 +174,52 @@ class ListingController extends Controller
     }
 
     /**
-     * Détails d'une annonce.
+     * @OA\Get(
+     * path="/listings/{id}",
+     * summary="Détails d'une annonce",
+     * tags={"Listings"},
+     * @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     * @OA\Response(response=200, description="Détail de l'annonce"),
+     * @OA\Response(response=404, description="Annonce introuvable")
+     * )
      */
     public function show($id)
     {
         $listing = Listing::with(['utilisateur:user_id,lastname,firstname,email', 'reviews', 'histories.listingStatus'])
             ->findOrFail($id);
+        
         $listing->append('discount_percentage');
+
         return response()->json($listing);
     }
 
     /**
-     * Suppression (avec sécurité Escrow).
+     * @OA\Delete(
+     * path="/listings/{id}",
+     * summary="Suppression d'une annonce (avec sécurité Escrow)",
+     * tags={"Listings"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     * @OA\Response(response=200, description="Annonce supprimée"),
+     * @OA\Response(response=403, description="Non autorisé"),
+     * @OA\Response(response=422, description="Transactions en cours")
+     * )
      */
     public function destroy($id)
     {
         $listing = Listing::findOrFail($id);
         $utilisateur = Auth::user();
 
-        if ($listing->user_id !== $utilisateur->user_id && !$utilisateur->isAdmin()) {
+        if ($listing->user_id !== $utilisateur->user_id && ! $utilisateur->isAdmin()) {
             return response()->json(['message' => 'Action non autorisée.'], 403);
         }
 
-        // Empêcher la suppression si une transaction est liée (même en cours)
         if ($listing->transactions()->exists()) {
             return response()->json(['message' => 'Impossible de supprimer une annonce ayant des transactions.'], 422);
         }
 
         $listing->delete();
+
         return response()->json(['message' => 'Annonce supprimée avec succès.']);
     }
 }

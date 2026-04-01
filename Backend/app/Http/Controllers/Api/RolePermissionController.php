@@ -8,11 +8,64 @@ use App\Models\RolePermission;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @OA\Tag(
+ *     name="Rôles & Permissions",
+ *     description="Gestion de l'assignation des permissions aux rôles"
+ * )
+ */
 class RolePermissionController extends Controller
 {
     /**
      * Assigne des permissions à un rôle (Nettoie l'existant et remplace).
      * Cette méthode est appelée quand l'admin clique sur la "clé" dans le frontend.
+     *
+     * @OA\Post(
+     *     path="/api/role-permissions",
+     *     summary="Assigner des permissions à un rôle",
+     *     description="Remplace toutes les permissions existantes du rôle par les nouvelles fournies (stratégie sync : supprime puis réinsère).",
+     *     tags={"Rôles & Permissions"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"role_id", "permissions"},
+     *             @OA\Property(
+     *                 property="role_id",
+     *                 type="integer",
+     *                 description="ID du rôle cible",
+     *                 example=2
+     *             ),
+     *             @OA\Property(
+     *                 property="permissions",
+     *                 type="array",
+     *                 description="Liste des IDs de permissions à assigner",
+     *                 @OA\Items(type="integer", example=5)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Permissions assignées avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Les permissions ont été assignées avec succès.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Données invalides"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erreur serveur lors de la transaction",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Erreur lors de l'assignation : ...")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Non authentifié")
+     * )
      */
     public function assignPermissions(RolePermissionRequest $request): JsonResponse
     {
@@ -26,10 +79,10 @@ class RolePermissionController extends Controller
             $newPermissions = [];
             foreach ($request->permissions as $permissionId) {
                 $newPermissions[] = [
-                    'role_id' => $request->role_id,
+                    'role_id'       => $request->role_id,
                     'permission_id' => $permissionId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'created_at'    => now(),
+                    'updated_at'    => now(),
                 ];
             }
 
