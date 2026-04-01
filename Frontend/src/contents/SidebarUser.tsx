@@ -7,7 +7,9 @@ import {
   MdNotifications,
   MdRateReview,
   MdAccountCircle,
-  MdMenu 
+  MdMenu,
+  MdListAlt,
+  MdPublic // Icône pour le Réseau/Market
 } from "react-icons/md";
 import { authService } from "../services/authService";
 import notificationService from "../services/NotificationService";
@@ -49,18 +51,15 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
     }
   };
 
-  // Classes de base pour les liens
-  // Ajout de h-100 pour que le background orange prenne toute la hauteur du li
   const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
     `nav-link h-100 ${isActive ? "active bg-excha-orange text-white fw-bold shadow-sm" : "text-white opacity-75 hover-opacity-100"} d-flex align-items-center p-0`;
 
-  // Style des éléments de liste (li)
   const navItemStyle = {
-    borderRadius: '12px', // Légèrement plus arrondi pour aller avec la taille plus grande
+    borderRadius: '12px',
     transition: 'all 0.3s ease',
-    height: '56px', // AUGMENTÉ : de 48px à 56px pour un background plus large
-    overflow: 'hidden',
-    marginBottom: '10px', // Un peu plus d'espace entre les boutons
+    height: '56px', 
+    overflow: 'visible',
+    marginBottom: '10px',
     position: 'relative' as const
   };
 
@@ -77,14 +76,14 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
           zIndex: 1000
         }}
       >
-        {/* Header */}
+        {/* Header Logo */}
         <div className={`d-flex align-items-center mb-4 mt-2 ${isCollapsed ? 'justify-content-center' : 'px-3 justify-content-between'}`}>
           {!isCollapsed && (
             <div className="d-flex align-items-center text-decoration-none">
               <MdSwapHorizontalCircle className="text-excha-green me-2" size={32} />
               <div className="d-flex flex-column">
                 <span className="fw-bold text-white" style={{ fontSize: '1.1rem' }}>ExchaPay</span>
-                <small className="text-excha-green fw-bold text-uppercase" style={{ fontSize: '0.6rem' }}>Utilisateur</small>
+                <small className="text-excha-green fw-bold text-uppercase" style={{ fontSize: '0.6rem' }}>Espace Client</small>
               </div>
             </div>
           )}
@@ -95,16 +94,47 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
 
         <hr className="mx-2" style={{ backgroundColor: "rgba(255,255,255,0.1)", border: 'none', height: '1px' }} />
 
-        {/* Navigation */}
         <ul className="nav nav-pills flex-column mb-auto px-1">
           
+          {/* 🌐 RÉSEAU D'ÉCHANGES (Redirige vers Market) */}
+          <li style={navItemStyle}>
+            <NavLink to="/user/market" className={navLinkClasses}>
+              <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
+                <MdPublic size={26} />
+              </div>
+              {!isCollapsed ? (
+                <span className="text-nowrap" style={{ fontSize: '1rem' }}>Réseau d'Échanges</span>
+              ) : (
+                <span className="sidebar-tooltip">Réseau d'Échanges</span>
+              )}
+            </NavLink>
+          </li>
+
+          {/* Mes Annonces */}
+          <li style={navItemStyle}>
+            <NavLink to="/user/listings" className={navLinkClasses}>
+              <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
+                <MdListAlt size={26} />
+              </div>
+              {!isCollapsed ? (
+                <span className="text-nowrap" style={{ fontSize: '1rem' }}>Mes Annonces</span>
+              ) : (
+                <span className="sidebar-tooltip">Mes Annonces</span>
+              )}
+            </NavLink>
+          </li>
+
           {/* KYC */}
           <li style={navItemStyle}>
             <NavLink to="/user/kyc" className={navLinkClasses}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
-                <MdDescription size={26} /> {/* Icône un poil plus grande */}
+                <MdDescription size={26} />
               </div>
-              {!isCollapsed && <span className="text-nowrap" style={{ fontSize: '1rem' }}>KYC</span>}
+              {!isCollapsed ? (
+                <span className="text-nowrap" style={{ fontSize: '1rem' }}>Vérification (KYC)</span>
+              ) : (
+                <span className="sidebar-tooltip">Vérification (KYC)</span>
+              )}
             </NavLink>
           </li>
 
@@ -120,7 +150,7 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
                   </span>
                 )}
               </div>
-              {!isCollapsed && (
+              {!isCollapsed ? (
                 <div className="d-flex align-items-center justify-content-between flex-grow-1 pe-3">
                   <span className="text-nowrap" style={{ fontSize: '1rem' }}>Notifications</span>
                   {unreadCount > 0 && (
@@ -129,6 +159,8 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
                     </span>
                   )}
                 </div>
+              ) : (
+                <span className="sidebar-tooltip">Notifications ({unreadCount})</span>
               )}
             </NavLink>
           </li>
@@ -139,7 +171,11 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
                 <MdRateReview size={26} />
               </div>
-              {!isCollapsed && <span className="text-nowrap" style={{ fontSize: '1rem' }}>Avis & Feedback</span>}
+              {!isCollapsed ? (
+                <span className="text-nowrap" style={{ fontSize: '1rem' }}>Laisser un avis</span>
+              ) : (
+                <span className="sidebar-tooltip">Laisser un avis</span>
+              )}
             </NavLink>
           </li>
 
@@ -149,52 +185,75 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
                 <MdAccountCircle size={26} />
               </div>
-              {!isCollapsed && <span className="text-nowrap" style={{ fontSize: '1rem' }}>Mon Profil</span>}
+              {!isCollapsed ? (
+                <span className="text-nowrap" style={{ fontSize: '1rem' }}>Mon Profil</span>
+              ) : (
+                <span className="sidebar-tooltip">Mon Profil</span>
+              )}
             </NavLink>
           </li>
         </ul>
 
         <hr className="mx-2" style={{ backgroundColor: "rgba(255,255,255,0.1)", border: 'none', height: '1px' }} />
 
-        {/* Déconnexion */}
-        <div className="px-1 mb-3">
+        <div className="px-1 mb-3 logout-container" style={{ position: 'relative' }}>
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="btn w-100 d-flex align-items-center p-0 border-0"
+            className="btn w-100 d-flex align-items-center p-0 border-0 logout-btn-hover"
             style={{ 
-              height: '56px', // Aligné sur la hauteur des autres boutons
+              height: '56px',
               borderRadius: '12px', 
               backgroundColor: 'rgba(255, 107, 43, 0.1)', 
               color: 'white',
-              transition: 'all 0.2s'
+              transition: 'all 0.3s'
             }}
           >
             <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px' }}>
               <MdLogout size={24} className="text-excha-orange" />
             </div>
-            {!isCollapsed && <span className="fw-bold" style={{ fontSize: '1rem' }}>Déconnexion</span>}
+            {!isCollapsed ? (
+              <span className="fw-bold" style={{ fontSize: '1rem' }}>Déconnexion</span>
+            ) : (
+              <span className="sidebar-tooltip" style={{ top: '10px' }}>Déconnexion</span>
+            )}
           </button>
         </div>
       </div>
-
-      {/* MODAL */}
-      {showLogoutModal && (
-        <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(10, 37, 64, 0.6)', backdropFilter: 'blur(4px)', zIndex: 1100 }}>
-          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>
-            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '20px' }}>
-              <div className="modal-body p-4 text-center">
-                <MdLogout size={50} className="text-excha-orange mb-3" />
-                <h5 className="fw-bold mb-3" style={{ color: 'var(--blue)' }}>Déconnexion</h5>
-                <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session ?</p>
-                <div className="d-flex gap-2 mt-4">
-                  <button className="btn fw-bold w-50 py-2" onClick={() => setShowLogoutModal(false)}>Annuler</button>
-                  <button className="btn btn-excha-orange fw-bold w-50 py-2 shadow-sm" onClick={confirmLogout}>Oui, quitter</button>
+        {/* MODAL DE DÉCONNEXION */}
+            {showLogoutModal && (
+              <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(10, 37, 64, 0.6)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
+                <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>
+                  <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '20px' }}>
+                    <div className="modal-body p-4 text-center">
+                      <div className="mb-3">
+                          <MdLogout size={50} className="text-excha-orange" />
+                      </div>
+                      <h5 className="fw-bold mb-3" style={{ color: 'var(--blue)' }}>Déconnexion</h5>
+                      <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session ?</p>
+                      <div className="d-flex gap-2 mt-4">
+                        <button 
+                          type="button" 
+                          className="btn fw-bold w-50 py-2" 
+                          style={{ color: 'var(--gray)', borderRadius: '10px' }} 
+                          onClick={() => setShowLogoutModal(false)}
+                        >
+                          Annuler
+                        </button>
+                        <button 
+                          type="button" 
+                          className="btn btn-excha-orange fw-bold w-50 py-2 shadow-sm" 
+                          style={{ borderRadius: '10px' }}
+                          onClick={confirmLogout}
+                        >
+                          Oui, quitter
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            )}
+
     </>
   );
 };
