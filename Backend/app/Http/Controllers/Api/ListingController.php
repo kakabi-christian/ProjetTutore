@@ -14,6 +14,18 @@ use Illuminate\Support\Facades\Auth;
 class ListingController extends Controller
 {
     /**
+     * @OA\Get(
+     *      path="/listings",
+     *      summary="Liste des annonces",
+     *      tags={"Listings"},
+     *      @OA\Parameter(name="currency_from", in="query", required=false, @OA\Schema(type="string")),
+     *      @OA\Parameter(name="currency_to", in="query", required=false, @OA\Schema(type="string")),
+     *      @OA\Parameter(name="min_amount", in="query", required=false, @OA\Schema(type="number")),
+     *      @OA\Parameter(name="sort_by", in="query", required=false, @OA\Schema(type="string", enum={"exchange_rate", "amount_available", "created_at"})),
+     *      @OA\Parameter(name="sort_order", in="query", required=false, @OA\Schema(type="string", enum={"asc", "desc"})),
+     *      @OA\Response(response=200, description="Liste des annonces")
+     * )
+     *
      * Liste des annonces
      */
     public function index(Request $request)
@@ -62,6 +74,15 @@ class ListingController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *      path="/listings/{id}",
+     *      summary="Afficher une annonce",
+     *      tags={"Listings"},
+     *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *      @OA\Response(response=200, description="Détail de l'annonce"),
+     *      @OA\Response(response=404, description="Annonce introuvable")
+     * )
+     *
      * Afficher une annonce
      */
     public function show($id)
@@ -73,6 +94,25 @@ class ListingController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *      path="/listings",
+     *      summary="Publier une nouvelle annonce",
+     *      tags={"Listings"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              required={"currency_from", "currency_to", "amount_available", "exchange_rate"},
+     *              @OA\Property(property="currency_from", type="string", example="USD"),
+     *              @OA\Property(property="currency_to", type="string", example="EUR"),
+     *              @OA\Property(property="amount_available", type="number", example=100.50),
+     *              @OA\Property(property="exchange_rate", type="number", example=0.92)
+     *          )
+     *      ),
+     *      @OA\Response(response=201, description="Annonce créée avec succès"),
+     *      @OA\Response(response=403, description="KYC requis")
+     * )
+     *
      * Publier une nouvelle annonce
      */
     public function store(Request $request)
@@ -126,6 +166,25 @@ class ListingController extends Controller
     }
 
     /**
+     * @OA\Put(
+     *      path="/listings/{id}",
+     *      summary="Modifier une annonce",
+     *      tags={"Listings"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              @OA\Property(property="currency_from", type="string", example="USD"),
+     *              @OA\Property(property="currency_to", type="string", example="EUR"),
+     *              @OA\Property(property="amount_available", type="number", example=150.0),
+     *              @OA\Property(property="exchange_rate", type="number", example=0.95)
+     *          )
+     *      ),
+     *      @OA\Response(response=200, description="Annonce mise à jour"),
+     *      @OA\Response(response=403, description="Non autorisé")
+     * )
+     *
      * Modifier une annonce
      */
     public function update(Request $request, $id)
@@ -171,6 +230,17 @@ class ListingController extends Controller
     }
 
     /**
+     * @OA\Delete(
+     *      path="/listings/{id}",
+     *      summary="Supprimer une annonce",
+     *      tags={"Listings"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *      @OA\Response(response=200, description="Annonce supprimée"),
+     *      @OA\Response(response=403, description="Non autorisé"),
+     *      @OA\Response(response=422, description="Transactions en cours")
+     * )
+     *
      * Supprimer une annonce
      */
     public function destroy($id)
