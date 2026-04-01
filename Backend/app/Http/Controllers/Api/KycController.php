@@ -18,6 +18,21 @@ use Illuminate\Support\Facades\Mail; // Import de la Facade Mail
 class KycController extends Controller
 {
     /**
+     * @OA\Get(
+     *      path="/admin/kycs",
+     *      summary="Liste des dossiers KYC (Admin)",
+     *      tags={"KYC (Admin)"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Parameter(
+     *          name="per_page",
+     *          in="query",
+     *          description="Nombre d'éléments par page",
+     *          required=false,
+     *          @OA\Schema(type="integer", default=10)
+     *      ),
+     *      @OA\Response(response=200, description="Liste récupérée")
+     * )
+     *
      * Liste des dossiers KYC avec pagination (pour l'Admin).
      */
     public function index(): JsonResponse
@@ -45,6 +60,34 @@ class KycController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *      path="/kyc/submit",
+     *      summary="Soumission d'un dossier KYC",
+     *      tags={"KYC"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\MediaType(
+     *              mediaType="multipart/form-data",
+     *              @OA\Schema(
+     *                  @OA\Property(property="country_of_issue", type="string", example="FR"),
+     *                  @OA\Property(
+     *                      property="documents[0][type_document_id]",
+     *                      type="integer",
+     *                      example=1
+     *                  ),
+     *                  @OA\Property(
+     *                      property="documents[0][file]",
+     *                      type="string",
+     *                      format="binary"
+     *                  )
+     *              )
+     *          )
+     *      ),
+     *      @OA\Response(response=201, description="Dossier soumis"),
+     *      @OA\Response(response=403, description="Dossier déjà soumis ou approuvé")
+     * )
+     *
      * Soumission d'un dossier (Création KYC + Documents).
      */
     public function store(KycRequest $request): JsonResponse
@@ -111,6 +154,21 @@ class KycController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *      path="/admin/kycs/{id}",
+     *      summary="Afficher un dossier KYC précis et ses documents (Admin)",
+     *      tags={"KYC (Admin)"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Parameter(
+     *          name="id",
+     *          in="path",
+     *          required=true,
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Response(response=200, description="Dossier trouvé"),
+     *      @OA\Response(response=404, description="Dossier introuvable")
+     * )
+     *
      * Afficher un dossier KYC précis avec ses documents.
      */
     public function show(int $id): JsonResponse
@@ -125,6 +183,21 @@ class KycController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *      path="/admin/kycs/{id}/approve",
+     *      summary="Approuver un dossier KYC (Admin)",
+     *      tags={"KYC (Admin)"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Parameter(
+     *          name="id",
+     *          in="path",
+     *          required=true,
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Response(response=200, description="Approuvé"),
+     *      @OA\Response(response=404, description="Introuvable")
+     * )
+     *
      * Approuver un dossier KYC.
      */
     public function approve(int $id): JsonResponse
@@ -164,6 +237,28 @@ class KycController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *      path="/admin/kycs/{id}/reject",
+     *      summary="Rejeter un dossier KYC avec motif (Admin)",
+     *      tags={"KYC (Admin)"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Parameter(
+     *          name="id",
+     *          in="path",
+     *          required=true,
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              required={"reason"},
+     *              @OA\Property(property="reason", type="string", example="Document illisible")
+     *          )
+     *      ),
+     *      @OA\Response(response=200, description="Rejeté"),
+     *      @OA\Response(response=404, description="Introuvable")
+     * )
+     *
      * Rejeter un dossier KYC avec motif.
      */
     public function reject(Request $request, int $id): JsonResponse
@@ -207,6 +302,14 @@ class KycController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *      path="/my-kyc",
+     *      summary="Récupérer l'état de son dernier KYC",
+     *      tags={"KYC"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Response(response=200, description="Statut récupéré")
+     * )
+     *
      * Récupérer le dernier KYC de l'utilisateur connecté (pour son Dashboard).
      */
     public function getUserStatus(Request $request): JsonResponse
@@ -220,6 +323,14 @@ class KycController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *      path="/admin/kycs/pending-count",
+     *      summary="Récupère le nombre de dossiers KYC en attente (Admin)",
+     *      tags={"KYC (Admin)"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Response(response=200, description="Nombre de KYC en attente")
+     * )
+     *
      * Récupère le nombre de dossiers KYC en attente (pour la sidebar).
      */
     public function getPendingCount(): JsonResponse

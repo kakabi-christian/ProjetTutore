@@ -24,7 +24,17 @@ class ListingController extends Controller
     }
 
     /**
-     * Liste des annonces actives globales avec Pagination.
+     * @OA\Get(
+     * path="/listings",
+     * summary="Liste des annonces actives globales avec Pagination.",
+     * tags={"Listings"},
+     * @OA\Parameter(name="currency_from", in="query", required=false, @OA\Schema(type="string")),
+     * @OA\Parameter(name="currency_to", in="query", required=false, @OA\Schema(type="string")),
+     * @OA\Parameter(name="min_amount", in="query", required=false, @OA\Schema(type="number")),
+     * @OA\Parameter(name="sort_by", in="query", required=false, @OA\Schema(type="string", enum={"user_rate", "amount_available", "created_at"})),
+     * @OA\Parameter(name="sort_order", in="query", required=false, @OA\Schema(type="string", enum={"asc", "desc"})),
+     * @OA\Response(response=200, description="Liste des annonces")
+     * )
      */
     public function index(Request $request)
     {
@@ -42,7 +52,6 @@ class ListingController extends Controller
             })->where('amount_available', '>', 0)
               ->with(['utilisateur:user_id,lastname,firstname,email']);
 
-            // Filtres de devises
             if ($request->filled('currency_from')) {
                 $query->where('currency_from', strtoupper(substr($request->currency_from, 0, 3)));
             }
@@ -51,7 +60,6 @@ class ListingController extends Controller
                 $query->where('currency_to', strtoupper(substr($request->currency_to, 0, 3)));
             }
 
-            // Tri
             $sort_by = $request->get('sort_by', 'created_at');
             $sort_order = $request->get('sort_order', 'desc');
             $allowed_sorts = ['user_rate', 'amount_available', 'created_at'];
@@ -62,7 +70,6 @@ class ListingController extends Controller
 
             $listings = $query->paginate(10);
 
-            // Transformation des données pour inclure les accessors (discount)
             $listings->getCollection()->transform(function ($listing) {
                 $listing->append('discount_percentage');
                 return $listing;
@@ -80,7 +87,13 @@ class ListingController extends Controller
     }
 
     /**
-     * Liste des annonces de l'utilisateur connecté avec Pagination.
+     * @OA\Get(
+     * path="/listings/user",
+     * summary="Liste des annonces de l'utilisateur connecté avec Pagination.",
+     * tags={"Listings"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Response(response=200, description="Liste des annonces utilisateur")
+     * )
      */
     public function userListings(Request $request)
     {
@@ -93,7 +106,6 @@ class ListingController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
 
-            // On ajoute le pourcentage de réduction sur chaque annonce de l'utilisateur
             $listings->getCollection()->transform(function ($listing) {
                 $listing->append('discount_percentage');
                 return $listing;
@@ -109,14 +121,30 @@ class ListingController extends Controller
     }
 
     /**
-     * Publier une nouvelle annonce.
+     * @OA\Post(
+     * path="/listings",
+     * summary="Publier une nouvelle annonce.",
+     * tags={"Listings"},
+     * security={{"bearerAuth":{}}},
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"currency_from", "currency_to", "amount_available", "user_rate"},
+     * @OA\Property(property="currency_from", type="string", example="USD"),
+     * @OA\Property(property="currency_to", type="string", example="EUR"),
+     * @OA\Property(property="amount_available", type="number", example=100.50),
+     * @OA\Property(property="user_rate", type="number", example=0.92)
+     * )
+     * ),
+     * @OA\Response(response=201, description="Annonce créée avec succès"),
+     * @OA\Response(response=403, description="KYC requis")
+     * )
      */
     public function store(ListingRequest $request)
     {
         /** @var Utilisateur $utilisateur */
         $utilisateur = Auth::user();
 
-        // 1. Vérification KYC
         $isKycApproved = Kyc::where('user_id', $utilisateur->user_id)
             ->where('status', 'APPROVED')
             ->exists();
@@ -129,7 +157,6 @@ class ListingController extends Controller
         $currencyFrom = strtoupper(substr($validatedData['currency_from'], 0, 3));
         $currencyTo = strtoupper(substr($validatedData['currency_to'], 0, 3));
 
-        // 2. Récupération du taux officiel
         try {
             $officialRate = $this->exchangeRateService->getLiveRate($currencyFrom, $currencyTo);
             if (!$officialRate) {
@@ -140,7 +167,6 @@ class ListingController extends Controller
             $officialRate = $validatedData['user_rate'];
         }
 
-        // 3. Création de l'annonce
         $listing = Listing::create([
             'user_id' => $utilisateur->user_id,
             'currency_from' => $currencyFrom,
@@ -153,7 +179,6 @@ class ListingController extends Controller
             'description' => $validatedData['description'] ?? null,
         ]);
 
-        // 4. Historique / Statut Initial
         $activeStatus = ListingStatus::firstOrCreate(['title' => 'active']);
         ListingHistory::create([
             'listing_id' => $listing->listing_id,
@@ -168,7 +193,14 @@ class ListingController extends Controller
     }
 
     /**
-     * Détails d'une annonce.
+     * @OA\Get(
+     * path="/listings/{id}",
+     * summary="Détails d'une annonce.",
+     * tags={"Listings"},
+     * @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     * @OA\Response(response=200, description="Détail de l'annonce"),
+     * @OA\Response(response=404, description="Annonce introuvable")
+     * )
      */
     public function show($id)
     {
@@ -181,7 +213,16 @@ class ListingController extends Controller
     }
 
     /**
-     * Suppression (avec sécurité Escrow).
+     * @OA\Delete(
+     * path="/listings/{id}",
+     * summary="Suppression (avec sécurité Escrow).",
+     * tags={"Listings"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     * @OA\Response(response=200, description="Annonce supprimée"),
+     * @OA\Response(response=403, description="Non autorisé"),
+     * @OA\Response(response=422, description="Transactions en cours")
+     * )
      */
     public function destroy($id)
     {
@@ -192,7 +233,6 @@ class ListingController extends Controller
             return response()->json(['message' => 'Action non autorisée.'], 403);
         }
 
-        // Empêcher la suppression si une transaction est liée
         if ($listing->transactions()->exists()) {
             return response()->json(['message' => 'Impossible de supprimer une annonce liée à des transactions.'], 422);
         }
