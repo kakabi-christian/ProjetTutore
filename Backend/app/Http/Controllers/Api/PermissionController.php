@@ -10,6 +10,15 @@ use Illuminate\Http\Request;
 class PermissionController extends Controller
 {
     /**
+     * @OA\Get(
+     *      path="/admin/permissions",
+     *      summary="Liste des permissions avec pagination (Admin)",
+     *      tags={"Permissions (Admin)"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=10)),
+     *      @OA\Response(response=200, description="Liste des permissions récupérée")
+     * )
+     *
      * Affiche la liste des permissions avec pagination.
      * Utile pour que l'admin puisse les voir et les assigner.
      */
