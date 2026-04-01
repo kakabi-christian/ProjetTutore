@@ -111,7 +111,7 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
           </li>
 
           {/* Mes Annonces */}
-          <li style={navItemStyle}>
+          {/* <li style={navItemStyle}>
             <NavLink to="/user/listings" className={navLinkClasses}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
                 <MdListAlt size={26} />
@@ -122,7 +122,7 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
                 <span className="sidebar-tooltip">Mes Annonces</span>
               )}
             </NavLink>
-          </li>
+          </li> */}
 
           {/* KYC */}
           <li style={navItemStyle}>

@@ -9,7 +9,7 @@ class ListingRequest extends FormRequest
     public function authorize(): bool
     {
         // Autorise si l'utilisateur est authentifié (géré par le middleware sanctum)
-        return true; 
+        return true;
     }
 
     /**
@@ -21,16 +21,16 @@ class ListingRequest extends FormRequest
             // On utilise 'uppercase' pour forcer la cohérence en DB
             'currency_from' => 'required|string|size:3',
             'currency_to' => 'required|string|size:3|different:currency_from',
-            
+
             // Montant total
             'amount_available' => 'required|numeric|min:0.01',
-            
+
             // Correction : Utilisation de 'lte' (Less Than or Equal) pour comparer avec un autre champ
             'min_amount' => 'nullable|numeric|min:0|lte:amount_available',
-            
+
             // Taux proposé
             'user_rate' => 'required|numeric|gt:0',
-            
+
             'visual_theme' => 'nullable|string|max:50',
             'description' => 'nullable|string|max:500',
         ];

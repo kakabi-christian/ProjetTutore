@@ -4,15 +4,16 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\KycController;
 use App\Http\Controllers\Api\ListingController;
-use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PermissionController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\RolePermissionController;
 use App\Http\Controllers\Api\TypeDocumentController;
 use App\Http\Controllers\Api\UtilisateurController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\StatisticsController; // 📊 Ajout du contrôleur de stats
 use App\Services\ExchangeRateService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,24 +32,23 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 /**
- * 📈 Consultation des taux en direct (Massive API) 
- * Injecte automatiquement le service ExchangeRateService
+ * 📈 Consultation des taux en direct
  */
 Route::get('/market-rate', function (Request $request, ExchangeRateService $service) {
     $from = $request->query('from');
     $to = $request->query('to');
-    
-    if (!$from || !$to) {
+
+    if (! $from || ! $to) {
         return response()->json(['error' => 'Les devises from et to sont requises'], 400);
     }
 
     $rate = $service->getLiveRate($from, $to);
-    
+
     return response()->json([
         'from' => strtoupper($from),
         'to' => strtoupper($to),
         'rate' => $rate,
-        'timestamp' => now()
+        'timestamp' => now(),
     ]);
 });
 
@@ -61,7 +61,6 @@ Route::get('/listings', [ListingController::class, 'index']);
 Route::get('/listings/{id}', [ListingController::class, 'show']);
 Route::get('/listings/{listing_id}/reviews', [ReviewController::class, 'index']);
 
-
 // --- ROUTES PROTÉGÉES (auth:sanctum) ---
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -71,6 +70,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [UtilisateurController::class, 'profile']);
     Route::put('/profile/update', [UtilisateurController::class, 'updateProfile']);
     Route::post('/profile/password', [UtilisateurController::class, 'updatePassword']);
+
+    // 📊 Statistiques de l'utilisateur connecté (Dashboard Personnel)
+    Route::get('/my-statistics', [StatisticsController::class, 'userStats']);
 
     // KYC
     Route::post('/kyc/submit', [KycController::class, 'store']);
@@ -88,6 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/listings', [ListingController::class, 'store']);
     Route::put('/listings/{id}', [ListingController::class, 'update']);
     Route::delete('/listings/{id}', [ListingController::class, 'destroy']);
+    Route::get('/my-listings', [ListingController::class, 'userListings']);
 
     // Reviews
     Route::post('/listings/{listing_id}/reviews', [ReviewController::class, 'store']);
@@ -96,7 +99,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- ESPACE ADMINISTRATION ---
     Route::middleware('is_admin')->prefix('admin')->group(function () {
+        
+        // 📊 Statistiques Globales (Dashboard Admin)
+        Route::get('/statistics', [StatisticsController::class, 'index']);
+
         Route::get('/collaborators', [UtilisateurController::class, 'getAdminsList']);
+        // ... (autres routes admin inchangées)
         Route::post('/collaborators', [UtilisateurController::class, 'storeAdmin']);
         Route::put('/collaborators/{id}', [UtilisateurController::class, 'updateAdmin']);
         Route::delete('/collaborators/{id}', [UtilisateurController::class, 'destroyAdmin']);

@@ -24,11 +24,11 @@ class ListingController extends Controller
     }
 
     /**
-     * Liste des annonces actives avec Pagination.
+     * Liste des annonces actives globales avec Pagination.
      */
     public function index(Request $request)
     {
-        Log::info("[ExchaPay] --- Début de la requête index ---");
+        Log::info('[ExchaPay] --- Début de la requête index ---');
 
         try {
             $query = Listing::whereHas('histories', function ($q) {
@@ -40,9 +40,6 @@ class ListingController extends Controller
                         ->whereColumn('listing_id', 'listings.listing_id');
                 });
             })->where('amount_available', '>', 0)
-              /* CORRECTION : Utilisation des colonnes réelles de ta migration 
-                 'lastname' et 'firstname' au lieu de 'nom' et 'prenom'.
-              */
               ->with(['utilisateur:user_id,lastname,firstname,email']);
 
             // Filtres de devises
@@ -65,27 +62,48 @@ class ListingController extends Controller
 
             $listings = $query->paginate(10);
 
-            // Transformation sécurisée des données
-            $listings->through(function ($listing) {
-                try {
-                    $listing->append('discount_percentage');
-                    return $listing;
-                } catch (\Exception $e) {
-                    Log::warning("[ExchaPay] Impossible de calculer le discount pour ID " . $listing->listing_id);
-                    return $listing;
-                }
+            // Transformation des données pour inclure les accessors (discount)
+            $listings->getCollection()->transform(function ($listing) {
+                $listing->append('discount_percentage');
+                return $listing;
             });
 
-            Log::info("[ExchaPay] Requête index réussie - " . $listings->count() . " résultats.");
             return response()->json($listings);
 
         } catch (\Exception $e) {
-            Log::error("[ExchaPay] CRITICAL - Erreur dans ListingController@index");
-            Log::error("[ExchaPay] Message : " . $e->getMessage());
-            
+            Log::error('[ExchaPay] Erreur ListingController@index : ' . $e->getMessage());
             return response()->json([
                 'message' => 'Erreur lors du chargement des annonces.',
-                'error' => $e->getMessage() 
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Liste des annonces de l'utilisateur connecté avec Pagination.
+     */
+    public function userListings(Request $request)
+    {
+        try {
+            /** @var Utilisateur $user */
+            $user = Auth::user();
+
+            $listings = Listing::where('user_id', $user->user_id)
+                ->with(['histories.listingStatus'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+
+            // On ajoute le pourcentage de réduction sur chaque annonce de l'utilisateur
+            $listings->getCollection()->transform(function ($listing) {
+                $listing->append('discount_percentage');
+                return $listing;
+            });
+
+            return response()->json($listings);
+        } catch (\Exception $e) {
+            Log::error('[ExchaPay] Erreur ListingController@userListings : ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Erreur lors de la récupération de vos annonces.',
             ], 500);
         }
     }
@@ -111,18 +129,18 @@ class ListingController extends Controller
         $currencyFrom = strtoupper(substr($validatedData['currency_from'], 0, 3));
         $currencyTo = strtoupper(substr($validatedData['currency_to'], 0, 3));
 
-        // 2. Récupération du taux officiel (Resilience Mode)
+        // 2. Récupération du taux officiel
         try {
             $officialRate = $this->exchangeRateService->getLiveRate($currencyFrom, $currencyTo);
             if (!$officialRate) {
                 $officialRate = $validatedData['user_rate'];
             }
         } catch (\Exception $e) {
-            Log::warning("[ExchaPay] API Taux externe indisponible, utilisation du taux utilisateur.");
+            Log::warning('[ExchaPay] API Taux indisponible, utilisation du taux utilisateur.');
             $officialRate = $validatedData['user_rate'];
         }
 
-        // 3. Création
+        // 3. Création de l'annonce
         $listing = Listing::create([
             'user_id' => $utilisateur->user_id,
             'currency_from' => $currencyFrom,
@@ -135,7 +153,7 @@ class ListingController extends Controller
             'description' => $validatedData['description'] ?? null,
         ]);
 
-        // 4. Statut Initial
+        // 4. Historique / Statut Initial
         $activeStatus = ListingStatus::firstOrCreate(['title' => 'active']);
         ListingHistory::create([
             'listing_id' => $listing->listing_id,
@@ -156,7 +174,9 @@ class ListingController extends Controller
     {
         $listing = Listing::with(['utilisateur:user_id,lastname,firstname,email', 'reviews', 'histories.listingStatus'])
             ->findOrFail($id);
+        
         $listing->append('discount_percentage');
+
         return response()->json($listing);
     }
 
@@ -172,12 +192,13 @@ class ListingController extends Controller
             return response()->json(['message' => 'Action non autorisée.'], 403);
         }
 
-        // Empêcher la suppression si une transaction est liée (même en cours)
+        // Empêcher la suppression si une transaction est liée
         if ($listing->transactions()->exists()) {
-            return response()->json(['message' => 'Impossible de supprimer une annonce ayant des transactions.'], 422);
+            return response()->json(['message' => 'Impossible de supprimer une annonce liée à des transactions.'], 422);
         }
 
         $listing->delete();
+
         return response()->json(['message' => 'Annonce supprimée avec succès.']);
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 class ExchangeRateService
 {
     protected $apiKey;
+
     protected $baseUrl;
 
     public function __construct()
@@ -20,38 +21,39 @@ class ExchangeRateService
     {
         try {
             // Construction du ticker type "C:USDXAF" pour le Forex chez Massive
-            $ticker = "C:" . strtoupper($from) . strtoupper($to);
+            $ticker = 'C:'.strtoupper($from).strtoupper($to);
 
             $response = Http::withoutVerifying()
                 ->timeout(10) // Évite le 502 en coupant la connexion si l'API est lente
                 ->withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Authorization' => 'Bearer '.$this->apiKey,
                     'Accept' => 'application/json',
                 ])
                 ->get("{$this->baseUrl}/market/forex/rate", [
-                    'ticker' => $ticker
+                    'ticker' => $ticker,
                 ]);
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 // Selon leur doc: les résultats sont souvent dans 'results'
                 if (isset($data['results']['rate'])) {
                     return $data['results']['rate'];
                 }
-                
+
                 // Fallback si la structure est différente
                 return $data['rate'] ?? ($data['results'][0]['rate'] ?? null);
             }
 
-            Log::error("Massive API Error [{$response->status()}]: " . $response->body());
-            
+            Log::error("Massive API Error [{$response->status()}]: ".$response->body());
+
             // --- SOLUTION DE SECOURS (IMPORTANT) ---
             // Si l'API Massive échoue (404), on utilise une API de secours gratuite
             return $this->getFallbackRate($from, $to);
 
         } catch (\Exception $e) {
-            Log::error("ExchangeRateService Exception: " . $e->getMessage());
+            Log::error('ExchangeRateService Exception: '.$e->getMessage());
+
             return $this->getFallbackRate($from, $to);
         }
     }
@@ -69,6 +71,7 @@ class ExchangeRateService
         } catch (\Exception $e) {
             return null;
         }
+
         return null;
     }
 

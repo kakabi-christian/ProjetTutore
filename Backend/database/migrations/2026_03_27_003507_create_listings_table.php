@@ -21,9 +21,9 @@ return new class extends Migration
             // Détails de la transaction
             $table->string('currency_from', 3); // Code ISO (ex: USD, XAF)
             $table->string('currency_to', 3);   // Code ISO (ex: EUR, CAD)
-            
+
             // On utilise decimal(15,2) pour la précision financière (évite les erreurs de float)
-            $table->decimal('amount_available', 15, 2); 
+            $table->decimal('amount_available', 15, 2);
             $table->decimal('min_amount', 15, 2)->nullable(); // Optionnel : montant min accepté pour un échange partiel
 
             // Gestion des taux
@@ -32,10 +32,9 @@ return new class extends Migration
 
             // Social & Design (Le côté "Instagram/Facebook")
             // On ne stocke pas d'image lourde, mais une référence pour le front (ex: 'gradient-blue', 'urgent-red')
-            $table->string('visual_theme')->default('default'); 
+            $table->string('visual_theme')->default('default');
             $table->text('description')->nullable(); // Un petit mot du vendeur pour rassurer
 
-           
             $table->timestamps();
         });
     }

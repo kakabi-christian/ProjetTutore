@@ -16,6 +16,8 @@ import ProfilePage from './components/ProfilePage';
 import RolePage from './contents/admin/RolePage';
 import UserPage from './contents/admin/UserPage';
 import MarketContentPage from './contents/user/MarketContent';
+import StatsAdmin from './contents/admin/StatsAdmin';
+import StatsGraphe from './contents/admin/StatsGraphe';
 function App() {
   return (
     <Router>
@@ -37,6 +39,8 @@ function App() {
             <Route path="profile-admin" element={<ProfilePage />} />
             <Route path="roles" element={<RolePage />} />
             <Route path="users-list" element={<UserPage />} />
+            <Route path="stats" element={<StatsAdmin />} />
+            <Route path="stats-graphe" element={<StatsGraphe />} />
           </Route>
 
           {/* Routes User (avec enfants) */}

@@ -36,13 +36,13 @@ class ReviewController extends Controller
     {
         $listing = Listing::findOrFail($listing_id);
 
-        /** @var \App\Models\Utilisateur $utilisateur */
+        /** @var Utilisateur $utilisateur */
         $utilisateur = Utilisateur::find(Auth::id());
 
         // 1. Empêcher de s'auto-évaluer
         if ($listing->user_id === $utilisateur->user_id) {
             return response()->json([
-                'message' => 'Vous ne pouvez pas laisser un avis sur votre propre annonce.'
+                'message' => 'Vous ne pouvez pas laisser un avis sur votre propre annonce.',
             ], 403);
         }
 
@@ -50,14 +50,14 @@ class ReviewController extends Controller
         $hasCompletedTransaction = Transaction::where('listing_id', $listing->listing_id)
             ->where(function ($query) use ($utilisateur) {
                 $query->where('buyer_id', $utilisateur->user_id)
-                      ->orWhere('seller_id', $utilisateur->user_id);
+                    ->orWhere('seller_id', $utilisateur->user_id);
             })
             ->where('status', 'COMPLETED')
             ->exists();
 
-        if (!$hasCompletedTransaction) {
+        if (! $hasCompletedTransaction) {
             return response()->json([
-                'message' => 'Vous devez avoir complété une transaction avec cet utilisateur pour laisser un avis.'
+                'message' => 'Vous devez avoir complété une transaction avec cet utilisateur pour laisser un avis.',
             ], 403);
         }
 
@@ -68,7 +68,7 @@ class ReviewController extends Controller
 
         if ($existingReview) {
             return response()->json([
-                'message' => 'Vous avez déjà laissé un avis sur cette annonce.'
+                'message' => 'Vous avez déjà laissé un avis sur cette annonce.',
             ], 409);
         }
 
@@ -87,7 +87,7 @@ class ReviewController extends Controller
 
         return response()->json([
             'message' => 'Avis ajouté avec succès',
-            'review' => $review->load('reviewer:user_id,nom,prenom,pseudonyme')
+            'review' => $review->load('reviewer:user_id,nom,prenom,pseudonyme'),
         ], 201);
     }
 
@@ -97,8 +97,8 @@ class ReviewController extends Controller
     public function update(Request $request, $id)
     {
         $review = Review::findOrFail($id);
-        
-        /** @var \App\Models\Utilisateur $utilisateur */
+
+        /** @var Utilisateur $utilisateur */
         $utilisateur = Utilisateur::find(Auth::id());
 
         // Seul le créateur de l'avis peut le modifier
@@ -115,7 +115,7 @@ class ReviewController extends Controller
 
         return response()->json([
             'message' => 'Avis mis à jour avec succès',
-            'review' => $review
+            'review' => $review,
         ]);
     }
 
@@ -126,11 +126,11 @@ class ReviewController extends Controller
     {
         $review = Review::findOrFail($id);
 
-        /** @var \App\Models\Utilisateur $utilisateur */
+        /** @var Utilisateur $utilisateur */
         $utilisateur = Utilisateur::find(Auth::id());
 
         // Vérification des droits
-        if ($review->reviewer_id !== $utilisateur->user_id && !$utilisateur->hasRole('admin')) {
+        if ($review->reviewer_id !== $utilisateur->user_id && ! $utilisateur->hasRole('admin')) {
             return response()->json(['message' => 'Non autorisé à supprimer cet avis.'], 403);
         }
 

@@ -24,7 +24,6 @@ export interface ListingFilters {
 const ListingService = {
   /**
    * 📈 Récupère le taux de change officiel en direct
-   * Utilisé dans le formulaire de création pour aider l'utilisateur à fixer son prix.
    */
   async getLiveMarketRate(from: string, to: string): Promise<number | null> {
     try {
@@ -37,14 +36,13 @@ const ListingService = {
       return response.data.rate;
     } catch (error) {
       console.error("Erreur lors de la récupération du taux officiel:", error);
-      // On retourne null pour que le composant React affiche "Taux indisponible"
       return null; 
     }
   },
 
   /**
    * 📜 Récupère la liste des annonces actives (Pagination + Filtres)
-   * Parfait pour l'Infinite Scroll de ton application ExchaPay.
+   * Utilisé pour le flux public du marché ExchaPay.
    */
   async getAllListings(
     page: number = 1,
@@ -60,6 +58,22 @@ const ListingService = {
   },
 
   /**
+   * 👤 Récupère les annonces de l'utilisateur connecté (Mes Publications)
+   * Correspond à la route GET api/my-listings
+   */
+  async getUserListings(page: number = 1): Promise<ListingPaginationResponse> {
+    try {
+      const response = await api.get<ListingPaginationResponse>('/my-listings', {
+        params: { page }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erreur lors de la récupération de vos annonces:", error);
+      throw error;
+    }
+  },
+
+  /**
    * 🔍 Récupère les détails complets d'une annonce spécifique
    */
   async getListingById(id: number | string): Promise<Listing> {
@@ -69,17 +83,14 @@ const ListingService = {
 
   /**
    * 🆕 Publie une nouvelle offre de change
-   * @requires Auth (Sanctum Token)
-   * @requires KYC_APPROVED (Géré par ton middleware backend)
    */
   async createListing(data: Partial<Listing>): Promise<{ message: string; listing: Listing }> {
-    // Note : discount_percentage sera calculé automatiquement par le backend
     const response = await api.post('/listings', data);
     return response.data;
   },
 
   /**
-   * 📝 Met à jour une annonce existante (ex: changer le montant disponible)
+   * 📝 Met à jour une annonce existante
    */
   async updateListing(id: number | string, data: Partial<Listing>): Promise<{ message: string; listing: Listing }> {
     const response = await api.put(`/listings/${id}`, data);
@@ -88,7 +99,6 @@ const ListingService = {
 
   /**
    * 🗑️ Supprime une annonce
-   * @throws 422 si une transaction Escrow est déjà liée (sécurité antifraude)
    */
   async deleteListing(id: number | string): Promise<{ message: string }> {
     const response = await api.delete(`/listings/${id}`);
@@ -96,7 +106,7 @@ const ListingService = {
   },
 
   /**
-   * ⭐ Récupère les avis (reviews) laissés sur une annonce spécifique
+   * ⭐ Récupère les avis sur une annonce spécifique
    */
   async getListingReviews(listingId: number | string) {
     const response = await api.get(`/listings/${listingId}/reviews`);

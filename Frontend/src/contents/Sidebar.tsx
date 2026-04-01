@@ -9,7 +9,9 @@ import {
   MdAccountCircle,
   MdShield,
   MdPeople,
-  MdMenu 
+  MdMenu,
+  MdDashboard,
+  MdBarChart 
 } from "react-icons/md";
 import { authService } from "../services/authService";
 import KycService from "../services/KycService";
@@ -68,11 +70,36 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
     alignItems: 'center',
     justifyContent: isCollapsed ? 'center' : 'space-between',
     padding: isCollapsed ? '10px 0' : '10px 15px',
-    position: 'relative' as const, // Important pour le positionnement du tooltip
+    position: 'relative' as const,
   });
 
   return (
     <>
+      {/* STYLE CSS INTERNE POUR LE TOOLTIP AU SURVOL */}
+      <style>{`
+        .sidebar-container.collapsed .nav-item .nav-link::after {
+          content: attr(data-label);
+          position: absolute;
+          left: 100%;
+          margin-left: 15px;
+          padding: 5px 10px;
+          background: var(--orange);
+          color: white;
+          border-radius: 5px;
+          white-space: nowrap;
+          opacity: 0;
+          visibility: hidden;
+          transition: 0.2s ease;
+          z-index: 2000;
+          font-size: 0.8rem;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .sidebar-container.collapsed .nav-item .nav-link:hover::after {
+          opacity: 1;
+          visibility: visible;
+        }
+      `}</style>
+
       <div
         className={`d-flex flex-column flex-shrink-0 p-3 shadow sidebar-container ${isCollapsed ? "collapsed" : ""}`}
         style={{ 
@@ -115,6 +142,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
         <ul className="nav nav-pills flex-column mb-auto">
           
           <li className="nav-item mb-2">
+            <NavLink to="/admin/stats" className={navLinkClasses} style={navLinkStyle} data-label="Tableau de Bord">
+              <div className="d-flex align-items-center">
+                <MdDashboard className={isCollapsed ? "" : "me-2"} size={22} />
+                {!isCollapsed && <span>Tableau de Bord</span>}
+              </div>
+            </NavLink>
+          </li>
+
+          <li className="nav-item mb-2">
+            <NavLink to="/admin/stats-graphe" className={navLinkClasses} style={navLinkStyle} data-label="Analyses Graphiques">
+              <div className="d-flex align-items-center">
+                <MdBarChart className={isCollapsed ? "" : "me-2"} size={22} />
+                {!isCollapsed && <span>Analyses Graphiques</span>}
+              </div>
+            </NavLink>
+          </li>
+
+          <li className="nav-item mb-2">
             <NavLink to="/admin/roles" className={navLinkClasses} style={navLinkStyle} data-label="Gestion des Rôles">
               <div className="d-flex align-items-center">
                 <MdShield className={isCollapsed ? "" : "me-2"} size={22} />
@@ -147,7 +192,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                 <MdNotificationsActive className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Gestion des KYC</span>}
               </div>
-
               {pendingCount > 0 && (
                 <span 
                   className={`badge rounded-pill bg-white text-excha-orange shadow-sm d-flex align-items-center justify-content-center ${isCollapsed ? 'position-absolute' : ''}`}
@@ -199,12 +243,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
             <MdLogout size={22} className="text-excha-orange" />
             {!isCollapsed && <span className="fw-bold">Déconnexion</span>}
           </button>
-          
-          {!isCollapsed && (
-            <div className="text-center mt-3">
-              <small style={{ fontSize: '0.6rem', color: 'var(--gray)' }}>© 2026 ExchaPay Platform</small>
-            </div>
-          )}
         </div>
       </div>
 
@@ -220,22 +258,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                 <h5 className="fw-bold mb-3" style={{ color: 'var(--blue)' }}>Déconnexion</h5>
                 <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session ?</p>
                 <div className="d-flex gap-2 mt-4">
-                  <button 
-                    type="button" 
-                    className="btn fw-bold w-50 py-2" 
-                    style={{ color: 'var(--gray)', borderRadius: '10px' }} 
-                    onClick={() => setShowLogoutModal(false)}
-                  >
-                    Annuler
-                  </button>
-                  <button 
-                    type="button" 
-                    className="btn btn-excha-orange fw-bold w-50 py-2 shadow-sm" 
-                    style={{ borderRadius: '10px' }}
-                    onClick={confirmLogout}
-                  >
-                    Oui, quitter
-                  </button>
+                  <button type="button" className="btn fw-bold w-50 py-2" style={{ color: 'var(--gray)', borderRadius: '10px' }} onClick={() => setShowLogoutModal(false)}>Annuler</button>
+                  <button type="button" className="btn btn-excha-orange fw-bold w-50 py-2 shadow-sm" style={{ borderRadius: '10px' }} onClick={confirmLogout}>Oui, quitter</button>
                 </div>
               </div>
             </div>

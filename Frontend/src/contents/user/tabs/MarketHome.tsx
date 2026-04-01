@@ -7,7 +7,7 @@ import ListingService from '../../../services/ListingService';
 import type { Listing, ListingPaginationResponse } from '../../../models/Listing';
 import { 
   MdAdd, MdAccountCircle, MdVerified, 
-  MdPublic, MdSwapHoriz, MdLocalFireDepartment, MdTrendingUp
+  MdPublic, MdSwapHoriz, MdLocalFireDepartment, MdTrendingUp, MdClose
 } from "react-icons/md";
 import CurrencyService from '../../../services/CurrencyService';
 
@@ -48,9 +48,9 @@ export default function MarketHome() {
     const rate = formData.user_rate ? parseFloat(formData.user_rate) : marketRate;
     
     if (!isNaN(amount) && rate) {
-      return (amount * rate).toLocaleString();
+      return (amount * rate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
-    return '0';
+    return '0.00';
   }, [formData.amount_available, formData.user_rate, marketRate]);
 
   const observer = useRef<IntersectionObserver | null>(null);
@@ -67,11 +67,13 @@ export default function MarketHome() {
 
   useEffect(() => {
     const loadCurrencies = async () => {
-      const data = await CurrencyService.getAllCurrencies();
-      const formatted = data.map(c => ({
-        value: c.code, label: c.code, flag: c.flag, fullName: c.name
-      }));
-      setCurrencies(formatted);
+      try {
+        const data = await CurrencyService.getAllCurrencies();
+        const formatted = data.map(c => ({
+          value: c.code, label: c.code, flag: c.flag, fullName: c.name
+        }));
+        setCurrencies(formatted);
+      } catch (err) { console.error("Erreur devises", err); }
     };
     loadCurrencies();
   }, []);
@@ -113,7 +115,7 @@ export default function MarketHome() {
   useEffect(() => {
     const getMarketRate = async () => {
       if (!showModal) return;
-      if (formData.currency_from === formData.currency_to) { setMarketRate(null); return; }
+      if (formData.currency_from === formData.currency_to) { setMarketRate(1); return; }
       try {
         setRateLoading(true);
         const rate = await ListingService.getLiveMarketRate(formData.currency_from, formData.currency_to);
@@ -142,8 +144,6 @@ export default function MarketHome() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Correction de l'erreur TS : on s'assure que finalRate n'est jamais null pour le payload
     const finalRate = formData.user_rate ? parseFloat(formData.user_rate) : (marketRate || 0);
     
     if (marketRate && finalRate > marketRate) {
@@ -155,7 +155,7 @@ export default function MarketHome() {
         currency_from: formData.currency_from,
         currency_to: formData.currency_to,
         amount_available: parseFloat(formData.amount_available),
-        user_rate: finalRate, // Maintenant garanti comme number
+        user_rate: finalRate,
         description: formData.description || `Échange ${formData.currency_from} → ${formData.currency_to}`
       };
 
@@ -169,7 +169,7 @@ export default function MarketHome() {
 
   const CustomOption = (props: any) => (
     <components.Option {...props}>
-      <div className="d-flex align-items-center">
+      <div className="d-flex align-items-center cursor-pointer">
         <img src={props.data.flag} alt="" style={{ width: 22, height: 16, marginRight: 10, borderRadius: 2, objectFit: 'cover' }} />
         <div>
           <span className="fw-bold d-block" style={{ lineHeight: '1.2' }}>{props.data.label}</span>
@@ -190,9 +190,9 @@ export default function MarketHome() {
 
   const selectStyles = {
     control: (base: any) => ({
-      ...base, border: 'none', backgroundColor: '#f8f9fa', borderRadius: '12px', padding: '2px', boxShadow: 'none'
+      ...base, border: 'none', backgroundColor: '#f1f3f5', borderRadius: '12px', padding: '4px', boxShadow: 'none'
     }),
-    menu: (base: any) => ({ ...base, zIndex: 9999 })
+    menu: (base: any) => ({ ...base, zIndex: 9999, borderRadius: '12px', overflow: 'hidden' })
   };
 
   const filterOptions = useMemo(() => [
@@ -202,21 +202,22 @@ export default function MarketHome() {
 
   return (
     <div className="market-container w-100 py-4 px-3">
+      {/* Header & Filtres */}
       <div className="mx-auto mb-4" style={{ maxWidth: '1200px' }}>
-        <div className="d-flex justify-content-between align-items-center mb-4 px-2">
-          <div>
+        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 px-2">
+          <div className="mb-3 mb-md-0">
              <h3 className="fw-bold mb-0 text-dark">Marché ExchaPay</h3>
              <p className="text-muted small mb-0">Trouvez les meilleurs taux de change en direct</p>
           </div>
-          <button onClick={toggleModal} className="btn btn-excha-orange rounded-pill px-4 fw-bold text-white shadow-lg d-flex align-items-center">
-            <MdAdd size={22} className="me-1" /> <span className="d-none d-sm-inline">Publier une offre</span>
+          <button onClick={toggleModal} className="btn btn-excha-orange rounded-pill px-4 py-2 fw-bold text-white shadow-lg d-flex align-items-center justify-content-center">
+            <MdAdd size={22} className="me-1" /> <span>Publier une offre</span>
           </button>
         </div>
 
         <div className="bg-white p-3 rounded-4 shadow-sm border mb-4">
           <div className="row g-3 align-items-center">
             <div className="col-12 border-bottom pb-3 mb-2">
-              <label className="form-label small fw-bold text-muted text-uppercase" style={{fontSize: '10px'}}>Par Pays</label>
+              <label className="form-label small fw-bold text-muted text-uppercase" style={{fontSize: '10px', letterSpacing: '1px'}}>Filtrer par pays</label>
               <div className="country-filter-bar d-flex overflow-x-auto no-scrollbar align-items-center pt-1">
                 <button
                   onClick={() => handleFilterChange('country', 'Tous')}
@@ -248,12 +249,11 @@ export default function MarketHome() {
                 value={filterOptions.find((o: CurrencyOption) => o.value === filterFrom)}
                 onChange={(opt) => handleFilterChange('from', opt?.value || 'Toutes')}
                 components={{ Option: CustomOption, SingleValue: CustomSingleValue }}
-                placeholder="Monnaie vendue..."
               />
             </div>
 
             <div className="col-12 col-md-2 text-center d-none d-md-block">
-              <MdSwapHoriz size={24} className="text-muted mt-3" />
+              <MdSwapHoriz size={28} className="text-muted mt-3" />
             </div>
 
             <div className="col-12 col-md-5">
@@ -264,33 +264,38 @@ export default function MarketHome() {
                 value={filterOptions.find((o: CurrencyOption) => o.value === filterTo)}
                 onChange={(opt) => handleFilterChange('to', opt?.value || 'Toutes')}
                 components={{ Option: CustomOption, SingleValue: CustomSingleValue }}
-                placeholder="Monnaie reçue..."
               />
             </div>
           </div>
         </div>
       </div>
 
+      {/* Liste des annonces avec ANIMATIONS INFINIES */}
       <div className="mx-auto" style={{ maxWidth: '1400px' }}>
         <div className="row g-4">
           {listings.map((listing, index) => {
             const isLastElement = listings.length === index + 1;
             const officialRate = listing.official_rate || '---';
             const isBestDeal = Number(listing.user_rate) < Number(officialRate);
+            
+            // On alterne les classes de délai pour un effet moins "robotique"
+            const delayClass = `card-delay-${(index % 4) + 1}`;
 
             return (
               <div key={listing.listing_id} ref={isLastElement ? lastListingElementRef : null} className="col-12 col-sm-6 col-md-4 col-xl-3">
-                <div className="card listing-card-premium border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                <div className={`card listing-card-premium border-0 shadow-sm rounded-4 h-100 overflow-hidden animate-card-floating ${delayClass}`}>
                   {isBestDeal && (
                     <div className="best-price-badge">
-                      <MdLocalFireDepartment size={14} className="me-1" /> MEILLEUR PRIX
+                      <MdLocalFireDepartment size={14} className="me-1 animate-flicker" /> MEILLEUR TAUX
                     </div>
                   )}
                   <div className="card-body p-4 d-flex flex-column">
                     <div className="d-flex align-items-center mb-3">
-                        <MdAccountCircle size={36} className="text-secondary me-2" />
+                        <div className="profile-icon-wrapper me-2">
+                            <MdAccountCircle size={38} className="text-secondary" />
+                        </div>
                         <div>
-                            <div className="fw-bold small">{listing.utilisateur?.firstname || 'Trader'}</div>
+                            <div className="fw-bold small">{listing.utilisateur?.firstname || 'Utilisateur'}</div>
                             <div className="d-flex align-items-center">
                                 <MdVerified className="text-primary me-1" size={12} />
                                 <span style={{fontSize: '9px'}} className="text-muted fw-bold text-uppercase">Vérifié</span>
@@ -314,16 +319,16 @@ export default function MarketHome() {
 
                     <div className="exchange-details flex-grow-1">
                         <div className="d-flex justify-content-between mb-2">
-                            <small className="text-muted fw-bold">Disponible</small>
+                            <small className="text-muted fw-bold">Dispo.</small>
                             <span className="fw-bolder">{listing.amount_available} {listing.currency_from}</span>
                         </div>
                         <div className="d-flex justify-content-between mb-4">
-                            <small className="text-muted fw-bold">Reçoit</small>
+                            <small className="text-muted fw-bold">Cible</small>
                             <span className="badge bg-primary-subtle text-primary rounded-pill px-3">{listing.currency_to}</span>
                         </div>
                     </div>
 
-                    <button className="btn btn-dark w-100 rounded-pill py-2 fw-bold shadow-sm mt-auto">
+                    <button className="btn btn-dark w-100 rounded-pill py-2 fw-bold shadow-sm mt-auto btn-exchange-hover">
                         Échanger
                     </button>
                   </div>
@@ -332,15 +337,16 @@ export default function MarketHome() {
             );
           })}
         </div>
-        {loading && <div className="text-center p-5"><div className="spinner-border text-excha-orange" /></div>}
+        {loading && <div className="text-center p-5"><div className="spinner-border text-excha-orange" role="status" /></div>}
       </div>
 
+      {/* Modal de Publication */}
       {showModal && (
-        <div className="custom-modal-overlay d-flex align-items-center justify-content-center p-3">
-          <div className="custom-modal-content bg-white rounded-5 shadow-2xl">
+        <div className="custom-modal-overlay d-flex align-items-center justify-content-center p-3 animate-fade-in">
+          <div className="custom-modal-content bg-white rounded-5 shadow-2xl animate-slide-up">
             <div className="p-4 d-flex justify-content-between align-items-center border-bottom">
                 <h5 className="fw-bold mb-0">Créer une offre</h5>
-                <button className="btn-close" onClick={toggleModal}></button>
+                <button className="btn btn-light rounded-circle p-1" onClick={toggleModal}><MdClose size={20}/></button>
             </div>
             <form className="p-4" onSubmit={handleSubmit}>
                 <div className="row g-3">
@@ -353,23 +359,24 @@ export default function MarketHome() {
                         <Select name="currency_to" options={currencies} styles={selectStyles} components={{ Option: CustomOption, SingleValue: CustomSingleValue }} value={currencies.find(c => c.value === formData.currency_to)} onChange={handleSelectChange} />
                     </div>
                     <div className="col-12 text-center my-2">
-                        <div className={`p-2 rounded-4 small fw-bold ${showRateError ? 'bg-danger-subtle text-danger' : 'bg-light text-muted'}`}>
-                            Marché : 1 {formData.currency_from} = {rateLoading ? '...' : marketRate || '---'} {formData.currency_to}
+                        <div className={`p-2 rounded-4 small fw-bold transition-all ${showRateError ? 'bg-danger-subtle text-danger border border-danger' : 'bg-light text-muted'}`}>
+                            {rateLoading ? 'Chargement du taux...' : `Marché : 1 ${formData.currency_from} = ${marketRate || '---'} ${formData.currency_to}`}
                         </div>
                     </div>
                     <div className="col-12">
                         <label className="form-label small fw-bold">Montant disponible ({formData.currency_from})</label>
-                        <input type="number" name="amount_available" value={formData.amount_available} onChange={handleChange} className="form-control border-0 bg-light py-2 rounded-3 shadow-none" placeholder="Ex: 100" required />
+                        <input type="number" name="amount_available" value={formData.amount_available} onChange={handleChange} className="form-control border-0 bg-light py-2 rounded-3 shadow-none" placeholder="Ex: 500" required />
                     </div>
                     <div className="col-12">
                         <label className="form-label small fw-bold">Votre Taux (Optionnel)</label>
                         <input type="number" step="any" name="user_rate" value={formData.user_rate} onChange={handleChange} className={`form-control border-0 py-2 rounded-3 shadow-none ${showRateError ? 'is-invalid bg-danger-subtle' : 'bg-light'}`} placeholder={`Par défaut: ${marketRate || '...'}`} />
+                        {showRateError && <div className="text-danger" style={{fontSize: '10px'}}>Le taux ne peut pas dépasser le prix du marché.</div>}
                     </div>
 
                     <div className="col-12">
                       <div className="calculation-preview p-3 rounded-4 d-flex align-items-center justify-content-between">
                         <div className="d-flex align-items-center">
-                          <div className="icon-circle me-3">
+                          <div className="icon-circle me-3 shadow-sm">
                             <MdTrendingUp size={20} className="text-success" />
                           </div>
                           <div>
@@ -379,33 +386,101 @@ export default function MarketHome() {
                         </div>
                       </div>
                     </div>
-
                 </div>
-                <button type="submit" className="btn btn-excha-orange w-100 rounded-pill mt-4 py-3 fw-bold text-white shadow">
-                    Publier sur le marché
+                <button type="submit" className="btn btn-excha-orange w-100 rounded-pill mt-4 py-3 fw-bold text-white shadow transition-all">
+                    Publier l'annonce
                 </button>
             </form>
           </div>
         </div>
       )}
 
+      {/* Styles mis à jour avec animations */}
       <style>{`
         .market-container { background: #f8f9fa; min-height: 100vh; }
-        .btn-excha-orange { background: linear-gradient(135deg, #FF7A00 0%, #FF9500 100%); border: none; }
+        .btn-excha-orange { background: linear-gradient(135deg, #FF7A00 0%, #FF9500 100%); border: none; transition: transform 0.2s; }
+        .btn-excha-orange:hover { transform: scale(1.02); opacity: 0.9; }
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .filter-pill { font-size: 13px; font-weight: 500; cursor: pointer; }
-        .listing-card-premium { transition: all 0.3s ease; border: 1px solid #eee !important; position: relative; }
-        .listing-card-premium:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important; }
-        .best-price-badge { 
-          position: absolute; top: 0; right: 0; background: #ff4d4d; color: white; padding: 5px 12px; font-size: 9px; font-weight: 900; 
-          border-bottom-left-radius: 15px; display: flex; align-items: center; z-index: 5;
+        .filter-pill { font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
+        
+        /* Animation flottante infinie des cartes */
+        @keyframes floating {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+          100% { transform: translateY(0px); }
         }
-        .rate-comparison-box { background: #f1f3f5; }
-        .vs-circle { width: 22px; height: 22px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 900; color: #adb5bd; border: 1px solid #dee2e6; margin: 0 auto; }
-        .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 4000; backdrop-filter: blur(5px); }
-        .custom-modal-content { width: 100%; max-width: 450px; }
-        .calculation-preview { background: #e8f5e9; border: 1px dashed #2e7d32; }
-        .icon-circle { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        .animate-card-floating {
+          animation: floating 4s ease-in-out infinite;
+        }
+
+        /* Délais d'animation pour un effet naturel */
+        .card-delay-1 { animation-delay: 0s; }
+        .card-delay-2 { animation-delay: 0.8s; }
+        .card-delay-3 { animation-delay: 1.6s; }
+        .card-delay-4 { animation-delay: 2.4s; }
+
+        .listing-card-premium { 
+          transition: border-color 0.3s ease, box-shadow 0.3s ease;
+          border: 1px solid #f0f0f0 !important; 
+          position: relative; 
+          background: white;
+        }
+        
+        /* On garde le hover pour accentuer l'effet quand l'utilisateur survole */
+        .listing-card-premium:hover { 
+          animation-play-state: paused; /* Optionnel: stoppe l'animation au survol */
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important; 
+          border-color: #FF7A00 !important;
+          z-index: 10;
+        }
+
+        .btn-exchange-hover:hover { background-color: #000 !important; transform: translateY(-2px); }
+
+        .best-price-badge { 
+          position: absolute; top: 0; right: 0; background: #ff4d4d; color: white; padding: 5px 15px; 
+          font-size: 10px; font-weight: 900; border-bottom-left-radius: 20px; 
+          display: flex; align-items: center; z-index: 5; box-shadow: -2px 2px 10px rgba(255, 77, 77, 0.3);
+        }
+
+        .rate-comparison-box { background: #f8f9fa; border: 1px solid #eee; }
+        .vs-circle { 
+          width: 24px; height: 24px; background: #fff; border-radius: 50%; 
+          display: flex; align-items: center; justify-content: center; 
+          font-size: 8px; font-weight: 900; color: #adb5bd; 
+          border: 1px solid #eee; margin: 0 auto; 
+        }
+
+        .custom-modal-overlay { 
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+          background: rgba(0,0,0,0.6); z-index: 5000; backdrop-filter: blur(8px); 
+        }
+        .custom-modal-content { width: 100%; max-width: 460px; border: none; }
+
+        .calculation-preview { 
+          background: #f0fff4; 
+          border: 2px dashed #c6f6d5; 
+        }
+
+        @keyframes flicker {
+          0% { opacity: 1; }
+          50% { opacity: 0.7; }
+          100% { opacity: 1; }
+        }
+        .animate-flicker { animation: flicker 1.5s infinite; }
+
+        @keyframes slideUp {
+          from { transform: translateY(20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up { animation: slideUp 0.4s ease-out; }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fade-in { animation: fadeIn 0.3s ease-in; }
       `}</style>
     </div>
   );
