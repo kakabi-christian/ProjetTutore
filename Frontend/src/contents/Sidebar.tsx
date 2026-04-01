@@ -9,12 +9,13 @@ import {
   MdAccountCircle,
   MdShield,
   MdPeople,
-  MdMenu // Import de l'icône Hamburger
+  MdMenu,
+  MdDashboard,
+  MdBarChart 
 } from "react-icons/md";
 import { authService } from "../services/authService";
 import KycService from "../services/KycService";
 
-// Définition des props pour recevoir l'état du parent (AdminDashboard)
 interface SidebarProps {
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
@@ -69,12 +70,38 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
     alignItems: 'center',
     justifyContent: isCollapsed ? 'center' : 'space-between',
     padding: isCollapsed ? '10px 0' : '10px 15px',
+    position: 'relative' as const,
   });
 
   return (
     <>
+      {/* STYLE CSS INTERNE POUR LE TOOLTIP AU SURVOL */}
+      <style>{`
+        .sidebar-container.collapsed .nav-item .nav-link::after {
+          content: attr(data-label);
+          position: absolute;
+          left: 100%;
+          margin-left: 15px;
+          padding: 5px 10px;
+          background: var(--orange);
+          color: white;
+          border-radius: 5px;
+          white-space: nowrap;
+          opacity: 0;
+          visibility: hidden;
+          transition: 0.2s ease;
+          z-index: 2000;
+          font-size: 0.8rem;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .sidebar-container.collapsed .nav-item .nav-link:hover::after {
+          opacity: 1;
+          visibility: visible;
+        }
+      `}</style>
+
       <div
-        className="d-flex flex-column flex-shrink-0 p-3 shadow"
+        className={`d-flex flex-column flex-shrink-0 p-3 shadow sidebar-container ${isCollapsed ? "collapsed" : ""}`}
         style={{ 
           width: isCollapsed ? "80px" : "280px", 
           minHeight: "100vh", 
@@ -87,7 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           zIndex: 1000
         }}
       >
-        {/* Header : Logo + Bouton Hamburger */}
+        {/* Header */}
         <div className={`d-flex align-items-center mb-4 mt-2 ${isCollapsed ? 'justify-content-center' : 'justify-content-between'}`}>
           {!isCollapsed && (
             <div className="d-flex align-items-center text-decoration-none">
@@ -115,7 +142,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
         <ul className="nav nav-pills flex-column mb-auto">
           
           <li className="nav-item mb-2">
-            <NavLink to="/admin/roles" className={navLinkClasses} style={navLinkStyle} title={isCollapsed ? "Rôles" : ""}>
+            <NavLink to="/admin/stats" className={navLinkClasses} style={navLinkStyle} data-label="Tableau de Bord">
+              <div className="d-flex align-items-center">
+                <MdDashboard className={isCollapsed ? "" : "me-2"} size={22} />
+                {!isCollapsed && <span>Tableau de Bord</span>}
+              </div>
+            </NavLink>
+          </li>
+
+          <li className="nav-item mb-2">
+            <NavLink to="/admin/stats-graphe" className={navLinkClasses} style={navLinkStyle} data-label="Analyses Graphiques">
+              <div className="d-flex align-items-center">
+                <MdBarChart className={isCollapsed ? "" : "me-2"} size={22} />
+                {!isCollapsed && <span>Analyses Graphiques</span>}
+              </div>
+            </NavLink>
+          </li>
+
+          <li className="nav-item mb-2">
+            <NavLink to="/admin/roles" className={navLinkClasses} style={navLinkStyle} data-label="Gestion des Rôles">
               <div className="d-flex align-items-center">
                 <MdShield className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Gestion des Rôles</span>}
@@ -124,7 +169,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           </li>
 
           <li className="nav-item mb-2">
-            <NavLink to="/admin/users-list" className={navLinkClasses} style={navLinkStyle} title={isCollapsed ? "Utilisateurs" : ""}>
+            <NavLink to="/admin/users-list" className={navLinkClasses} style={navLinkStyle} data-label="Utilisateurs">
               <div className="d-flex align-items-center">
                 <MdPeople className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Utilisateurs</span>}
@@ -133,7 +178,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           </li>
 
           <li className="nav-item mb-2">
-            <NavLink to="/admin/type-documents" className={navLinkClasses} style={navLinkStyle} title={isCollapsed ? "Documents" : ""}>
+            <NavLink to="/admin/type-documents" className={navLinkClasses} style={navLinkStyle} data-label="Documents">
               <div className="d-flex align-items-center">
                 <MdDescription className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Types de Documents</span>}
@@ -142,12 +187,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           </li>
 
           <li className="nav-item mb-2">
-            <NavLink to="/admin/kyc" className={navLinkClasses} style={navLinkStyle} title={isCollapsed ? "KYC" : ""}>
+            <NavLink to="/admin/kyc" className={navLinkClasses} style={navLinkStyle} data-label="Gestion des KYC">
               <div className="d-flex align-items-center">
                 <MdNotificationsActive className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Gestion des KYC</span>}
               </div>
-
               {pendingCount > 0 && (
                 <span 
                   className={`badge rounded-pill bg-white text-excha-orange shadow-sm d-flex align-items-center justify-content-center ${isCollapsed ? 'position-absolute' : ''}`}
@@ -165,7 +209,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           </li>
 
           <li className="nav-item mb-2">
-            <NavLink to="/admin/notifications-admin" className={navLinkClasses} style={navLinkStyle} title={isCollapsed ? "Notifications" : ""}>
+            <NavLink to="/admin/notifications-admin" className={navLinkClasses} style={navLinkStyle} data-label="Notifications">
               <div className="d-flex align-items-center">
                 <MdSend className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Notifications</span>}
@@ -174,19 +218,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           </li>
 
           <li className="nav-item mb-2">
-            <NavLink to="/admin/profile-admin" className={navLinkClasses} style={navLinkStyle} title={isCollapsed ? "Profil" : ""}>
+            <NavLink to="/admin/profile-admin" className={navLinkClasses} style={navLinkStyle} data-label="Mon Profil">
               <div className="d-flex align-items-center">
                 <MdAccountCircle className={isCollapsed ? "" : "me-2"} size={22} />
                 {!isCollapsed && <span>Mon Profil</span>}
               </div>
             </NavLink>
           </li>
-
         </ul>
 
         <hr style={{ backgroundColor: "rgba(255,255,255,0.1)", height: '1px', border: 'none' }} />
 
-        {/* Bouton de Déconnexion */}
+        {/* Déconnexion */}
         <div className="mt-auto">
           <button
             onClick={() => setShowLogoutModal(true)}
@@ -200,12 +243,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
             <MdLogout size={22} className="text-excha-orange" />
             {!isCollapsed && <span className="fw-bold">Déconnexion</span>}
           </button>
-          
-          {!isCollapsed && (
-            <div className="text-center mt-3">
-              <small style={{ fontSize: '0.6rem', color: 'var(--gray)' }}>© 2026 ExchaPay Platform</small>
-            </div>
-          )}
         </div>
       </div>
 
@@ -221,22 +258,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                 <h5 className="fw-bold mb-3" style={{ color: 'var(--blue)' }}>Déconnexion</h5>
                 <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session ?</p>
                 <div className="d-flex gap-2 mt-4">
-                  <button 
-                    type="button" 
-                    className="btn fw-bold w-50 py-2" 
-                    style={{ color: 'var(--gray)', borderRadius: '10px' }} 
-                    onClick={() => setShowLogoutModal(false)}
-                  >
-                    Annuler
-                  </button>
-                  <button 
-                    type="button" 
-                    className="btn btn-excha-orange fw-bold w-50 py-2 shadow-sm" 
-                    style={{ borderRadius: '10px' }}
-                    onClick={confirmLogout}
-                  >
-                    Oui, quitter
-                  </button>
+                  <button type="button" className="btn fw-bold w-50 py-2" style={{ color: 'var(--gray)', borderRadius: '10px' }} onClick={() => setShowLogoutModal(false)}>Annuler</button>
+                  <button type="button" className="btn btn-excha-orange fw-bold w-50 py-2 shadow-sm" style={{ borderRadius: '10px' }} onClick={confirmLogout}>Oui, quitter</button>
                 </div>
               </div>
             </div>
