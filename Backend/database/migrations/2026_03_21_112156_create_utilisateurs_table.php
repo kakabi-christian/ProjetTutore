@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('telephone')->unique();
             $table->string('country');
+            $table->string('country_code', 2)->index();
             $table->timestamp('lastlogin')->nullable();
             $table->boolean('isactive')->default(true);
             $table->boolean('isverified')->default(false);

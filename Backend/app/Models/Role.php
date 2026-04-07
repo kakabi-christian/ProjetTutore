@@ -6,6 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+
+/**
+ * @OA\Schema(
+ *     schema="Role",
+ *     type="object",
+ *     @OA\Property(property="role_id", type="integer", example=1),
+ *     @OA\Property(property="name", type="string", example="admin"),
+ *     @OA\Property(property="description", type="string", example="Administrateur du système"),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time")
+ * )
+ */
 class Role extends Model
 {
     use HasFactory;
@@ -44,13 +56,13 @@ class Role extends Model
 
     /**
      * Relation Many-to-Many avec les Permissions.
-     * On passe par la table pivot 'user_permissions'.
+     * On passe par la table pivot 'role_permissions'.
      */
     public function permissions(): BelongsToMany
     {
         return $this->belongsToMany(
             Permission::class,
-            'user_permissions', // Table pivot
+            'role_permissions', // Table pivot
             'role_id',          // Clé étrangère vers 'roles'
             'permission_id'     // Clé étrangère vers 'permissions'
         );

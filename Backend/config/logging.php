@@ -139,6 +139,12 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+        'exchapay' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/ExchaPay.log'),
+            'level' => 'debug',
+        ],
+        
 
     ],
 

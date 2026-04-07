@@ -10,12 +10,12 @@ class RolePermission extends Model
 {
     use HasFactory;
 
-    protected $table = 'user_permissions';
+    protected $table = 'role_permissions';
 
     /**
      * La clé primaire associée à la table.
      */
-    protected $primaryKey = 'user_permission_id';
+    protected $primaryKey = 'role_permission_id';
 
     /**
      * Indique si l'ID est auto-incrémenté.

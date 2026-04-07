@@ -8,7 +8,7 @@ class AuthRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Obligatoire pour permettre l'accès aux routes d'auth
+        return true; 
     }
 
     public function rules(): array
@@ -29,7 +29,9 @@ class AuthRequest extends FormRequest
                 'email' => 'required|email|unique:utilisateurs,email',
                 'password' => 'required|string|min:8|confirmed',
                 'telephone' => 'required|string|unique:utilisateurs,telephone',
-                'country' => 'required|string', // Mis à jour ici
+                'country' => 'required|string', 
+                // ✅ Ajout du country_code (ex: CM, NG)
+                'country_code' => 'required|string|size:2', 
             ];
         }
 
@@ -37,18 +39,18 @@ class AuthRequest extends FormRequest
         if ($this->is('api/verify-otp')) {
             return [
                 'email' => 'required|email|exists:utilisateurs,email',
-                'otp' => 'required|string|size:6', // Supposant un code à 6 chiffres
+                'otp' => 'required|string|size:6', 
             ];
         }
 
-        // 4. Validation FORGOT PASSWORD (Envoi du mail)
+        // 4. Validation FORGOT PASSWORD
         if ($this->is('api/forgot-password')) {
             return [
                 'email' => 'required|email|exists:utilisateurs,email',
             ];
         }
 
-        // 5. Validation RESET PASSWORD (Nouveau mot de passe)
+        // 5. Validation RESET PASSWORD
         if ($this->is('api/reset-password')) {
             return [
                 'email' => 'required|email|exists:utilisateurs,email',
@@ -68,6 +70,9 @@ class AuthRequest extends FormRequest
             'telephone.unique' => 'Ce numéro de téléphone est déjà utilisé.',
             'otp.size' => 'Le code de vérification doit comporter 6 chiffres.',
             'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
+            // Message pour le code pays
+            'country_code.required' => 'Le code pays est obligatoire.',
+            'country_code.size' => 'Le code pays doit comporter exactement 2 caractères (ex: CM).',
         ];
     }
 }
