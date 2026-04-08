@@ -1,0 +1,18 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: exchapay-backend-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: exchapay-backend # Il surveille ton déploiement backend
+  minReplicas: 2  # Jamais moins de 2 copies
+  maxReplicas: 10 # Peut monter jusqu'à 10 copies si c'est la panique !
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70 # Se déclenche à 70% de consommation CPU
