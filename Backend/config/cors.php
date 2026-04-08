@@ -22,6 +22,8 @@ return [
         '#^https://.*\.ngrok-free\.app$#',
     ],
 
+    'allowed_origins_patterns' => [],
+
     'allowed_headers' => ['*'],
 
     'exposed_headers' => [],
