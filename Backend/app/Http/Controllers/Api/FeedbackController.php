@@ -20,15 +20,19 @@ class FeedbackController extends Controller
      *      summary="Enregistre ou met à jour le feedback d'un utilisateur",
      *      tags={"Feedback"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
      *              required={"user_id", "comment", "note"},
+     *
      *              @OA\Property(property="user_id", type="string", format="uuid", example="123e4567-e89b-12d3..."),
      *              @OA\Property(property="comment", type="string", example="Super application!"),
      *              @OA\Property(property="note", type="integer", example=5)
      *          )
      *      ),
+     *
      *      @OA\Response(response=200, description="Feedback mis à jour avec succès"),
      *      @OA\Response(response=201, description="Feedback enregistré"),
      *      @OA\Response(response=500, description="Erreur serveur")

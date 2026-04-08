@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StatisticsRequest;
-use App\Models\Utilisateur;
-use App\Models\Transaction;
 use App\Models\Listing;
 use App\Models\Review;
+use App\Models\Transaction;
+use App\Models\Utilisateur;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -37,7 +37,7 @@ class StatisticsController extends Controller
             ->first();
 
         $listingStats = [
-            'active_listings' => Listing::whereHas('histories.listingStatus', function($q) {
+            'active_listings' => Listing::whereHas('histories.listingStatus', function ($q) {
                 $q->where('title', 'active');
             })->count(),
             'total_listings_period' => Listing::whereBetween('created_at', [$startDate, $endDate])->count(),
@@ -63,13 +63,13 @@ class StatisticsController extends Controller
                     'completed' => $transactionStats->completed_count ?? 0,
                     'volume' => round($transactionStats->total_volume_from ?? 0, 2),
                     'revenue' => round($transactionStats->total_revenue ?? 0, 2),
-                    'success_rate' => $transactionStats->total_count > 0 
-                        ? round(($transactionStats->completed_count / $transactionStats->total_count) * 100, 2) 
+                    'success_rate' => $transactionStats->total_count > 0
+                        ? round(($transactionStats->completed_count / $transactionStats->total_count) * 100, 2)
                         : 0,
                 ],
                 'listings' => $listingStats,
-                'chart_data' => $dailyTrend
-            ]
+                'chart_data' => $dailyTrend,
+            ],
         ]);
     }
 
@@ -88,24 +88,24 @@ class StatisticsController extends Controller
 
         // 1. Volume d'échange et Économies réalisées
         // On calcule l'économie par rapport au taux officiel
-        $myTransactions = Transaction::where(function($q) use ($userId) {
-                $q->where('buyer_id', $userId)->orWhere('seller_id', $userId);
-            })
+        $myTransactions = Transaction::where(function ($q) use ($userId) {
+            $q->where('buyer_id', $userId)->orWhere('seller_id', $userId);
+        })
             ->where('status', 'COMPLETED')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->get();
 
         $totalVolume = $myTransactions->sum('amount_from');
-        
+
         // 2. Calcul de la fiabilité (Rating moyen)
-        $averageRating = Review::whereHas('listing', function($q) use ($userId) {
+        $averageRating = Review::whereHas('listing', function ($q) use ($userId) {
             $q->where('user_id', $userId);
         })->avg('rating') ?? 5.0;
 
         // 3. Activité par mois (pour graphique linéaire personnel)
-        $monthlyActivity = Transaction::where(function($q) use ($userId) {
-                $q->where('buyer_id', $userId)->orWhere('seller_id', $userId);
-            })
+        $monthlyActivity = Transaction::where(function ($q) use ($userId) {
+            $q->where('buyer_id', $userId)->orWhere('seller_id', $userId);
+        })
             ->where('status', 'COMPLETED')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->select(
@@ -118,18 +118,18 @@ class StatisticsController extends Controller
             ->get();
 
         // 4. Comparaison avec l'année dernière (Growth)
-        $lastYearVolume = Transaction::where(function($q) use ($userId) {
-                $q->where('buyer_id', $userId)->orWhere('seller_id', $userId);
-            })
+        $lastYearVolume = Transaction::where(function ($q) use ($userId) {
+            $q->where('buyer_id', $userId)->orWhere('seller_id', $userId);
+        })
             ->where('status', 'COMPLETED')
             ->whereBetween('created_at', [
-                Carbon::parse($startDate)->subYear(), 
-                Carbon::parse($endDate)->subYear()
-            ])
+            Carbon::parse($startDate)->subYear(),
+            Carbon::parse($endDate)->subYear(),
+        ])
             ->sum('amount_from');
 
-        $growth = $lastYearVolume > 0 
-            ? round((($totalVolume - $lastYearVolume) / $lastYearVolume) * 100, 2) 
+        $growth = $lastYearVolume > 0
+            ? round((($totalVolume - $lastYearVolume) / $lastYearVolume) * 100, 2)
             : 100;
 
         return response()->json([
@@ -143,16 +143,16 @@ class StatisticsController extends Controller
                 ],
                 'listings' => [
                     'total' => Listing::where('user_id', $userId)->count(),
-                    'active' => Listing::where('user_id', $userId)->whereHas('histories.listingStatus', function($q) {
+                    'active' => Listing::where('user_id', $userId)->whereHas('histories.listingStatus', function ($q) {
                         $q->where('title', 'active');
                     })->count(),
                 ],
                 'chart_data' => $monthlyActivity,
                 'period' => [
                     'from' => $startDate->toDateString(),
-                    'to' => $endDate->toDateString()
-                ]
-            ]
+                    'to' => $endDate->toDateString(),
+                ],
+            ],
         ]);
     }
 }

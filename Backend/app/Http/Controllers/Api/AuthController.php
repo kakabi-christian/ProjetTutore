@@ -20,10 +20,13 @@ class AuthController extends Controller
      *      path="/register",
      *      summary="Inscription d'un nouvel utilisateur",
      *      tags={"Auth"},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
      *              required={"firstname","lastname","email","password"},
+     *
      *              @OA\Property(property="firstname", type="string", example="John"),
      *              @OA\Property(property="lastname", type="string", example="Doe"),
      *              @OA\Property(property="email", type="string", format="email", example="john@example.com"),
@@ -31,6 +34,7 @@ class AuthController extends Controller
      *              @OA\Property(property="pseudonyme", type="string", example="johndoe")
      *          )
      *      ),
+     *
      *      @OA\Response(response=201, description="Inscription réussie")
      * )
      *
@@ -110,13 +114,17 @@ class AuthController extends Controller
      *      path="/forgot-password",
      *      summary="Mot de passe oublié, envoi d'OTP",
      *      tags={"Auth"},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
      *              required={"email"},
+     *
      *              @OA\Property(property="email", type="string", format="email", example="john@example.com")
      *          )
      *      ),
+     *
      *      @OA\Response(response=200, description="Code envoyé"),
      *      @OA\Response(response=404, description="Utilisateur non trouvé")
      * )
@@ -162,14 +170,18 @@ class AuthController extends Controller
      *      path="/login",
      *      summary="Connexion de l'utilisateur",
      *      tags={"Auth"},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
      *              required={"email","password"},
+     *
      *              @OA\Property(property="email", type="string", format="email", example="john@example.com"),
      *              @OA\Property(property="password", type="string", format="password", example="secret123")
      *          )
      *      ),
+     *
      *      @OA\Response(response=200, description="Connexion réussie"),
      *      @OA\Response(response=401, description="Identifiants incorrects"),
      *      @OA\Response(response=403, description="Compte non vérifié ou suspendu")
@@ -244,14 +256,18 @@ class AuthController extends Controller
      *      path="/verify-otp",
      *      summary="Vérification OTP",
      *      tags={"Auth"},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
      *              required={"email","otp"},
+     *
      *              @OA\Property(property="email", type="string", format="email", example="john@example.com"),
      *              @OA\Property(property="otp", type="string", example="123456")
      *          )
      *      ),
+     *
      *      @OA\Response(response=200, description="Compte vérifié"),
      *      @OA\Response(response=404, description="Non trouvé")
      * )
@@ -276,6 +292,7 @@ class AuthController extends Controller
      *      summary="Déconnexion",
      *      tags={"Auth"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Response(response=200, description="Déconnexion réussie")
      * )
      *

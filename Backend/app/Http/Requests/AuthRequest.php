@@ -8,7 +8,7 @@ class AuthRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; 
+        return true;
     }
 
     public function rules(): array
@@ -29,9 +29,9 @@ class AuthRequest extends FormRequest
                 'email' => 'required|email|unique:utilisateurs,email',
                 'password' => 'required|string|min:8|confirmed',
                 'telephone' => 'required|string|unique:utilisateurs,telephone',
-                'country' => 'required|string', 
+                'country' => 'required|string',
                 // ✅ Ajout du country_code (ex: CM, NG)
-                'country_code' => 'required|string|size:2', 
+                'country_code' => 'required|string|size:2',
             ];
         }
 
@@ -39,7 +39,7 @@ class AuthRequest extends FormRequest
         if ($this->is('api/verify-otp')) {
             return [
                 'email' => 'required|email|exists:utilisateurs,email',
-                'otp' => 'required|string|size:6', 
+                'otp' => 'required|string|size:6',
             ];
         }
 

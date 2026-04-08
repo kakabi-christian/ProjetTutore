@@ -10,16 +10,16 @@ return new class extends Migration
     {
         Schema::create('wallets', function (Blueprint $table) {
             $table->id('wallet_id');
-            
+
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('user_id')->on('utilisateurs')->onDelete('cascade');
 
             $table->string('currency', 3); // Ex: XAF, USD
-            
+
             // On utilise 'text' car une valeur chiffrée est une longue chaîne de caractères
-            $table->text('balance'); 
-            $table->text('frozen_balance'); 
-            
+            $table->text('balance');
+            $table->text('frozen_balance');
+
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

@@ -17,13 +17,16 @@ class ReviewController extends Controller
      *      path="/reviews/{listing_id}",
      *      summary="Liste les avis pour une annonce spécifique",
      *      tags={"Reviews"},
+     *
      *      @OA\Parameter(
      *          name="listing_id",
      *          in="path",
      *          required=true,
      *          description="ID de l'annonce",
+     *
      *          @OA\Schema(type="integer")
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Liste des avis"
@@ -52,15 +55,20 @@ class ReviewController extends Controller
      *      summary="Ajouter un nouvel avis à une annonce",
      *      tags={"Reviews"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(name="listing_id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
      *              required={"rating"},
+     *
      *              @OA\Property(property="rating", type="integer", example=5),
      *              @OA\Property(property="comment", type="string", example="Très bon échange")
      *          )
      *      ),
+     *
      *      @OA\Response(response=201, description="Avis ajouté avec succès"),
      *      @OA\Response(response=403, description="Interdit (auto-évaluation ou pas de transaction)")
      * )
@@ -132,14 +140,19 @@ class ReviewController extends Controller
      *      summary="Modifier son avis",
      *      tags={"Reviews"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
+     *
      *              @OA\Property(property="rating", type="integer", example=4),
      *              @OA\Property(property="comment", type="string", example="Un peu lent mais correct")
      *          )
      *      ),
+     *
      *      @OA\Response(response=200, description="Avis mis à jour avec succès"),
      *      @OA\Response(response=403, description="Non autorisé")
      * )
@@ -177,7 +190,9 @@ class ReviewController extends Controller
      *      summary="Supprimer un avis (Auteur ou Admin)",
      *      tags={"Reviews"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *      @OA\Response(response=200, description="Avis supprimé avec succès"),
      *      @OA\Response(response=403, description="Non autorisé")
      * )

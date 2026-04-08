@@ -23,11 +23,11 @@ return new class extends Migration
             $table->string('currency', 3); // Ex: 'XAF', 'NGN', 'USD'
 
             // Données sensibles chiffrées (donc type text)
-            $table->text('account_number'); 
-            $table->text('account_name'); 
+            $table->text('account_number');
+            $table->text('account_name');
 
             $table->string('bank_code')->nullable(); // Code banque ou SWIFT (souvent public, donc pas besoin de chiffrer)
-            
+
             $table->boolean('is_default')->default(false);
             $table->boolean('is_verified')->default(false);
 
@@ -42,4 +42,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('method_payments');
     }
-}; 
+};

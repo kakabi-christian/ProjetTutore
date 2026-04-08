@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    BarChart, Bar, Cell, PieChart, Pie, Legend
+     Cell, PieChart, Pie, Legend
 } from 'recharts';
 import { 
     MdPeople, MdTrendingUp, MdAccountBalanceWallet, 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import KycService from '../../services/KycService';
 import type { Kyc } from '../../models/Kyc';
 import { toast } from 'react-toastify';

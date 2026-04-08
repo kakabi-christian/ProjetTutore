@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; 
+import { useState } from 'react'; 
 import { Outlet, useLocation } from 'react-router-dom'; // Import de useLocation
 import SidebarUser from '../contents/SidebarUser';
 import TopBarUser from '../components/TopBarUser';
