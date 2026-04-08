@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import Select, { components } from 'react-select';
 import type { ActionMeta } from 'react-select';
 import type { SingleValue as ReactSelectSingleValue } from 'react-select';
@@ -8,8 +8,8 @@ import CurrencyService from '../../../services/CurrencyService';
 import type { Listing, ListingPaginationResponse } from '../../../models/Listing';
 
 import { 
-  MdAdd, MdAccountCircle, MdVerified, MdEdit, MdDeleteSweep,
-  MdSwapHoriz, MdTrendingUp, MdClose, MdInfoOutline, MdLocalFireDepartment
+  MdAdd, MdEdit, MdDeleteSweep,
+  MdSwapHoriz, MdTrendingUp, MdClose, MdInfoOutline
 } from "react-icons/md";
 
 interface CurrencyOption {
