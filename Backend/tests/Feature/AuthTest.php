@@ -23,6 +23,7 @@ class AuthTest extends TestCase
             'password' => Hash::make('secret123'),
             'telephone' => '658788445',
             'country' => 'Cameroun',
+            'country_code' => 'CM',
             'type' => 'user',
             'isactive' => true,
             'isverified' => true,
@@ -55,6 +56,8 @@ class AuthTest extends TestCase
             'password' => Hash::make('correct_password'),
             'telephone' => '000000000',
             'country' => 'Cameroun',
+            'country_code' => 'CM',
+            'type' => 'user',
             'isactive' => true,
         ]);
 
