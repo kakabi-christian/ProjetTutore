@@ -28,6 +28,9 @@ return [
     'allowed_origins_patterns' => [
         '#^https://.*\.ngrok-free\.app$#',
     ],
+    ],
+
+    'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 
