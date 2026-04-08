@@ -2,30 +2,31 @@
 
 namespace App\Services;
 
+use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Exception;
 
 class FlutterwaveService
 {
     protected $baseUrl;
+
     protected $secretKey;
-    
+
     /**
      * Durée de conservation du cache en secondes (86400s = 24h)
      * Les banques et réseaux mobiles ne changent presque jamais.
      */
-    protected $cacheDuration = 86400; 
+    protected $cacheDuration = 86400;
 
     public function __construct()
     {
         $this->baseUrl = config('flutterwave.baseUrl');
         $this->secretKey = config('flutterwave.secretKey');
 
-        Log::debug("FlutterwaveService: Initialisation du service", [
+        Log::debug('FlutterwaveService: Initialisation du service', [
             'baseUrl' => $this->baseUrl,
-            'secretKey_prefix' => substr($this->secretKey, 0, 12) . '...' 
+            'secretKey_prefix' => substr($this->secretKey, 0, 12).'...',
         ]);
     }
 
@@ -34,31 +35,32 @@ class FlutterwaveService
      */
     public function getMobileNetworks(string $countryCode)
     {
-        $cacheKey = "flw_networks_" . strtolower($countryCode);
+        $cacheKey = 'flw_networks_'.strtolower($countryCode);
 
         return Cache::remember($cacheKey, $this->cacheDuration, function () use ($countryCode) {
             $url = "{$this->baseUrl}/mobile-networks";
 
-            Log::info("FlutterwaveService@getMobileNetworks: Appel API (Cache manquant)", [
-                'country' => $countryCode
+            Log::info('FlutterwaveService@getMobileNetworks: Appel API (Cache manquant)', [
+                'country' => $countryCode,
             ]);
 
             try {
                 $response = Http::withToken($this->secretKey)
-                    ->withoutVerifying() 
+                    ->withoutVerifying()
                     ->timeout(30)
                     ->get($url, ['country' => $countryCode]);
 
                 if ($response->failed()) {
-                    Log::error("FlutterwaveService@getMobileNetworks: Échec API", [
+                    Log::error('FlutterwaveService@getMobileNetworks: Échec API', [
                         'status' => $response->status(),
-                        'body' => $response->json()
+                        'body' => $response->json(),
                     ]);
-                    return null; 
+
+                    return null;
                 }
 
                 $data = $response->json();
-                
+
                 // On s'assure que le succès est total avant de mettre en cache
                 if (($data['status'] ?? '') !== 'success') {
                     return null;
@@ -67,7 +69,8 @@ class FlutterwaveService
                 return $data;
 
             } catch (Exception $e) {
-                Log::emergency("FlutterwaveService@getMobileNetworks: CRASH", ['msg' => $e->getMessage()]);
+                Log::emergency('FlutterwaveService@getMobileNetworks: CRASH', ['msg' => $e->getMessage()]);
+
                 return null;
             }
         }) ?? ['status' => 'error', 'message' => 'Impossible de récupérer les réseaux mobiles'];
@@ -78,13 +81,13 @@ class FlutterwaveService
      */
     public function getBanks(string $countryCode)
     {
-        $cacheKey = "flw_banks_" . strtolower($countryCode);
+        $cacheKey = 'flw_banks_'.strtolower($countryCode);
 
         return Cache::remember($cacheKey, $this->cacheDuration, function () use ($countryCode) {
             $url = "{$this->baseUrl}/banks/{$countryCode}";
 
-            Log::info("FlutterwaveService@getBanks: Appel API (Cache manquant)", [
-                'country' => $countryCode
+            Log::info('FlutterwaveService@getBanks: Appel API (Cache manquant)', [
+                'country' => $countryCode,
             ]);
 
             try {
@@ -94,10 +97,11 @@ class FlutterwaveService
                     ->get($url);
 
                 if ($response->failed()) {
-                    Log::error("FlutterwaveService@getBanks: Échec API", [
+                    Log::error('FlutterwaveService@getBanks: Échec API', [
                         'status' => $response->status(),
-                        'body' => $response->json()
+                        'body' => $response->json(),
                     ]);
+
                     return null;
                 }
 
@@ -110,7 +114,8 @@ class FlutterwaveService
                 return $data;
 
             } catch (Exception $e) {
-                Log::critical("FlutterwaveService@getBanks: Exception", ['msg' => $e->getMessage()]);
+                Log::critical('FlutterwaveService@getBanks: Exception', ['msg' => $e->getMessage()]);
+
                 return null;
             }
         }) ?? ['status' => 'error', 'message' => 'Impossible de récupérer la liste des banques'];

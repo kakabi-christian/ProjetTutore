@@ -5,7 +5,7 @@
 | Flutterwave Configuration
 |--------------------------------------------------------------------------
 |
-| Ce fichier permet de centraliser les clés API de Flutterwave pour 
+| Ce fichier permet de centraliser les clés API de Flutterwave pour
 | l'application ExchaPay. Les valeurs sont récupérées depuis le fichier .env.
 |
 */

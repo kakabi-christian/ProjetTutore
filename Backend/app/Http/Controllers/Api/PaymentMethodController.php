@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PaymentMethodRequest;
 use App\Models\MethodPayment;
 use App\Models\Utilisateur;
 use App\Services\FlutterwaveService;
-use App\Http\Requests\PaymentMethodRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -28,8 +28,8 @@ class PaymentMethodController extends Controller
         /** @var Utilisateur $user */
         $user = Auth::user();
 
-        Log::info("PaymentMethodController@index: Récupération des méthodes", [
-            'user_id' => $user->user_id
+        Log::info('PaymentMethodController@index: Récupération des méthodes', [
+            'user_id' => $user->user_id,
         ]);
 
         $perPage = $request->query('per_page', 10);
@@ -43,9 +43,9 @@ class PaymentMethodController extends Controller
             'data' => $methods->items(),
             'meta' => [
                 'current_page' => $methods->currentPage(),
-                'last_page'    => $methods->lastPage(),
-                'total'        => $methods->total(),
-            ]
+                'last_page' => $methods->lastPage(),
+                'total' => $methods->total(),
+            ],
         ]);
     }
 
@@ -65,8 +65,8 @@ class PaymentMethodController extends Controller
             $countryCode = 'CM';
         }
 
-        Log::info("PaymentMethodController@availableMethods: Demande de données réelles", [
-            'country' => $countryCode
+        Log::info('PaymentMethodController@availableMethods: Demande de données réelles', [
+            'country' => $countryCode,
         ]);
 
         // Appels réels au service
@@ -77,16 +77,16 @@ class PaymentMethodController extends Controller
         $mobileNetworksData = $networks['data'] ?? [];
         $banksData = $banks['data'] ?? [];
 
-        Log::debug("PaymentMethodController: Données Flutterwave reçues", [
+        Log::debug('PaymentMethodController: Données Flutterwave reçues', [
             'networks_found' => count($mobileNetworksData),
-            'banks_found' => count($banksData)
+            'banks_found' => count($banksData),
         ]);
 
         return response()->json([
             'status' => 'success',
             'country_detected' => $countryCode,
             'mobile_networks' => $mobileNetworksData,
-            'banks' => $banksData
+            'banks' => $banksData,
         ]);
     }
 
@@ -103,23 +103,24 @@ class PaymentMethodController extends Controller
             $validated['user_id'] = $user->user_id;
 
             // Définit par défaut si c'est la toute première méthode de l'utilisateur
-            $validated['is_default'] = !$user->methodPayments()->exists();
+            $validated['is_default'] = ! $user->methodPayments()->exists();
 
             $method = MethodPayment::create($validated);
 
-            Log::info("PaymentMethodController@store: Nouveau mode enregistré", [
+            Log::info('PaymentMethodController@store: Nouveau mode enregistré', [
                 'id' => $method->id,
-                'user' => $user->user_id
+                'user' => $user->user_id,
             ]);
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Mode de paiement ajouté avec succès',
-                'data' => $method
+                'data' => $method,
             ], 201);
 
         } catch (\Exception $e) {
-            Log::error("PaymentMethodController@store: Erreur insertion", ['msg' => $e->getMessage()]);
+            Log::error('PaymentMethodController@store: Erreur insertion', ['msg' => $e->getMessage()]);
+
             return response()->json(['message' => 'Erreur lors de l\'enregistrement local'], 500);
         }
     }
@@ -140,7 +141,7 @@ class PaymentMethodController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Méthode supprimée'
+            'message' => 'Méthode supprimée',
         ]);
     }
 }

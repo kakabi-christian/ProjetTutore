@@ -144,7 +144,6 @@ return [
             'path' => storage_path('logs/ExchaPay.log'),
             'level' => 'debug',
         ],
-        
 
     ],
 

@@ -43,7 +43,7 @@ class UtilisateurSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'telephone' => '+237699554488',
                 'country' => 'Cameroun',
-                'country_code'=>'CM',
+                'country_code' => 'CM',
                 'isactive' => true,
                 'isverified' => true,
             ]

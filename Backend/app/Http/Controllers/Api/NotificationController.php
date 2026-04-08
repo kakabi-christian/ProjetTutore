@@ -15,6 +15,7 @@ class NotificationController extends Controller
      *      summary="Récupérer les notifications (Personnelles + Broadcast)",
      *      tags={"Notifications"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Response(response=200, description="Liste des notifications")
      * )
      *
@@ -40,6 +41,7 @@ class NotificationController extends Controller
      *      summary="Récupérer uniquement le nombre de notifications NON LUES",
      *      tags={"Notifications"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Response(response=200, description="Nombre de notifications non lues")
      * )
      *
@@ -64,7 +66,9 @@ class NotificationController extends Controller
      *      summary="Marquer une notification spécifique comme lue",
      *      tags={"Notifications"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *      @OA\Response(response=200, description="Notification marquée comme lue")
      * )
      *
@@ -92,6 +96,7 @@ class NotificationController extends Controller
      *      summary="Marquer TOUTES les notifications comme lues",
      *      tags={"Notifications"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Response(response=200, description="Toutes les notifications ont été marquées comme lues")
      * )
      *
@@ -116,16 +121,20 @@ class NotificationController extends Controller
      *      summary="Créer une notification (Admin)",
      *      tags={"Notifications (Admin)"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
      *              required={"title", "message"},
+     *
      *              @OA\Property(property="title", type="string", example="Titre de la notif"),
      *              @OA\Property(property="message", type="string", example="Message"),
      *              @OA\Property(property="type", type="string", example="info"),
      *              @OA\Property(property="user_id", type="string", format="uuid", nullable=true)
      *          )
      *      ),
+     *
      *      @OA\Response(response=201, description="Notification envoyée avec succès")
      * )
      *
@@ -157,7 +166,9 @@ class NotificationController extends Controller
      *      summary="Supprimer une notification spécifique (Admin)",
      *      tags={"Notifications (Admin)"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *      @OA\Response(response=200, description="Notification supprimée définitivement")
      * )
      *

@@ -5,18 +5,17 @@ use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\KycController;
 use App\Http\Controllers\Api\ListingController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\RolePermissionController;
-use App\Http\Controllers\Api\TypeDocumentController;
-use App\Http\Controllers\Api\UtilisateurController;
 use App\Http\Controllers\Api\StatisticsController;
-use App\Http\Controllers\Api\PaymentMethodController; // ✅ Ajout du contrôleur
+use App\Http\Controllers\Api\TypeDocumentController;
+use App\Http\Controllers\Api\UtilisateurController; // ✅ Ajout du contrôleur
 use App\Services\ExchangeRateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -105,7 +104,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- ESPACE ADMINISTRATION ---
     Route::middleware('is_admin')->prefix('admin')->group(function () {
-        
+
         // 📊 Statistiques Globales
         Route::get('/statistics', [StatisticsController::class, 'index']);
 
