@@ -174,8 +174,7 @@ jobs:
 
       - name: "📥 Installation Dépendances (Composer)"
         working-directory: ./Backend
-        run: |
-          composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: "✨ Vérification du Style (Pint)"
         working-directory: ./Backend
@@ -217,7 +216,6 @@ jobs:
         run: |
           npm install
           npm run build
-          ls -lh dist/
 
       - name: "📤 Sauvegarde du Build"
         uses: actions/upload-artifact@v4
@@ -230,7 +228,6 @@ jobs:
     name: "🚀 Déploiement o2switch"
     needs: frontend-build
     runs-on: ubuntu-latest
-    # Mise à jour de la condition pour inclure les Pull Requests
     if: |
       (github.event_name == 'push' || github.event_name == 'pull_request') &&
       (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.base_ref == 'main' || github.base_ref == 'develop')
@@ -252,6 +249,7 @@ jobs:
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_KEY }}
+          remote_port: 5022
           path: ./Backend/
           remote_path: /home/${{ secrets.SSH_USER }}/public_html/talla/projetExchapay/Backend_Code/
 
@@ -262,6 +260,7 @@ jobs:
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_KEY }}
+          remote_port: 5022
           path: ./dist-frontend/
           remote_path: /home/${{ secrets.SSH_USER }}/public_html/talla/projetExchapay/Frontend_Public/
 
