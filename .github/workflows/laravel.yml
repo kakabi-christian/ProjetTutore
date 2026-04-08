@@ -135,7 +135,6 @@
 #       - name: "✅ Finalisation du déploiement"
 #         run: echo "Le code a été déployé avec succès sur talla.cdwfs.net"
 
-
 name: CI-CD ExchaPay (o2switch Pro)
 
 on:
@@ -178,7 +177,6 @@ jobs:
         run: |
           echo "Démarrage de composer install..."
           composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-          echo "Dépendances installées avec succès."
 
       - name: "✨ Vérification du Style (Pint)"
         working-directory: ./Backend
@@ -198,7 +196,7 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           echo "Lancement des tests unitaires et feature..."
-          php artisan test --verbose
+          php artisan test
 
   # --- PARTIE 2 : BUILD FRONTEND (REACT) ---
   frontend-build:
@@ -219,11 +217,8 @@ jobs:
       - name: "📥 Installation & Build"
         working-directory: ./Frontend
         run: |
-          echo "Installation des packages npm..."
           npm install
-          echo "Lancement du build Vite (Production)..."
           npm run build
-          echo "Vérification du dossier dist :"
           ls -lh dist/
 
       - name: "📤 Sauvegarde du Build"
@@ -237,7 +232,6 @@ jobs:
     name: "🚀 Déploiement o2switch"
     needs: frontend-build
     runs-on: ubuntu-latest
-    # Déploiement uniquement sur push main ou develop
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     
     steps:
