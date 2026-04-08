@@ -14,10 +14,20 @@ return new class extends Migration
         Schema::create('method_payments', function (Blueprint $table) {
             $table->id('method_payment_id');
 
-            $table->string('type');
-            $table->string('provider');
-            $table->string('account_number');
-            $table->string('bank_code')->nullable();
+            // Liaison à l'utilisateur
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('user_id')->on('utilisateurs')->onDelete('cascade');
+
+            $table->string('type'); // Ex: 'Mobile Money', 'Bank Transfer'
+            $table->string('provider'); // Ex: 'MTN', 'Orange', 'UBA'
+            $table->string('currency', 3); // Ex: 'XAF', 'NGN', 'USD'
+
+            // Données sensibles chiffrées (donc type text)
+            $table->text('account_number'); 
+            $table->text('account_name'); 
+
+            $table->string('bank_code')->nullable(); // Code banque ou SWIFT (souvent public, donc pas besoin de chiffrer)
+            
             $table->boolean('is_default')->default(false);
             $table->boolean('is_verified')->default(false);
 
@@ -32,4 +42,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('method_payments');
     }
-};
+}; 

@@ -1,6 +1,7 @@
 import type { ListingHistory } from './ListingHistory';
 import type { Review } from './Review';
 import type { User } from './Utilisateur';
+import type { MethodPayment } from './MehodPayment'; // ✅ À importer
 
 /**
  * Interface représentant une annonce d'échange sur ExchaPay
@@ -9,16 +10,18 @@ export interface Listing {
     listing_id: number;
     user_id: number;
     
-    // Devises (ISO 3 caractères)
+    // ✅ ID du compte de réception choisi par le vendeur
+    method_payment_id: number; 
+
+    // Devises (ISO 3 caractères : XAF, EUR, USD...)
     currency_from: string;
     currency_to: string;
     
-    // Montants (Transmis sous forme de string par Laravel decimal, à convertir en number si besoin)
+    // Montants (Laravel renvoie souvent les decimal en string pour la précision)
     amount_available: string | number;
     min_amount: string | number | null;
     
     // Gestion des taux
-    // official_rate correspond au taux du marché lors de la création
     official_rate: string | number; 
     user_rate: string | number;
     
@@ -26,8 +29,8 @@ export interface Listing {
     visual_theme: string;
     description: string | null;
     
-    // Attributs calculés (Accessors Laravel)
-    discount_percentage?: number;
+    // Attributs calculés (Accessors Laravel via $appends)
+    discount_percentage?: number; 
     
     // Timestamps
     created_at: string;
@@ -35,12 +38,13 @@ export interface Listing {
 
     // Relations (Chargées via Eloquent 'with')
     utilisateur?: User;
+    payment_method?: MethodPayment; // ✅ Relation pour afficher le logo/nom du compte
     histories?: ListingHistory[];
     reviews?: Review[];
 }
 
 /**
- * Type pour la réponse paginée de l'API
+ * Type pour la réponse paginée de l'API Laravel
  */
 export interface ListingPaginationResponse {
     current_page: number;

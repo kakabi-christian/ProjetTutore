@@ -17,6 +17,7 @@ import RolePage from './contents/admin/RolePage';
 import UserPage from './contents/admin/UserPage';
 import MarketContentPage from './contents/user/MarketContent';
 import StatsAdmin from './contents/admin/StatsAdmin';
+import MethodPaymentUser from './contents/user/MethodPaymentUser';
 import StatsGraphe from './contents/admin/StatsGraphe';
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
             <Route path="feedback" element={<FeedbackPage />} />
             <Route path="profile-user" element={<ProfilePage />} />
             <Route path="market" element={<MarketContentPage />} />
+            <Route path="method-payment" element={<MethodPaymentUser />} />
 
 
           </Route>

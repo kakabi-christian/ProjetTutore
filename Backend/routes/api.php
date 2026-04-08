@@ -11,10 +11,12 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\RolePermissionController;
 use App\Http\Controllers\Api\TypeDocumentController;
 use App\Http\Controllers\Api\UtilisateurController;
-use App\Http\Controllers\Api\StatisticsController; // 📊 Ajout du contrôleur de stats
+use App\Http\Controllers\Api\StatisticsController;
+use App\Http\Controllers\Api\PaymentMethodController; // ✅ Ajout du contrôleur
 use App\Services\ExchangeRateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -52,11 +54,9 @@ Route::get('/market-rate', function (Request $request, ExchangeRateService $serv
     ]);
 });
 
-// Consultation des documents
+// Consultation des documents / Annonces
 Route::get('/type-documents', [TypeDocumentController::class, 'index']);
 Route::get('/type-documents/{id}', [TypeDocumentController::class, 'show']);
-
-// Annonces
 Route::get('/listings', [ListingController::class, 'index']);
 Route::get('/listings/{id}', [ListingController::class, 'show']);
 Route::get('/listings/{listing_id}/reviews', [ReviewController::class, 'index']);
@@ -71,8 +71,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile/update', [UtilisateurController::class, 'updateProfile']);
     Route::post('/profile/password', [UtilisateurController::class, 'updatePassword']);
 
-    // 📊 Statistiques de l'utilisateur connecté (Dashboard Personnel)
+    // 📊 Statistiques de l'utilisateur
     Route::get('/my-statistics', [StatisticsController::class, 'userStats']);
+
+    // ✅ GESTION DES MÉTHODES DE PAIEMENT (Flutterwave integration)
+    // Route pour lister les banques/réseaux mobiles dispos par pays
+    Route::get('/payment-methods/available', [PaymentMethodController::class, 'availableMethods']);
+    // CRUD : index (paginé), store, destroy
+    Route::apiResource('payment-methods', PaymentMethodController::class)->only(['index', 'store', 'destroy']);
 
     // KYC
     Route::post('/kyc/submit', [KycController::class, 'store']);
@@ -100,11 +106,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // --- ESPACE ADMINISTRATION ---
     Route::middleware('is_admin')->prefix('admin')->group(function () {
         
-        // 📊 Statistiques Globales (Dashboard Admin)
+        // 📊 Statistiques Globales
         Route::get('/statistics', [StatisticsController::class, 'index']);
 
         Route::get('/collaborators', [UtilisateurController::class, 'getAdminsList']);
-        // ... (autres routes admin inchangées)
         Route::post('/collaborators', [UtilisateurController::class, 'storeAdmin']);
         Route::put('/collaborators/{id}', [UtilisateurController::class, 'updateAdmin']);
         Route::delete('/collaborators/{id}', [UtilisateurController::class, 'destroyAdmin']);

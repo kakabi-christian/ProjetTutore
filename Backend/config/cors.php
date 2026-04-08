@@ -22,6 +22,12 @@ return [
     'allowed_origins' => [
         'http://localhost:5173',
         'http://127.0.0.1:5173',
+        'https://5982-102-244-223-207.ngrok-free.app', // Ton tunnel ngrok  
+    ],
+
+    'allowed_origins_patterns' => [
+        '#^https://.*\.ngrok-free\.app$#',
+    ],
     ],
 
     'allowed_origins_patterns' => [],

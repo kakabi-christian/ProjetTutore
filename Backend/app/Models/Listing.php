@@ -17,6 +17,7 @@ class Listing extends Model
 
     protected $fillable = [
         'user_id',
+        'method_payment_id', // ✅ Ajouté pour lier le compte de réception
         'currency_from',
         'currency_to',
         'amount_available',
@@ -35,7 +36,7 @@ class Listing extends Model
     protected $casts = [
         'amount_available' => 'decimal:2',
         'min_amount' => 'decimal:2',
-        'official_rate' => 'float', // Changé en float pour faciliter les calculs
+        'official_rate' => 'float',
         'user_rate' => 'float',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -43,34 +44,45 @@ class Listing extends Model
 
     /**
      * 📈 Accesseur pour calculer la réduction.
-     * Sécurisé contre la division par zéro et les taux officiels manquants.
+     * Utile pour afficher "-5%" sur le badge de l'annonce au frontend.
      */
     public function getDiscountPercentageAttribute()
     {
-        // On récupère les valeurs brutes du modèle
         $official = (float) $this->official_rate;
         $user = (float) $this->user_rate;
 
-        // Sécurité : si pas de taux officiel, on ne peut pas calculer de réduction
         if ($official <= 0) {
             return 0;
         }
 
-        // Calcul : (Taux Officiel - Taux Utilisateur) / Taux Officiel * 100
+        // Formule : ((Officiel - Utilisateur) / Officiel) * 100
         $diff = $official - $user;
         $percentage = ($diff / $official) * 100;
 
-        // On arrondit à 2 décimales pour un affichage propre (ex: 5.25)
         return round($percentage, 2);
     }
 
     // --- RELATIONS ---
 
+    /**
+     * L'utilisateur qui a publié l'annonce.
+     */
     public function utilisateur(): BelongsTo
     {
         return $this->belongsTo(Utilisateur::class, 'user_id', 'user_id');
     }
 
+    /**
+     * ✅ Le compte bancaire ou mobile money choisi pour recevoir les fonds de cette annonce.
+     */
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(MethodPayment::class, 'method_payment_id', 'method_payment_id');
+    }
+
+    /**
+     * Historique des changements de statut (publiée, en attente, terminée).
+     */
     public function histories(): HasMany
     {
         return $this->hasMany(ListingHistory::class, 'listing_id', 'listing_id');

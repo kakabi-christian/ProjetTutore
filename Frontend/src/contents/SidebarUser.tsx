@@ -8,8 +8,8 @@ import {
   MdRateReview,
   MdAccountCircle,
   MdMenu,
-  MdListAlt,
-  MdPublic // Icône pour le Réseau/Market
+  MdPublic,
+  MdPayments // ✅ Nouvelle icône pour les méthodes de paiement
 } from "react-icons/md";
 import { authService } from "../services/authService";
 import notificationService from "../services/NotificationService";
@@ -96,7 +96,7 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
 
         <ul className="nav nav-pills flex-column mb-auto px-1">
           
-          {/* 🌐 RÉSEAU D'ÉCHANGES (Redirige vers Market) */}
+          {/* 🌐 RÉSEAU D'ÉCHANGES */}
           <li style={navItemStyle}>
             <NavLink to="/user/market" className={navLinkClasses}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
@@ -110,19 +110,19 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
             </NavLink>
           </li>
 
-          {/* Mes Annonces */}
-          {/* <li style={navItemStyle}>
-            <NavLink to="/user/listings" className={navLinkClasses}>
+          {/* 💳 MES COMPTES / MÉTHODES DE PAIEMENT */}
+          <li style={navItemStyle}>
+            <NavLink to="/user/method-payment" className={navLinkClasses}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
-                <MdListAlt size={26} />
+                <MdPayments size={26} />
               </div>
               {!isCollapsed ? (
-                <span className="text-nowrap" style={{ fontSize: '1rem' }}>Mes Annonces</span>
+                <span className="text-nowrap" style={{ fontSize: '1rem' }}>Mes Comptes</span>
               ) : (
-                <span className="sidebar-tooltip">Mes Annonces</span>
+                <span className="sidebar-tooltip">Mes Comptes</span>
               )}
             </NavLink>
-          </li> */}
+          </li>
 
           {/* KYC */}
           <li style={navItemStyle}>
@@ -219,41 +219,27 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
           </button>
         </div>
       </div>
-        {/* MODAL DE DÉCONNEXION */}
-            {showLogoutModal && (
-              <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(10, 37, 64, 0.6)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
-                <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>
-                  <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '20px' }}>
-                    <div className="modal-body p-4 text-center">
-                      <div className="mb-3">
-                          <MdLogout size={50} className="text-excha-orange" />
-                      </div>
-                      <h5 className="fw-bold mb-3" style={{ color: 'var(--blue)' }}>Déconnexion</h5>
-                      <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session ?</p>
-                      <div className="d-flex gap-2 mt-4">
-                        <button 
-                          type="button" 
-                          className="btn fw-bold w-50 py-2" 
-                          style={{ color: 'var(--gray)', borderRadius: '10px' }} 
-                          onClick={() => setShowLogoutModal(false)}
-                        >
-                          Annuler
-                        </button>
-                        <button 
-                          type="button" 
-                          className="btn btn-excha-orange fw-bold w-50 py-2 shadow-sm" 
-                          style={{ borderRadius: '10px' }}
-                          onClick={confirmLogout}
-                        >
-                          Oui, quitter
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+
+      {/* MODAL DE DÉCONNEXION (Inchangée) */}
+      {showLogoutModal && (
+        <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(10, 37, 64, 0.6)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
+          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '20px' }}>
+              <div className="modal-body p-4 text-center">
+                <div className="mb-3">
+                  <MdLogout size={50} className="text-excha-orange" />
+                </div>
+                <h5 className="fw-bold mb-3" style={{ color: 'var(--blue)' }}>Déconnexion</h5>
+                <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session ?</p>
+                <div className="d-flex gap-2 mt-4">
+                  <button type="button" className="btn fw-bold w-50 py-2" style={{ color: 'var(--gray)', borderRadius: '10px' }} onClick={() => setShowLogoutModal(false)}>Annuler</button>
+                  <button type="button" className="btn btn-excha-orange fw-bold w-50 py-2 shadow-sm" style={{ borderRadius: '10px' }} onClick={confirmLogout}>Oui, quitter</button>
                 </div>
               </div>
-            )}
-
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

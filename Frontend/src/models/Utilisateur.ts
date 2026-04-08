@@ -8,7 +8,8 @@ export interface UserRegistration {
   firstname: string;            // Prénom 👤
   email: string;                // Email 📧
   telephone: string;            // Téléphone (format international) 📱
-  country: string;              // Pays 🌍
+  country: string;              // Nom complet du pays (ex: Cameroun) 🌍
+  country_code: string;         // Code ISO 2 lettres (ex: CM) 🆔
   password: string;             // Mot de passe 🔑
   password_confirmation: string; // Confirmation pour la validation Laravel ✅
 }
@@ -24,6 +25,7 @@ export interface User {
   type: 'user' | 'admin';
   telephone: string;
   country: string;
+  country_code: string;         // Ajouté pour la cohérence globale
   isactive: boolean;
   isverified: boolean;
   lastlogin?: string;
@@ -40,12 +42,13 @@ export interface CreateCollaboratorPayload {
   email: string;
   telephone: string;
   country: string;
+  country_code: string;         // Obligatoire pour la création
   role_id: number;
   isactive: boolean;
 }
 
 export interface UpdateCollaboratorPayload extends Partial<CreateCollaboratorPayload> {
-  // On peut rendre tous les champs optionnels pour les mises à jour partielles (PATCH)
+  // Les champs deviennent optionnels pour les mises à jour (PATCH)
 }
 
 /**

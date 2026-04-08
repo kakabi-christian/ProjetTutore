@@ -6,9 +6,10 @@ import { authService } from "../services/authService";
 import type { UserRegistration } from "../models/Utilisateur";
 import "../styles/RegisterContent.css";
 
-// Interface pour les options du sélecteur de pays
+// Interface mise à jour pour inclure le nom complet et le code ISO
 interface CountryOption {
-  value: string;
+  value: string;      // On stocke ici le code ISO (ex: CM)
+  fullCountryName: string; // Le nom complet (ex: Cameroun)
   label: React.JSX.Element;
   dialCode: string;
 }
@@ -23,15 +24,16 @@ export default function RegisterContent() {
     email: "",
     telephone: "",
     country: "",
+    country_code: "", // Champ critique pour ton backend
     password: "",
     password_confirmation: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [errors, setErrors] = useState<Record<string, any>>({});
 
-  // Récupération des pays avec images et indicatifs
+  // Récupération des pays
   useEffect(() => {
     const fetchCountries = async () => {
       try {
@@ -39,19 +41,20 @@ export default function RegisterContent() {
         const data = await response.json();
         
         const formatted = data.map((c: any) => ({
-          value: c.translations?.fra?.common || c.name.common,
+          value: c.cca2, // ✅ On utilise le code ISO 2 lettres (ex: CM) comme valeur principale
+          fullCountryName: c.translations?.fra?.common || c.name.common,
           dialCode: (c.idd.root || "") + (c.idd.suffixes ? c.idd.suffixes[0] : ""),
           label: (
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <img 
                 src={c.flags.png} 
-                alt={`Drapeau ${c.name.common}`} 
+                alt={`Drapeau ${c.cca2}`} 
                 style={{ width: "22px", height: "15px", borderRadius: "2px", objectFit: "cover" }} 
               />
               <span>{c.translations?.fra?.common || c.name.common}</span>
             </div>
           ),
-        })).sort((a: any, b: any) => a.value.localeCompare(b.value));
+        })).sort((a: any, b: any) => a.fullCountryName.localeCompare(b.fullCountryName));
 
         setCountries(formatted);
       } catch (err) {
@@ -61,15 +64,16 @@ export default function RegisterContent() {
     fetchCountries();
   }, []);
 
-  // Gestion du changement de pays (met à jour l'indicatif tel)
+  // Gestion du changement de pays
   const handleCountryChange = (selectedOption: SingleValue<CountryOption>) => {
     if (selectedOption) {
       setFormData((prev) => ({ 
         ...prev, 
-        country: selectedOption.value,
+        country: selectedOption.fullCountryName, // Ex: "Cameroun"
+        country_code: selectedOption.value,      // Ex: "CM" -> Ira dans country_code en BD
         telephone: selectedOption.dialCode 
       }));
-      setErrors((prev) => ({ ...prev, country: false }));
+      setErrors((prev) => ({ ...prev, country: false, country_code: false }));
     }
   };
 
@@ -95,6 +99,7 @@ export default function RegisterContent() {
     }
 
     try {
+      // ✅ Envoie maintenant country_code: "CM" et country: "Cameroun"
       await authService.register(formData);
       navigate("/verify-otp", { state: { email: formData.email } });
     } catch (error: any) {
@@ -108,12 +113,11 @@ export default function RegisterContent() {
     }
   };
 
-  // Styles personnalisés pour react-select pour correspondre à ton design
   const customSelectStyles = {
     control: (base: any, state: any) => ({
       ...base,
       background: "#fff",
-      borderColor: errors.country ? "#ff4d4f" : state.isFocused ? "#ff9800" : "#ddd",
+      borderColor: errors.country || errors.country_code ? "#ff4d4f" : state.isFocused ? "#ff9800" : "#ddd",
       borderRadius: "8px",
       padding: "2px",
       boxShadow: state.isFocused ? "0 0 0 1px #ff9800" : "none",
@@ -190,6 +194,7 @@ export default function RegisterContent() {
                 styles={customSelectStyles}
                 required
               />
+              {/* Le champ country_code est envoyé de manière invisible via formData */}
             </div>
             <div className="input-field">
               <label>Téléphone</label>

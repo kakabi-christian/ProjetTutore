@@ -28,15 +28,22 @@ services:
       - DB_DATABASE=ExchaPay_db
       - DB_USERNAME=root
       - DB_PASSWORD=root
+    # ✅ AJOUT : Injecter le certificat et configurer PHP dans le container
+    volumes:
+      - ./Backend/cacert.pem:/usr/local/etc/php/cacert.pem:ro
+    command: >
+      sh -c "echo 'curl.cainfo=\"/usr/local/etc/php/cacert.pem\"' >> /usr/local/etc/php/conf.d/docker-php-ext-curl.ini && 
+             echo 'openssl.cafile=\"/usr/local/etc/php/cacert.pem\"' >> /usr/local/etc/php/conf.d/docker-php-ext-openssl.ini && 
+             php artisan serve --host=0.0.0.0 --port=8000"
 
   # 3. Frontend React (Vite)
   frontend:
     build: 
       context: ./Frontend
-      dockerfile: Dockerfile # Il faudra créer ce fichier !
+      dockerfile: Dockerfile
     container_name: ExchaPay-ui
     ports:
-      - "4200:5173" # Vite utilise par défaut le port 5173
+      - "4200:5173" 
     depends_on:
       - backend
 

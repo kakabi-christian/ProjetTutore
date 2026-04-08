@@ -17,6 +17,9 @@ return new class extends Migration
             // Relation avec l'utilisateur
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('user_id')->on('utilisateurs')->onDelete('cascade');
+            // ✅ LE COMPTE DE RÉCEPTION (Important : C'est ici que Flutterwave enverra l'argent final)
+            $table->unsignedBigInteger('method_payment_id');
+            $table->foreign('method_payment_id')->references('method_payment_id')->on('method_payments');
 
             // Détails de la transaction
             $table->string('currency_from', 3); // Code ISO (ex: USD, XAF)
