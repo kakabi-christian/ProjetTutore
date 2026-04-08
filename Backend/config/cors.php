@@ -25,7 +25,9 @@ return [
         'https://5982-102-244-223-207.ngrok-free.app', // Ton tunnel ngrok  
     ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^https://.*\.ngrok-free\.app$#',
+    ],
 
     'allowed_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 

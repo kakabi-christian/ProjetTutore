@@ -16,14 +16,15 @@ class UtilisateurSeeder extends Seeder
     {
         // Administrateur
         $admin = Utilisateur::firstOrCreate(
-            ['email' => 'admin@exchapay.com'],
+            ['email' => 'kakabichristian@gmail.com'],
             [
                 'lastname' => 'Kakabi',
                 'firstname' => 'Talla',
                 'type' => 'admin',
-                'password' => Hash::make('password'),
-                'telephone' => '+237699554433',
+                'password' => Hash::make('tkkc2@@6L20'),
+                'telephone' => '+237699454433',
                 'country' => 'Cameroun',
+                'country_code' => 'CM',
                 'isactive' => true,
                 'isverified' => true,
             ]
@@ -42,6 +43,7 @@ class UtilisateurSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'telephone' => '+237699554488',
                 'country' => 'Cameroun',
+                'country_code'=>'CM',
                 'isactive' => true,
                 'isverified' => true,
             ]
@@ -61,6 +63,7 @@ class UtilisateurSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'telephone' => '+237699554411',
                 'country' => 'Cameroun',
+                'country_code' => 'CM',
                 'isactive' => true,
                 'isverified' => true,
             ]
