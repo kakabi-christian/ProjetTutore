@@ -175,7 +175,6 @@ jobs:
       - name: "📥 Installation Dépendances (Composer)"
         working-directory: ./Backend
         run: |
-          echo "Démarrage de composer install..."
           composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: "✨ Vérification du Style (Pint)"
@@ -195,7 +194,6 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
-          echo "Lancement des tests unitaires et feature..."
           php artisan test
 
   # --- PARTIE 2 : BUILD FRONTEND (REACT) ---
@@ -232,7 +230,10 @@ jobs:
     name: "🚀 Déploiement o2switch"
     needs: frontend-build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    # Mise à jour de la condition pour inclure les Pull Requests
+    if: |
+      (github.event_name == 'push' || github.event_name == 'pull_request') &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.base_ref == 'main' || github.base_ref == 'develop')
     
     steps:
       - name: "📦 Récupération du code source"
