@@ -104,7 +104,7 @@ jobs:
           name: frontend-dist
           path: Frontend/dist/
 
-  # --- PARTIE 3 : DOCKER HUB (Uniquement sur Push) ---
+  # --- PARTIE 3 : DOCKER HUB (Optionnel pour o2switch) ---
   docker-hub:
     name: "🐳 Build & Push Docker"
     needs: laravel-tests
@@ -131,13 +131,10 @@ jobs:
   # --- PARTIE 4 : DÉPLOIEMENT O2SWITCH (FTP PORT 21) ---
   deploy-o2switch:
     name: "🚀 Déploiement o2switch (FTP)"
-    # On dépend de frontend-build mais PLUS de docker-hub pour que ça tourne en PR
     needs: [frontend-build] 
     if: |
-      github.ref == 'refs/heads/main' || 
-      github.ref == 'refs/heads/develop' || 
-      github.base_ref == 'main' || 
-      github.base_ref == 'develop'
+      github.event_name == 'push' && 
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
     
     steps:
@@ -156,6 +153,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          # On déploie directement dans les sous-dossiers du compte projetExchaPay
           local-dir: ./Backend/
           server-dir: Backend_Code/
           exclude: |
