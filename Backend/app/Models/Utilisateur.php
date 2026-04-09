@@ -50,7 +50,7 @@ class Utilisateur extends Authenticatable
         'lastlogin',
         'isactive',
         'isverified',
-    ];
+    ];  
 
     protected $hidden = [
         'password',
