@@ -7,6 +7,9 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
+    // 🚀 AJOUT CRUCIAL : Définit les chemins en relatif pour le déploiement
+    base: './', 
+    
     plugins: [react()],
     server: {
       host: '0.0.0.0', // Indispensable pour Docker
@@ -16,14 +19,11 @@ export default defineConfig(({ mode }) => {
       // ✅ Configuration du Proxy dynamique
       proxy: {
         '/api': {
-          // Utilise l'URL du .env ou l'adresse actuelle par défaut
-          target: env.VITE_API_URL || 'https://5982-102-244-223-207.ngrok-free.app',
+          target: env.VITE_API_URL,
           changeOrigin: true,
           secure: false, 
-          // Rewrite le prefixe si nécessaire (optionnel selon ton API Laravel)
-          // rewrite: (path) => path.replace(/^\/api/, ''), 
           headers: {
-            'ngrok-skip-browser-warning': 'true', // Bypass la page d'avertissement Ngrok
+            'ngrok-skip-browser-warning': 'true', 
             'Accept': 'application/json',
           }
         }
@@ -34,14 +34,14 @@ export default defineConfig(({ mode }) => {
         clientPort: 5173,
       },
 
-      // ✅ Autorise tous les hosts pour éviter les erreurs "Invalid Host Header" avec Ngrok
+      // ✅ Autorise tous les hosts
       allowedHosts: [
         'all',
         '.ngrok-free.app',
         '.ngrok.io'
       ],
 
-      // Indispensable pour que Docker détecte les changements de fichiers sur Windows/macOS
+      // Indispensable pour que Docker détecte les changements
       watch: {
         usePolling: true,
       },
