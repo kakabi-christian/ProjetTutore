@@ -63,7 +63,7 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           echo "🏃 Lancement des tests unitaires et feature..."
-          php artisan test --parallel
+          php artisan test
           echo "✅ Tests terminés."
 
       - name: "🛡️ Scan SonarCloud"
@@ -95,7 +95,7 @@ jobs:
           npm install
           echo "🛠️ Lancement du Build de production..."
           npm run build
-          echo "📂 Contenu du dossier dist généré :"
+          echo "📂 Structure du dossier dist :"
           ls -R dist/
 
       - name: "📤 Archivage du Build"
@@ -133,8 +133,7 @@ jobs:
   # --- PARTIE 4 : DÉPLOIEMENT O2SWITCH ---
   deploy-o2switch:
     name: "🚀 Déploiement o2switch"
-    needs: [frontend-build, docker-hub]
-    # On autorise le déploiement sur push ou PR vers les branches cibles
+    needs: frontend-build
     if: |
       (github.event_name == 'push' || github.event_name == 'pull_request') &&
       (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.base_ref == 'main' || github.base_ref == 'develop')
@@ -150,7 +149,7 @@ jobs:
           name: frontend-dist
           path: ./dist-frontend
 
-      - name: "🚀 Déploiement Backend via Rsync"
+      - name: "🚀 Déploiement Backend (Rsync)"
         uses: Burnett01/rsync-deployments@5.2.1
         with:
           switches: -avzr --delete --exclude='.env' --exclude='/storage/*.key' --exclude='/vendor'
@@ -161,7 +160,7 @@ jobs:
           path: ./Backend/
           remote_path: /home/${{ secrets.SSH_USER }}/public_html/talla/projetExchapay/Backend_Code/
 
-      - name: "🚀 Déploiement Frontend via Rsync"
+      - name: "🚀 Déploiement Frontend (Rsync)"
         uses: Burnett01/rsync-deployments@5.2.1
         with:
           switches: -avzr --delete
@@ -172,9 +171,9 @@ jobs:
           path: ./dist-frontend/
           remote_path: /home/${{ secrets.SSH_USER }}/public_html/talla/projetExchapay/Frontend_Public/
 
-      - name: "✨ Logs de fin de déploiement"
+      - name: "✨ Logs de fin"
         run: |
           echo "✅ Déploiement terminé avec succès sur o2switch !"
           echo "🔗 URL : https://talla.cdwfs.net"
-          echo "🕒 Heure du déploiement : $(date)"
+          echo "🕒 Heure : $(date)"
           echo "🆔 Commit : ${{ github.sha }}"
