@@ -20,7 +20,7 @@ class UtilisateurRequest extends FormRequest
      */
     public function rules(): array
     {
-        /** * On récupère l'ID de l'utilisateur. 
+        /** * On récupère l'ID de l'utilisateur.
          * Si c'est une mise à jour, l'ID permettra d'ignorer ses propres données.
          * Si c'est une création (visiteur), $userId sera null.
          */
