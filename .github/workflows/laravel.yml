@@ -172,7 +172,7 @@ jobs:
 
       - name: "✨ Logs de fin"
         run: |
-          echo "✅ Déploiement FTP terminé avec succès !"
+          echo "✅ Déploiement FTP terminé avec succès !!!!"
           echo "🔗 URL : https://talla.cdwfs.net"
           echo "🕒 Heure : $(date)"
           echo "🆔 Commit : ${{ github.sha }}"
