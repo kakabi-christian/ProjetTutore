@@ -1,4 +1,4 @@
-name: CI-CD ExchaPay (Full Pipeline)
+name: CI-CD ExchaPay (Full Pipeline FTP)
 
 on:
   push:
@@ -130,13 +130,13 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/exchapay-backend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/exchapay-backend:${{ github.sha }}
 
-  # --- PARTIE 4 : DÉPLOIEMENT O2SWITCH ---
+  # --- PARTIE 4 : DÉPLOIEMENT O2SWITCH (FTP PORT 21) ---
   deploy-o2switch:
-    name: "🚀 Déploiement o2switch"
-    needs: frontend-build
+    name: "🚀 Déploiement o2switch (FTP)"
+    needs: [frontend-build, docker-hub]
     if: |
-      (github.event_name == 'push' || github.event_name == 'pull_request') &&
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.base_ref == 'main' || github.base_ref == 'develop')
+      github.event_name == 'push' && 
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
     
     steps:
@@ -149,31 +149,32 @@ jobs:
           name: frontend-dist
           path: ./dist-frontend
 
-      - name: "🚀 Déploiement Backend (Rsync)"
-        uses: Burnett01/rsync-deployments@5.2.1
+      - name: "🚀 Déploiement Backend via FTP"
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          switches: -avzr --delete --exclude='.env' --exclude='/storage/*.key' --exclude='/vendor'
-          remote_host: ${{ secrets.SSH_HOST }}
-          remote_user: ${{ secrets.SSH_USER }}
-          remote_key: ${{ secrets.SSH_KEY }}
-          remote_port: 5022
-          path: ./Backend/
-          remote_path: /home/${{ secrets.SSH_USER }}/public_html/talla/projetExchapay/Backend_Code/
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # Port 21 par défaut
+          local-dir: ./Backend/
+          server-dir: Backend_Code/
+          exclude: |
+            **/vendor/**
+            **/.env
+            **/.git*
 
-      - name: "🚀 Déploiement Frontend (Rsync)"
-        uses: Burnett01/rsync-deployments@5.2.1
+      - name: "🚀 Déploiement Frontend via FTP"
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          switches: -avzr --delete
-          remote_host: ${{ secrets.SSH_HOST }}
-          remote_user: ${{ secrets.SSH_USER }}
-          remote_key: ${{ secrets.SSH_KEY }}
-          remote_port: 5022
-          path: ./dist-frontend/
-          remote_path: /home/${{ secrets.SSH_USER }}/public_html/talla/projetExchapay/Frontend_Public/
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist-frontend/
+          server-dir: Frontend_Public/
 
       - name: "✨ Logs de fin"
         run: |
-          echo "✅ Déploiement terminé avec succès sur o2switch !"
+          echo "✅ Déploiement FTP terminé avec succès !"
           echo "🔗 URL : https://talla.cdwfs.net"
           echo "🕒 Heure : $(date)"
           echo "🆔 Commit : ${{ github.sha }}"
