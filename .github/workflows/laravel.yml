@@ -104,7 +104,7 @@ jobs:
           name: frontend-dist
           path: Frontend/dist/
 
-  # --- PARTIE 3 : DOCKER HUB ---
+  # --- PARTIE 3 : DOCKER HUB (Uniquement sur Push) ---
   docker-hub:
     name: "🐳 Build & Push Docker"
     needs: laravel-tests
@@ -113,13 +113,11 @@ jobs:
     steps:
       - name: "📦 Récupération du code"
         uses: actions/checkout@v4
-
       - name: "🔑 Login Docker Hub"
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: "🚀 Build & Push"
         uses: docker/build-push-action@v5
         with:
@@ -133,10 +131,13 @@ jobs:
   # --- PARTIE 4 : DÉPLOIEMENT O2SWITCH (FTP PORT 21) ---
   deploy-o2switch:
     name: "🚀 Déploiement o2switch (FTP)"
-    needs: [frontend-build, docker-hub]
+    # On dépend de frontend-build mais PLUS de docker-hub pour que ça tourne en PR
+    needs: [frontend-build] 
     if: |
-      github.event_name == 'push' && 
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+      github.ref == 'refs/heads/main' || 
+      github.ref == 'refs/heads/develop' || 
+      github.base_ref == 'main' || 
+      github.base_ref == 'develop'
     runs-on: ubuntu-latest
     
     steps:
@@ -155,7 +156,6 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          # Port 21 par défaut
           local-dir: ./Backend/
           server-dir: Backend_Code/
           exclude: |
@@ -178,4 +178,3 @@ jobs:
           echo "🔗 URL : https://talla.cdwfs.net"
           echo "🕒 Heure : $(date)"
           echo "🆔 Commit : ${{ github.sha }}"
-          # 
