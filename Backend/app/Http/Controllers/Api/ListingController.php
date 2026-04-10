@@ -47,7 +47,11 @@ class ListingController extends Controller
                 ->where('amount_available', '>', 0)
                 ->with([
                     'utilisateur:user_id,lastname,firstname,email',
+<<<<<<< HEAD
                     'paymentMethod:method_payment_id,type,provider,currency',
+=======
+                    'paymentMethod:method_payment_id,type,provider,currency'
+>>>>>>> e334381212b7426381928fe47c0b4af2bc6e06c9
                 ]);
 
             if ($request->filled('currency_from')) {
@@ -71,7 +75,6 @@ class ListingController extends Controller
             $listings->getCollection()->each->append('discount_percentage');
 
             return response()->json($listings);
-
         } catch (\Exception $e) {
             Log::error('[ExchaPay] Erreur ListingController@index : '.$e->getMessage());
 
@@ -131,6 +134,7 @@ class ListingController extends Controller
         }
 
         $listing = Listing::create([
+<<<<<<< HEAD
             'user_id' => $utilisateur->user_id,
             'method_payment_id' => $validatedData['method_payment_id'], // ✅ Nouveau
             'currency_from' => $validatedData['currency_from'],
@@ -141,6 +145,18 @@ class ListingController extends Controller
             'official_rate' => $officialRate,
             'visual_theme' => $validatedData['visual_theme'] ?? 'default',
             'description' => $validatedData['description'] ?? null,
+=======
+            'user_id'           => $utilisateur->user_id,
+            // 'method_payment_id' => $validatedData['method_payment_id'], // ✅ Nouveau
+            'currency_from'     => $validatedData['currency_from'],
+            'currency_to'       => $validatedData['currency_to'],
+            'amount_available'  => $validatedData['amount_available'],
+            'min_amount'        => $validatedData['min_amount'] ?? 0,
+            'user_rate'         => $validatedData['user_rate'],
+            'official_rate'     => $officialRate,
+            'visual_theme'      => $validatedData['visual_theme'] ?? 'default',
+            'description'       => $validatedData['description'] ?? null,
+>>>>>>> e334381212b7426381928fe47c0b4af2bc6e06c9
         ]);
 
         // Statut par défaut : Active
@@ -170,7 +186,11 @@ class ListingController extends Controller
             'utilisateur:user_id,lastname,firstname,email',
             'paymentMethod',
             'reviews',
+<<<<<<< HEAD
             'histories.listingStatus',
+=======
+            'histories.listingStatus'
+>>>>>>> e334381212b7426381928fe47c0b4af2bc6e06c9
         ])->findOrFail($id);
 
         $listing->append('discount_percentage');
