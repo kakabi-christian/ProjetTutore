@@ -43,11 +43,11 @@ class ListingController extends Controller
                         ->whereColumn('listing_id', 'listings.listing_id');
                 });
             })
-            ->where('amount_available', '>', 0)
-            ->with([
-                'utilisateur:user_id,lastname,firstname,email',
-                'paymentMethod:method_payment_id,type,provider,currency'
-            ]);
+                ->where('amount_available', '>', 0)
+                ->with([
+                    'utilisateur:user_id,lastname,firstname,email',
+                    'paymentMethod:method_payment_id,type,provider,currency'
+                ]);
 
             if ($request->filled('currency_from')) {
                 $query->where('currency_from', strtoupper(substr($request->currency_from, 0, 3)));
@@ -70,7 +70,6 @@ class ListingController extends Controller
             $listings->getCollection()->each->append('discount_percentage');
 
             return response()->json($listings);
-
         } catch (\Exception $e) {
             Log::error('[ExchaPay] Erreur ListingController@index : ' . $e->getMessage());
             return response()->json(['message' => 'Erreur lors du chargement.'], 500);
@@ -111,11 +110,11 @@ class ListingController extends Controller
         }
 
         $validatedData = $request->validated();
-        
+
         // Récupération du taux officiel
         try {
             $officialRate = $this->exchangeRateService->getLiveRate(
-                $validatedData['currency_from'], 
+                $validatedData['currency_from'],
                 $validatedData['currency_to']
             );
             if (!$officialRate) $officialRate = $validatedData['user_rate'];
@@ -125,7 +124,7 @@ class ListingController extends Controller
 
         $listing = Listing::create([
             'user_id'           => $utilisateur->user_id,
-            'method_payment_id' => $validatedData['method_payment_id'], // ✅ Nouveau
+            // 'method_payment_id' => $validatedData['method_payment_id'], // ✅ Nouveau
             'currency_from'     => $validatedData['currency_from'],
             'currency_to'       => $validatedData['currency_to'],
             'amount_available'  => $validatedData['amount_available'],
@@ -160,12 +159,12 @@ class ListingController extends Controller
     public function show($id)
     {
         $listing = Listing::with([
-            'utilisateur:user_id,lastname,firstname,email', 
-            'paymentMethod', 
-            'reviews', 
+            'utilisateur:user_id,lastname,firstname,email',
+            'paymentMethod',
+            'reviews',
             'histories.listingStatus'
         ])->findOrFail($id);
-        
+
         $listing->append('discount_percentage');
 
         return response()->json($listing);

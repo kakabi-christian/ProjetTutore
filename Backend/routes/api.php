@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\TypeDocumentController;
 use App\Http\Controllers\Api\UtilisateurController;
 use App\Http\Controllers\Api\StatisticsController;
 use App\Http\Controllers\Api\PaymentMethodController; // ✅ Ajout du contrôleur
+use App\Http\Controllers\Api\TransactionController;
+use App\Http\Controllers\Api\WebhookController;
 use App\Services\ExchangeRateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -61,6 +63,16 @@ Route::get('/listings', [ListingController::class, 'index']);
 Route::get('/listings/{id}', [ListingController::class, 'show']);
 Route::get('/listings/{listing_id}/reviews', [ReviewController::class, 'index']);
 
+
+// -------------------------------------------------------
+// WEBHOOK — Route publique (pas d'auth, Flutterwave appelle ici)
+// Ref: https://developer.flutterwave.com/docs/integration-guides/webhooks
+// -------------------------------------------------------
+Route::post('/webhooks/flutterwave', [WebhookController::class, 'handle'])
+    ->name('webhooks.flutterwave');
+
+
+
 // --- ROUTES PROTÉGÉES (auth:sanctum) ---
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -103,9 +115,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/reviews/{id}', [ReviewController::class, 'update']);
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
 
+    // Initier un échange : crée la transaction + retourne le payment_link Flutterwave
+    Route::post('/transactions/initiate', [TransactionController::class, 'initiate'])
+        ->name('transactions.initiate');
+
+
     // --- ESPACE ADMINISTRATION ---
     Route::middleware('is_admin')->prefix('admin')->group(function () {
-        
+
         // 📊 Statistiques Globales
         Route::get('/statistics', [StatisticsController::class, 'index']);
 
