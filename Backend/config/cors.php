@@ -16,6 +16,7 @@ return [
         'http://localhost:5173',
         'http://127.0.0.1:5173',
         'https://5982-102-244-223-207.ngrok-free.app',
+        'https://talla.cdwfs.net',
     ],
 
     'allowed_origins_patterns' => [
