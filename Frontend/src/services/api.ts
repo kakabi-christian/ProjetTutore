@@ -1,12 +1,19 @@
 import axios from 'axios';
 
-// Ici, API_BASE_URL récupère "http://localhost:8000" depuis ton .env
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+/**
+ * 💡 Note : En production, VITE_API_BASE_URL doit être "https://talla.cdwfs.net"
+ * sans le slash final. On utilise une valeur par défaut vide pour éviter les erreurs.
+ */
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const api = axios.create({
-  // On concatène manuellement '/api' pour que toutes les requêtes 
-  // vers Laravel utilisent le bon préfixe de route.
+  // On s'assure que l'URL est bien construite
   baseURL: `${API_BASE_URL}/api`,
+  
+  // 🛡️ CRUCIAL : Permet d'envoyer et recevoir les cookies de session (Sanctum)
+  // Sans ça, le navigateur bloque la connexion même si le mot de passe est bon.
+  withCredentials: true, 
+  
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -16,11 +23,9 @@ const api = axios.create({
 // 🛡️ Intercepteur de requête : ajoute le token avant l'envoi
 api.interceptors.request.use(
   (config) => {
-    // On récupère le token stocké (souvent dans le localStorage)
     const token = localStorage.getItem('auth_token');
     
     if (token) {
-      // On l'ajoute aux headers de la configuration
       config.headers.Authorization = `Bearer ${token}`;
     }
     
