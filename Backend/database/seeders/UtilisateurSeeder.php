@@ -87,8 +87,8 @@ class UtilisateurSeeder extends Seeder
         $user_2 = Utilisateur::firstOrCreate(
             ['email' => 'user2@exchapay.com'],
             [
-                'lastname' => 'Pitou',
-                'firstname' => 'Tagne',
+                'lastname' => 'Donald',
+                'firstname' => 'Kamga',
                 'type' => 'user',
                 'password' => Hash::make('password'),
                 'country_code' => 'NG',

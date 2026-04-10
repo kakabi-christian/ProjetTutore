@@ -13,6 +13,7 @@ export const notificationService = {
      */
     async getUserNotifications(page: number = 1): Promise<NotificationResponse> {
         const response = await api.get<NotificationResponse>(`/notifications?page=${page}`);
+        console.log(response.data)
         return response.data;
     },
 

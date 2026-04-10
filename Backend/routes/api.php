@@ -119,6 +119,24 @@ Route::middleware('auth:sanctum')->group(function () {
         ->name('transactions.initiate');
 
 
+    Route::get('/transactions/status', function (Request $request) {
+        $txRef = $request->query('tx_ref');
+        $tx = \App\Models\Transaction::where('flw_tx_ref', $txRef)
+            ->where('buyer_id', auth()->id()) // sécurité : seulement ses propres transactions
+            ->first();
+
+        if (!$tx) {
+            return response()->json(['message' => 'Transaction introuvable'], 404);
+        }
+
+        return response()->json([
+            'status'         => $tx->status,
+            'transaction_id' => $tx->transaction_id,
+            'flw_tx_ref'     => $tx->flw_tx_ref,
+        ]);
+    });
+
+
     // --- ESPACE ADMINISTRATION ---
     Route::middleware('is_admin')->prefix('admin')->group(function () {
 

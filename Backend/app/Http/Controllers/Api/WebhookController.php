@@ -8,6 +8,7 @@ use App\Models\PaymentHistory;
 use App\Models\PaymentStatus;
 use App\Models\Transaction;
 use App\Services\FlutterwaveService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,25 +16,22 @@ use Illuminate\Support\Facades\Log;
 /**
  * WebhookController — Réception des notifications Flutterwave
  *
- * IMPORTANT : Cette route doit être EXCLUE du middleware `auth:sanctum`.
- * Flutterwave appelle cette URL de façon asynchrone, sans token JWT.
- * La sécurité est assurée par la vérification du `verif-hash`.
+ * IMPORTANT : Route EXCLUE du middleware auth:sanctum.
+ * Sécurité assurée par la vérification du header `verif-hash`.
  *
  * Ref: https://developer.flutterwave.com/docs/integration-guides/webhooks
- *
- * Pour tester en local avec ngrok :
- *   1. ngrok http 8000
- *   2. Coller dans Flutterwave Dashboard → Settings → Webhooks → URL :
- *      https://[ton-id].ngrok-free.app/api/webhooks/flutterwave
- *   3. Définir FLW_WEBHOOK_HASH dans .env avec la même valeur que le "Secret hash"
  */
 class WebhookController extends Controller
 {
     protected FlutterwaveService $flwService;
+    protected NotificationService $notificationService;
 
-    public function __construct(FlutterwaveService $flwService)
-    {
-        $this->flwService = $flwService;
+    public function __construct(
+        FlutterwaveService $flwService,
+        NotificationService $notificationService
+    ) {
+        $this->flwService          = $flwService;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -54,7 +52,6 @@ class WebhookController extends Controller
                 'received_hash' => $webhookHash,
                 'ip'            => $request->ip(),
             ]);
-            // On retourne 200 pour éviter les retries Flutterwave
             return response()->json(['message' => 'Signature invalide'], 200);
         }
 
@@ -66,7 +63,6 @@ class WebhookController extends Controller
         ]);
 
         // --- 2. On ne traite que les paiements complétés ---
-        // Ref: https://developer.flutterwave.com/docs/integration-guides/webhooks#webhook-events
         $event = $payload['event'] ?? '';
 
         if ($event !== 'charge.completed') {
@@ -85,7 +81,7 @@ class WebhookController extends Controller
 
         // --- 3. Retrouver notre transaction via flw_tx_ref ---
         $transaction = Transaction::where('flw_tx_ref', $txRef)
-            ->with(['payments.histories.paymentStatus', 'listing', 'escrow'])
+            ->with(['payments.histories.paymentStatus', 'listing', 'escrow', 'buyer', 'seller'])
             ->first();
 
         if (!$transaction) {
@@ -133,10 +129,9 @@ class WebhookController extends Controller
                 'flw_status'        => $verifiedData['status'],
             ]);
 
-            // Annuler la transaction et logger un PaymentHistory FAILED
             $transaction->update(['status' => Transaction::STATUS_CANCELLED]);
 
-            $failedStatus = PaymentStatus::firstOrCreate(['status' => 'FAILED']);
+            $failedStatus = PaymentStatus::firstOrCreate(['title' => 'FAILED']);
             PaymentHistory::create([
                 'payment_id'        => $payment->payment_id,
                 'payment_status_id' => $failedStatus->payment_status_id,
@@ -157,15 +152,15 @@ class WebhookController extends Controller
                 'paid_at'        => now(),
             ]);
 
-            // 7b. Ajouter un PaymentHistory SUCCESS
-            $successStatus = PaymentStatus::firstOrCreate(['status' => 'SUCCESS']);
+            // 7b. PaymentHistory → SUCCESS
+            $successStatus = PaymentStatus::firstOrCreate(['title' => 'SUCCESS']);
             PaymentHistory::create([
                 'payment_id'        => $payment->payment_id,
                 'payment_status_id' => $successStatus->payment_status_id,
                 'date'              => now(),
             ]);
 
-            // 7c. Finaliser la Transaction
+            // 7c. Finaliser la Transaction → COMPLETED
             $transaction->update([
                 'status'    => Transaction::STATUS_COMPLETED,
                 'flw_tx_id' => $flwTransactionId,
@@ -185,12 +180,6 @@ class WebhookController extends Controller
 
             DB::commit();
 
-            Log::info("WebhookController: Transaction finalisée", [
-                'transaction_id' => $transaction->transaction_id,
-                'buyer_id'       => $transaction->buyer_id,
-                'seller_id'      => $transaction->seller_id,
-            ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::emergency("WebhookController: Erreur finalisation", [
@@ -200,7 +189,18 @@ class WebhookController extends Controller
             return response()->json(['message' => 'Erreur interne'], 200);
         }
 
-        // Toujours 200 à Flutterwave pour stopper les retries
+        // --- 8. Notifications — APRÈS le commit, hors transaction DB ---
+        // Si une notif échoue, ça ne doit pas rollback le paiement.
+        // Le try/catch est géré DANS chaque méthode du NotificationService.
+        $this->notificationService->notifyBuyer($transaction);
+        $this->notificationService->notifySeller($transaction);
+
+        Log::info("WebhookController: Transaction finalisée et notifications envoyées", [
+            'transaction_id' => $transaction->transaction_id,
+            'buyer_id'       => $transaction->buyer_id,
+            'seller_id'      => $transaction->seller_id,
+        ]);
+
         return response()->json(['message' => 'Paiement traité avec succès'], 200);
     }
 }
