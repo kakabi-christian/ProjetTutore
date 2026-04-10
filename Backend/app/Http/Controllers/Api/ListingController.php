@@ -28,6 +28,7 @@ class ListingController extends Controller
      * path="/listings",
      * summary="Liste des annonces actives globales.",
      * tags={"Listings"},
+     *
      * @OA\Response(response=200, description="Liste des annonces")
      * )
      */
@@ -71,7 +72,8 @@ class ListingController extends Controller
 
             return response()->json($listings);
         } catch (\Exception $e) {
-            Log::error('[ExchaPay] Erreur ListingController@index : ' . $e->getMessage());
+            Log::error('[ExchaPay] Erreur ListingController@index : '.$e->getMessage());
+
             return response()->json(['message' => 'Erreur lors du chargement.'], 500);
         }
     }
@@ -82,10 +84,13 @@ class ListingController extends Controller
      * summary="Publier une nouvelle annonce.",
      * tags={"Listings"},
      * security={{"bearerAuth":{}}},
+     *
      * @OA\RequestBody(
      * required=true,
+     *
      * @OA\JsonContent(
      * required={"method_payment_id", "currency_from", "currency_to", "amount_available", "user_rate"},
+     *
      * @OA\Property(property="method_payment_id", type="integer", example=1),
      * @OA\Property(property="currency_from", type="string", example="XAF"),
      * @OA\Property(property="currency_to", type="string", example="EUR"),
@@ -105,7 +110,7 @@ class ListingController extends Controller
             ->where('status', 'APPROVED')
             ->exists();
 
-        if (!$isKycApproved) {
+        if (! $isKycApproved) {
             return response()->json(['message' => 'Un KYC approuvé est obligatoire pour publier.'], 403);
         }
 
@@ -117,7 +122,9 @@ class ListingController extends Controller
                 $validatedData['currency_from'],
                 $validatedData['currency_to']
             );
-            if (!$officialRate) $officialRate = $validatedData['user_rate'];
+            if (! $officialRate) {
+                $officialRate = $validatedData['user_rate'];
+            }
         } catch (\Exception $e) {
             $officialRate = $validatedData['user_rate'];
         }
@@ -138,9 +145,9 @@ class ListingController extends Controller
         // Statut par défaut : Active
         $activeStatus = ListingStatus::firstOrCreate(['title' => 'active']);
         ListingHistory::create([
-            'listing_id'        => $listing->listing_id,
+            'listing_id' => $listing->listing_id,
             'listing_status_id' => $activeStatus->listing_status_id,
-            'date'              => now(),
+            'date' => now(),
         ]);
 
         return response()->json([
@@ -211,7 +218,7 @@ class ListingController extends Controller
         // Sécurité : On ne supprime pas si des transactions sont en cours (Escrow actif)
         if ($listing->transactions()->whereIn('status', ['pending', 'processing'])->exists()) {
             return response()->json([
-                'message' => 'Impossible de supprimer une annonce liée à des transactions en cours.'
+                'message' => 'Impossible de supprimer une annonce liée à des transactions en cours.',
             ], 422);
         }
 

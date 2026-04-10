@@ -20,33 +20,36 @@ class UtilisateurRequest extends FormRequest
      */
     public function rules(): array
     {
-        // On récupère l'ID de l'utilisateur connecté pour l'exclure de la vérification unique
-        $userId = auth()->id();
+        /** * On récupère l'ID de l'utilisateur.
+         * Si c'est une mise à jour, l'ID permettra d'ignorer ses propres données.
+         * Si c'est une création (visiteur), $userId sera null.
+         */
+        $userId = $this->user() ? $this->user()->user_id : null;
 
         return [
             'lastname' => 'required|string|max:100',
             'firstname' => 'required|string|max:100',
 
-            // ✅ Correction Unicité Email : ignore l'ID de l'utilisateur actuel
             'email' => [
                 'required',
                 'email',
+                'max:255',
+                // On ignore l'ID actuel sur la colonne 'user_id' de la table 'utilisateurs'
                 Rule::unique('utilisateurs', 'email')->ignore($userId, 'user_id'),
             ],
 
-            // ✅ Correction Unicité Téléphone : ignore l'ID de l'utilisateur actuel
             'telephone' => [
                 'required',
                 'string',
                 Rule::unique('utilisateurs', 'telephone')->ignore($userId, 'user_id'),
             ],
 
-            // Le mot de passe est requis seulement à la création (POST)
+            // Requis en création (POST), optionnel en mise à jour (PUT/PATCH)
             'password' => $this->isMethod('post') ? 'required|string|min:8' : 'nullable|string|min:8',
 
-            // Le type et l'état sont souvent gérés par l'admin, on les met en nullable pour le profil simple
             'type' => 'nullable|in:user,admin',
             'country' => 'required|string',
+            'country_code' => 'nullable|string|max:5',
             'isactive' => 'nullable|boolean',
         ];
     }

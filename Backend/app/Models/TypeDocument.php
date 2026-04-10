@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
 /**
  * @OA\Schema(
  *     schema="TypeDocument",
  *     type="object",
+ *
  *     @OA\Property(property="type_document_id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Carte d'identité"),
  *     @OA\Property(property="description", type="string", example="Document d'identité"),

@@ -10,12 +10,11 @@ class StatisticsRequest extends FormRequest
 {
     /**
      * Détermine si l'utilisateur est autorisé à faire cette requête.
-     * Pour ExchaPay, on vérifie si l'utilisateur est connecté.
      */
     public function authorize(): bool
     {
-        // On autorise si l'utilisateur est authentifié
-        return auth()->check();
+        // Retourne true si l'utilisateur est connecté, false sinon
+        return $this->user() !== null;
     }
 
     /**
@@ -24,10 +23,10 @@ class StatisticsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'period'     => 'nullable|string|in:day,week,month,year,all',
+            'period' => 'nullable|string|in:day,week,month,year,all',
             'start_date' => 'nullable|date|before_or_equal:end_date',
-            'end_date'   => 'nullable|date|after_or_equal:start_date',
-            'currency'   => 'nullable|string|max:10', // Pour filtrer par devise (ex: XAF, EUR)
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'currency' => 'nullable|string|max:10',
         ];
     }
 
@@ -37,23 +36,24 @@ class StatisticsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'period.in'             => "La période sélectionnée n'est pas valide (choisissez : day, week, month, year, all).",
-            'start_date.date'       => "La date de début doit être une date valide.",
-            'start_date.before_or_equal' => "La date de début ne peut pas être après la date de fin.",
-            'end_date.date'         => "La date de fin doit être une date valide.",
-            'end_date.after_or_equal'  => "La date de fin ne peut pas être avant la date de début.",
-            'currency.max'          => "Le code de la devise est trop long.",
+            'period.in' => "La période sélectionnée n'est pas valide (day, week, month, year, all).",
+            'start_date.date' => 'La date de début doit être une date valide.',
+            'start_date.before_or_equal' => 'La date de début ne peut pas être après la date de fin.',
+            'end_date.date' => 'La date de fin doit être une date valide.',
+            'end_date.after_or_equal' => 'La date de fin ne peut pas être avant la date de début.',
+            'currency.max' => 'Le code de la devise est trop long.',
         ];
     }
 
     /**
-     * Optionnel : Gérer l'échec de validation pour renvoyer du JSON propre (utile pour ton frontend React)
+     * Gère l'échec de validation pour renvoyer du JSON (Format API)
      */
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
             'success' => false,
-            'errors'  => $validator->errors()
+            'message' => 'Erreur de validation des filtres',
+            'errors' => $validator->errors(),
         ], 422));
     }
 }

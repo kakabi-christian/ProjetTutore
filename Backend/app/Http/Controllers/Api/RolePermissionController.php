@@ -26,10 +26,13 @@ class RolePermissionController extends Controller
      *     description="Remplace toutes les permissions existantes du rôle par les nouvelles fournies (stratégie sync : supprime puis réinsère).",
      *     tags={"Rôles & Permissions"},
      *     security={{"bearerAuth": {}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"role_id", "permissions"},
+     *
      *             @OA\Property(
      *                 property="role_id",
      *                 type="integer",
@@ -40,18 +43,23 @@ class RolePermissionController extends Controller
      *                 property="permissions",
      *                 type="array",
      *                 description="Liste des IDs de permissions à assigner",
+     *
      *                 @OA\Items(type="integer", example=5)
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Permissions assignées avec succès",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Les permissions ont été assignées avec succès.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Données invalides"
@@ -59,11 +67,14 @@ class RolePermissionController extends Controller
      *     @OA\Response(
      *         response=500,
      *         description="Erreur serveur lors de la transaction",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Erreur lors de l'assignation : ...")
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Non authentifié")
      * )
      */
@@ -79,10 +90,10 @@ class RolePermissionController extends Controller
             $newPermissions = [];
             foreach ($request->permissions as $permissionId) {
                 $newPermissions[] = [
-                    'role_id'       => $request->role_id,
+                    'role_id' => $request->role_id,
                     'permission_id' => $permissionId,
-                    'created_at'    => now(),
-                    'updated_at'    => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ];
             }
 

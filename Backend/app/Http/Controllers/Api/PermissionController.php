@@ -15,7 +15,9 @@ class PermissionController extends Controller
      *      summary="Liste des permissions avec pagination (Admin)",
      *      tags={"Permissions (Admin)"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=10)),
+     *
      *      @OA\Response(response=200, description="Liste des permissions récupérée")
      * )
      *

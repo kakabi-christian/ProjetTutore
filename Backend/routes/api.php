@@ -9,16 +9,15 @@ use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\RolePermissionController;
-use App\Http\Controllers\Api\TypeDocumentController;
-use App\Http\Controllers\Api\UtilisateurController;
 use App\Http\Controllers\Api\StatisticsController;
 use App\Http\Controllers\Api\PaymentMethodController; // ✅ Ajout du contrôleur
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\Api\TypeDocumentController;
+use App\Http\Controllers\Api\UtilisateurController; // ✅ Ajout du contrôleur
 use App\Services\ExchangeRateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
 
 /*
 |--------------------------------------------------------------------------

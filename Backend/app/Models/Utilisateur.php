@@ -9,11 +9,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-
 /**
  * @OA\Schema(
  * schema="Utilisateur",
  * type="object",
+ *
  * @OA\Property(property="user_id", type="integer", example=1),
  * @OA\Property(property="lastname", type="string", example="Dupont"),
  * @OA\Property(property="firstname", type="string", example="Jean"),

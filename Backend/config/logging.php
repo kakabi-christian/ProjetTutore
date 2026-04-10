@@ -57,19 +57,19 @@ return [
         'stack' => [
             'driver' => 'stack',
             // On ajoute 'logstash' dans la pile pour loguer dans le fichier ET dans ELK
-            'channels' => ['single', 'logstash'],
+            'channels' => ['single'],
             'ignore_exceptions' => false,
         ],
 
-        'logstash' => [
-            'driver' => 'monolog',
-            'level' => env('LOG_LEVEL', 'debug'),
-            'handler' => SocketHandler::class,
-            'handler_with' => [
-                'connectionString' => 'tcp://127.0.0.1:5044',
-            ],
-            'formatter' => JsonFormatter::class,
-        ],
+        // 'logstash' => [
+        //     'driver' => 'monolog',
+        //     'level' => env('LOG_LEVEL', 'debug'),
+        //     'handler' => SocketHandler::class,
+        //     'handler_with' => [
+        //         'connectionString' => 'tcp://127.0.0.1:5044',
+        //     ],
+        //     'formatter' => JsonFormatter::class,
+        // ],
 
         'single' => [
             'driver' => 'single',
@@ -144,7 +144,6 @@ return [
             'path' => storage_path('logs/ExchaPay.log'),
             'level' => 'debug',
         ],
-        
 
     ],
 

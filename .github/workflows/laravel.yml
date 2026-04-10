@@ -1,4 +1,4 @@
-name: CI-CD ExchaPay
+name: CI-CD ExchaPay (Full Pipeline FTP)
 
 on:
   push:
@@ -7,11 +7,11 @@ on:
     branches: [ "main", "develop" ]
 
 jobs:
-  # --- PARTIE 1 : CI (INTEGRATION CONTINUE) ---
+  # --- PARTIE 1 : QUALITÉ, TESTS & SONARQUBE ---
   laravel-tests:
-    name: "Qualité & Tests"
+    name: "🛡️ Qualité & Tests (Backend)"
     runs-on: ubuntu-latest
-    env: # AJOUTE CECI
+    env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     services:
@@ -25,35 +25,33 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-      - name: Récupération du code
+      - name: "📦 Récupération du code"
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Installation de PHP
+      - name: "⚙️ Installation PHP 8.4"
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4' # Mis à jour pour correspondre à tes dépendances Symfony 8.0
+          php-version: '8.4'
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, bcmath
-          coverage: none
+          coverage: xdebug
 
-      - name: Installation des dépendances (Composer)
-        working-directory: ./Backend 
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-
-      - name: Vérification du Clean Code (Pint)
-        working-directory: ./Backend
-        # On utilise continue-on-error pour ne pas bloquer si c'est juste un espace en trop
-        run: ./vendor/bin/pint --test
-        continue-on-error: true 
-
-      - name: Préparation de l'environnement
+      - name: "📥 Installation Dépendances (Composer)"
         working-directory: ./Backend
         run: |
-          cp .env.example .env
-          php artisan key:generate
-          # Création d'une base SQLite temporaire si besoin ou utilisation du service MySQL
-          touch database/testing.sqlite 
+          echo "🚀 Démarrage de l'installation Composer..."
+          composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+          echo "✅ Dépendances installées."
 
-      - name: Exécution des Tests
+      - name: "✨ Vérification Clean Code (Pint)"
+        working-directory: ./Backend
+        run: |
+          echo "🧐 Analyse du style de code avec Laravel Pint..."
+          ./vendor/bin/pint --test
+        continue-on-error: true
+
+      - name: "🧪 Exécution des Tests"
         working-directory: ./Backend
         env:
           DB_CONNECTION: mysql
@@ -61,33 +59,120 @@ jobs:
           DB_PORT: 3306
           DB_DATABASE: laravel_test
           DB_USERNAME: root
-          LOG_CHANNEL: null  # <--- AJOUTE CECI ICI
-        run: php artisan test
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          echo "🏃 Lancement des tests unitaires et feature..."
+          php artisan test
+          echo "✅ Tests terminés."
 
-  # --- PARTIE 2 : CD (BUILD DOCKER) ---
-  build-and-push-docker:
-    name: "Build & Push Docker Hub"
+      - name: "🛡️ Scan SonarCloud"
+        uses: sonarsource/sonarqube-scan-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # --- PARTIE 2 : BUILD FRONTEND ---
+  frontend-build:
+    name: "🌐 Build Frontend (React)"
     needs: laravel-tests
     runs-on: ubuntu-latest
-    if: |
-      (github.event_name == 'push' || github.event_name == 'pull_request') &&
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.base_ref == 'main' || github.base_ref == 'develop')
     steps:
-      - name: Récupération du code
+      - name: "📦 Récupération du code"
         uses: actions/checkout@v4
 
-      - name: Connexion à Docker Hub
+      - name: "⚙️ Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: ./Frontend/package-lock.json
+
+      - name: "🏗️ Build Vite"
+        working-directory: ./Frontend
+        run: |
+          echo "📦 Installation des modules npm..."
+          npm install
+          echo "🛠️ Lancement du Build de production..."
+          npm run build
+          echo "📂 Structure du dossier dist :"
+          ls -R dist/
+
+      - name: "📤 Archivage du Build"
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: Frontend/dist/
+
+  # --- PARTIE 3 : DOCKER HUB (Optionnel pour o2switch) ---
+  docker-hub:
+    name: "🐳 Build & Push Docker"
+    needs: laravel-tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: "📦 Récupération du code"
+        uses: actions/checkout@v4
+      - name: "🔑 Login Docker Hub"
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Construction et envoi de l'image Backend
+      - name: "🚀 Build & Push"
         uses: docker/build-push-action@v5
         with:
           context: ./Backend
-          file: ./Backend/Dockerfile # Assure-toi que le chemin vers le Dockerfile est correct
+          file: ./Backend/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/exchapay-backend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/exchapay-backend:${{ github.sha }}
+
+  # --- PARTIE 4 : DÉPLOIEMENT O2SWITCH (FTP PORT 21) ---
+  deploy-o2switch:
+    name: "🚀 Déploiement o2switch (FTP)"
+    needs: [frontend-build] 
+    if: |
+      github.event_name == 'push' && 
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "📦 Récupération du code source"
+        uses: actions/checkout@v4
+
+      - name: "📥 Récupération du Build Frontend"
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: ./dist-frontend
+
+      - name: "🚀 Déploiement Backend via FTP"
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # On déploie directement dans les sous-dossiers du compte projetExchaPay
+          local-dir: ./Backend/
+          server-dir: Backend_Code/
+          exclude: |
+            **/vendor/**
+            **/.env
+            **/.git*
+
+      - name: "🚀 Déploiement Frontend via FTP"
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist-frontend/
+          server-dir: Frontend_Public/
+
+      - name: "✨ Logs de fin"
+        run: |
+          echo "✅ Déploiement FTP terminé avec succès !!!!"
+          echo "🔗 URL : https://talla.cdwfs.net"
+          echo "🕒 Heure : $(date)"
+          echo "🆔 Commit : ${{ github.sha }}"

@@ -17,7 +17,7 @@ class UtilisateurSeeder extends Seeder
     {
         // Administrateur
         $admin = Utilisateur::firstOrCreate(
-            ['email' => 'admin@exchapay.com'],
+            ['email' => 'kakabichristian@gmail.com'],
             [
                 'lastname' => 'Kakabi',
                 'firstname' => 'Talla',

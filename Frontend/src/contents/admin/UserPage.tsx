@@ -8,7 +8,7 @@ import RoleService from '../../services/RoleService';
 import type { User } from '../../models/Utilisateur';
 import type { Role } from '../../models/Role';
 import { 
-    MdAdd, MdEdit, MdDelete, MdRefresh, MdWarning, 
+    MdAdd, MdEdit, MdDelete, MdRefresh, 
     MdEmail, MdPhone, MdShield, MdSearch, MdFilterList 
 } from 'react-icons/md';
 

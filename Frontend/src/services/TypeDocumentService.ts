@@ -4,7 +4,6 @@ import api from "./api";
 import type { 
     TypeDocument, 
     CreateTypeDocument, 
-    UpdateTypeDocument 
 } from "../models/TypeDocument";
 
 /**

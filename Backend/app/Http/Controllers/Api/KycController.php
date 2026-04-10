@@ -23,13 +23,16 @@ class KycController extends Controller
      *      summary="Liste des dossiers KYC (Admin)",
      *      tags={"KYC (Admin)"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(
      *          name="per_page",
      *          in="query",
      *          description="Nombre d'éléments par page",
      *          required=false,
+     *
      *          @OA\Schema(type="integer", default=10)
      *      ),
+     *
      *      @OA\Response(response=200, description="Liste récupérée")
      * )
      *
@@ -65,11 +68,15 @@ class KycController extends Controller
      *      summary="Soumission d'un dossier KYC",
      *      tags={"KYC"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\MediaType(
      *              mediaType="multipart/form-data",
+     *
      *              @OA\Schema(
+     *
      *                  @OA\Property(property="country_of_issue", type="string", example="FR"),
      *                  @OA\Property(
      *                      property="documents[0][type_document_id]",
@@ -84,6 +91,7 @@ class KycController extends Controller
      *              )
      *          )
      *      ),
+     *
      *      @OA\Response(response=201, description="Dossier soumis"),
      *      @OA\Response(response=403, description="Dossier déjà soumis ou approuvé")
      * )
@@ -159,12 +167,15 @@ class KycController extends Controller
      *      summary="Afficher un dossier KYC précis et ses documents (Admin)",
      *      tags={"KYC (Admin)"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
+     *
      *          @OA\Schema(type="integer")
      *      ),
+     *
      *      @OA\Response(response=200, description="Dossier trouvé"),
      *      @OA\Response(response=404, description="Dossier introuvable")
      * )
@@ -188,12 +199,15 @@ class KycController extends Controller
      *      summary="Approuver un dossier KYC (Admin)",
      *      tags={"KYC (Admin)"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
+     *
      *          @OA\Schema(type="integer")
      *      ),
+     *
      *      @OA\Response(response=200, description="Approuvé"),
      *      @OA\Response(response=404, description="Introuvable")
      * )
@@ -242,19 +256,25 @@ class KycController extends Controller
      *      summary="Rejeter un dossier KYC avec motif (Admin)",
      *      tags={"KYC (Admin)"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
+     *
      *          @OA\Schema(type="integer")
      *      ),
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
      *              required={"reason"},
+     *
      *              @OA\Property(property="reason", type="string", example="Document illisible")
      *          )
      *      ),
+     *
      *      @OA\Response(response=200, description="Rejeté"),
      *      @OA\Response(response=404, description="Introuvable")
      * )
@@ -307,6 +327,7 @@ class KycController extends Controller
      *      summary="Récupérer l'état de son dernier KYC",
      *      tags={"KYC"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Response(response=200, description="Statut récupéré")
      * )
      *
@@ -328,6 +349,7 @@ class KycController extends Controller
      *      summary="Récupère le nombre de dossiers KYC en attente (Admin)",
      *      tags={"KYC (Admin)"},
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Response(response=200, description="Nombre de KYC en attente")
      * )
      *

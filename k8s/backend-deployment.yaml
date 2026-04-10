@@ -1,0 +1,43 @@
+# k8s/backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exchapay-backend
+  labels:
+    app: exchapay
+    tier: backend
+spec:
+  replicas: 2  # On commence avec 2 copies pour la sécurité
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # Crée un nouveau pod avant de supprimer l'ancien
+      maxUnavailable: 0  # Garantit qu'il y a toujours des pods qui tournent
+  selector:
+    matchLabels:
+      app: exchapay-backend
+  template:
+    metadata:
+      labels:
+        app: exchapay-backend
+    spec:
+      containers:
+      - name: backend
+        image: kakabi88548/exchapay-backend:latest
+        ports:
+        - containerPort: 8000
+        # --- SANTÉ DE L'APPLICATION ---
+        livenessProbe:
+          httpGet:
+            path: /api/health # Vérifie si l'app est en vie
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        # --- LIMITES DE RESSOURCES (Obligatoire pour l'Auto-scaling) ---
+        resources:
+          requests:
+            cpu: "100m"   # Réserve 1/10ème de processeur
+            memory: "128Mi"
+          limits:
+            cpu: "500m"   # Ne peut pas dépasser la moitié d'un processeur
+            memory: "256Mi"
