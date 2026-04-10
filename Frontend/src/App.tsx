@@ -19,6 +19,8 @@ import MarketContentPage from './contents/user/MarketContent';
 import StatsAdmin from './contents/admin/StatsAdmin';
 import MethodPaymentUser from './contents/user/MethodPaymentUser';
 import StatsGraphe from './contents/admin/StatsGraphe';
+import HowItWork from './pages/HowItWork';
+import Annonce from './pages/Annonce';
 function App() {
   return (
     <Router>
@@ -31,6 +33,10 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/how-it-work" element={<HowItWork />} />
+          <Route path="/annonces" element={<Annonce />} />
+
+
           {/* Routes Admin (avec enfants) */}
 
           <Route path="/admin/*" element={<AdminDashboard />}>

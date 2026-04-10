@@ -215,3 +215,72 @@
 {
     margin-top: -10%;
 }
+/* Ajustement global pour le mobile */
+@media (max-width: 768px) {
+  .hero-container {
+    padding-top: 100px !important; /* Laisse de la place sous le header fixe */
+    padding-bottom: 50px !important;
+  }
+
+  /* On retire le min-vh-100 qui force une hauteur trop grande et crée des vides bizarres */
+  .hero-container .row.min-vh-100 {
+    min-height: auto !important;
+  }
+
+  /* Titre plus petit sur mobile pour éviter qu'il prenne tout l'écran */
+  .hero-left h1 {
+    font-size: 2.2rem !important;
+    line-height: 1.2;
+    margin-bottom: 20px !important;
+  }
+
+  /* Sous-titre moins imposant */
+  .hero-sub {
+    font-size: 1rem !important;
+    margin-bottom: 30px !important;
+    padding: 0 10px;
+  }
+
+  /* Boutons l'un en dessous de l'autre pour plus de clarté */
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Stats : on les aligne mieux */
+  .hero-stats {
+    margin-top: 40px;
+    gap: 15px !important;
+    justify-content: space-around !important;
+  }
+
+  .stat-number {
+    font-size: 1.5rem !important;
+  }
+
+  /* Cacher le visuel (téléphone) sur très petit écran ou réduire sa taille */
+  .hero-visual {
+    margin-top: 60px !important;
+    transform: scale(0.9);
+  }
+
+  /* Masquer les cartes flottantes sur mobile pour ne pas surcharger */
+  .float-card {
+    display: none !important;
+  }
+}
+
+/* Correction pour les écrans ultra-petits (iPhone SE, etc.) */
+@media (max-width: 380px) {
+  .hero-left h1 {
+    font-size: 1.8rem !important;
+  }
+}

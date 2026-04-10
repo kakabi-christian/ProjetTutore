@@ -1,28 +1,67 @@
-.card-hover {
-    transition: all 0.3s ease-in-out;
+.about-wrapper {
+    background-color: #ffffff;
+    overflow-x: hidden;
 }
 
-.card-hover:hover {
-    background-color: #ffffff !important;
-    transform: translateY(-8px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+/* Réutilisation du style Hero de HowItWork */
+.about-hero {
+    background-color: #0a2540;
+    padding: 140px 0 100px 0;
+    clip-path: ellipse(150% 100% at 50% 0%);
 }
 
-.bg-soft-green {
-    background-color: rgba(0, 200, 150, 0.1);
-    width: 35px;
-    height: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.bg-excha-green {
+    background-color: #00c896 !important;
 }
 
+.text-excha-orange {
+    color: #ff8c00 !important;
+}
+
+.text-excha-blue {
+    color: #0a2540;
+}
+
+.bg-excha-blue {
+    background-color: #0a2540;
+}
+
+/* Animation flottante du Logo */
 .animate-float {
-    animation: float 3s ease-in-out infinite;
+    animation: floating 3s infinite ease-in-out;
 }
 
-@keyframes float {
-    0% { transform: translateY(0px); }
+@keyframes floating {
+    0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-15px); }
-    100% { transform: translateY(0px); }
+}
+
+/* Effets de survol sur les cartes */
+.hover-up {
+    transition: all 0.3s ease;
+}
+
+.hover-up:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+}
+
+.btn-excha-orange {
+    background-color: #ff8c00;
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+.btn-excha-orange:hover {
+    transform: scale(1.05);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .about-hero {
+        padding: 100px 20px 60px 20px;
+    }
+    .about-hero h1 {
+        font-size: 2.2rem;
+    }
 }

@@ -1,0 +1,158 @@
+:root {
+    --excha-green: #00c896;
+    --excha-orange: #ff8c00;
+    --excha-blue: #0a2540;
+    --white-soft: #f8fffe;
+}
+
+.how-it-work-wrapper {
+    background-color: var(--white-soft);
+    overflow-x: hidden;
+}
+
+/* ---- Section Hero avec Courbe ---- */
+.how-hero {
+    background-color: var(--excha-blue);
+    padding: 140px 0 100px 0;
+    clip-path: ellipse(150% 100% at 50% 0%);
+}
+
+.bg-excha-green {
+    background-color: var(--excha-green) !important;
+}
+
+.text-excha-orange {
+    color: var(--excha-orange);
+}
+
+.text-excha-blue {
+    color: var(--excha-blue);
+}
+
+/* ---- Timeline des étapes ---- */
+.steps-timeline {
+    padding-left: 10px;
+}
+
+.step-icon-wrapper {
+    min-width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    z-index: 2;
+}
+
+.icon-blue { background: linear-gradient(135deg, #3498db, #1d4ed8); }
+.icon-green { background: linear-gradient(135deg, var(--excha-green), #059669); }
+.icon-orange { background: linear-gradient(135deg, var(--excha-orange), #ea580c); }
+
+.step-item {
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.step-item:hover {
+    transform: translateX(10px);
+}
+
+/* Ligne verticale entre les icônes */
+.step-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 30px; /* Aligné au centre de l'icône (60px / 2) */
+    top: 65px;
+    width: 2px;
+    height: calc(100% - 55px);
+    background: rgba(10, 37, 64, 0.1);
+    z-index: 1;
+}
+
+/* ---- Box Visuelle (Téléphone) ---- */
+.how-visual-box {
+    border: 1px solid rgba(0,0,0,0.05);
+    background: white;
+    transition: box-shadow 0.3s ease;
+}
+
+.how-visual-box:hover {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08) !important;
+}
+
+/* ---- Animation Infinie (Bounce) ---- */
+.animate-bounce {
+    display: inline-block;
+    animation: bounce-infinite 2.5s infinite ease-in-out;
+}
+
+@keyframes bounce-infinite {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+/* ---- Bouton CTA ---- */
+.btn-excha-orange {
+    background-color: var(--excha-orange);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-excha-orange:hover {
+    background-color: #e67e22;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(255, 140, 0, 0.3);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+    .how-hero {
+        padding: 100px 20px 60px 20px;
+    }
+
+    .how-hero h1 {
+        font-size: 2.2rem;
+    }
+
+    .step-icon-wrapper {
+        min-width: 50px;
+        height: 50px;
+        font-size: 1.4rem;
+        border-radius: 14px;
+    }
+
+    .step-item:not(:last-child)::after {
+        left: 25px; /* Ajusté pour l'icône de 50px */
+        top: 55px;
+        height: calc(100% - 45px);
+    }
+
+    .step-text h4 {
+        font-size: 1.1rem;
+    }
+
+    .step-text p {
+        font-size: 0.9rem;
+    }
+}
+.btn-login-submit {
+  transition: all 0.3s ease;
+}
+
+.btn-login-submit:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 107, 43, 0.4) !important;
+  background-color: #e85a1e !important;
+}
+
+.btn-login-submit:active {
+  transform: translateY(1px);
+}

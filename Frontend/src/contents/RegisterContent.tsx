@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Select from "react-select";
 import type { SingleValue } from "react-select";
 import { authService } from "../services/authService";
 import type { UserRegistration } from "../models/Utilisateur";
+import { MdPerson, MdEmail, MdPhone, MdLock, MdArrowForward } from "react-icons/md";
+import AOS from 'aos'; // 1. Import AOS
+import 'aos/dist/aos.css'; // 2. Style AOS
 import "../styles/RegisterContent.css";
+import "../theme.css";
 
-// Interface mise à jour pour inclure le nom complet et le code ISO
 interface CountryOption {
-  value: string;      // On stocke ici le code ISO (ex: CM)
-  fullCountryName: string; // Le nom complet (ex: Cameroun)
+  value: string;
+  fullCountryName: string;
   label: React.JSX.Element;
   dialCode: string;
 }
 
 export default function RegisterContent() {
   const navigate = useNavigate();
-  
   const [countries, setCountries] = useState<CountryOption[]>([]);
   const [formData, setFormData] = useState<UserRegistration>({
     lastname: "",
@@ -24,225 +26,182 @@ export default function RegisterContent() {
     email: "",
     telephone: "",
     country: "",
-    country_code: "", // Champ critique pour ton backend
+    country_code: "",
     password: "",
     password_confirmation: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [errors, setErrors] = useState<Record<string, any>>({});
 
-  // Récupération des pays
   useEffect(() => {
+    // 3. Initialisation de AOS
+    AOS.init({
+      duration: 1000,
+      once: true,
+      easing: 'ease-out-back' // Un petit effet de rebond pour le dynamisme
+    });
+
     const fetchCountries = async () => {
       try {
         const response = await fetch("https://restcountries.com/v3.1/all?fields=name,flags,idd,translations,cca2");
         const data = await response.json();
-        
         const formatted = data.map((c: any) => ({
-          value: c.cca2, // ✅ On utilise le code ISO 2 lettres (ex: CM) comme valeur principale
+          value: c.cca2,
           fullCountryName: c.translations?.fra?.common || c.name.common,
           dialCode: (c.idd.root || "") + (c.idd.suffixes ? c.idd.suffixes[0] : ""),
           label: (
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <img 
-                src={c.flags.png} 
-                alt={`Drapeau ${c.cca2}`} 
-                style={{ width: "22px", height: "15px", borderRadius: "2px", objectFit: "cover" }} 
-              />
-              <span>{c.translations?.fra?.common || c.name.common}</span>
+            <div className="d-flex align-items-center gap-2">
+              <img src={c.flags.png} alt="" style={{ width: "16px", height: "11px" }} />
+              <span style={{ fontSize: '0.8rem' }}>{c.translations?.fra?.common || c.name.common}</span>
             </div>
           ),
         })).sort((a: any, b: any) => a.fullCountryName.localeCompare(b.fullCountryName));
-
         setCountries(formatted);
       } catch (err) {
-        console.error("Erreur lors du chargement des pays:", err);
+        console.error("Erreur pays:", err);
       }
     };
     fetchCountries();
   }, []);
 
-  // Gestion du changement de pays
   const handleCountryChange = (selectedOption: SingleValue<CountryOption>) => {
     if (selectedOption) {
       setFormData((prev) => ({ 
         ...prev, 
-        country: selectedOption.fullCountryName, // Ex: "Cameroun"
-        country_code: selectedOption.value,      // Ex: "CM" -> Ira dans country_code en BD
+        country: selectedOption.fullCountryName,
+        country_code: selectedOption.value,
         telephone: selectedOption.dialCode 
       }));
-      setErrors((prev) => ({ ...prev, country: false, country_code: false }));
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: false }));
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
-    setErrors({});
-
     if (formData.password !== formData.password_confirmation) {
-      setErrors({ password: true, password_confirmation: true });
-      setMessage({ type: "error", text: "Les mots de passe ne correspondent pas." });
+      setMessage({ type: "error", text: "Mots de passe différents." });
       setLoading(false);
       return;
     }
-
     try {
-      // ✅ Envoie maintenant country_code: "CM" et country: "Cameroun"
       await authService.register(formData);
       navigate("/verify-otp", { state: { email: formData.email } });
     } catch (error: any) {
-      const errorMsg = error.response?.data?.message || "Une erreur est survenue.";
-      setMessage({ type: "error", text: errorMsg });
-      if (error.response?.data?.errors) {
-        setErrors(error.response.data.errors); 
-      }
+      setMessage({ type: "error", text: error.response?.data?.message || "Erreur." });
     } finally {
       setLoading(false);
     }
   };
 
   const customSelectStyles = {
-    control: (base: any, state: any) => ({
+    control: (base: any) => ({
       ...base,
-      background: "#fff",
-      borderColor: errors.country || errors.country_code ? "#ff4d4f" : state.isFocused ? "#ff9800" : "#ddd",
+      background: "#F1F4F9",
+      border: "none",
       borderRadius: "8px",
-      padding: "2px",
-      boxShadow: state.isFocused ? "0 0 0 1px #ff9800" : "none",
-      "&:hover": { borderColor: "#ff9800" }
+      minHeight: "34px",
+      fontSize: "0.8rem",
     }),
-    option: (base: any, state: any) => ({
-      ...base,
-      backgroundColor: state.isFocused ? "#fff3e0" : "#fff",
-      color: "#333",
-      cursor: "pointer"
-    })
+    valueContainer: (base: any) => ({ ...base, padding: "0 8px" }),
+    indicatorsContainer: (base: any) => ({ ...base, height: "30px" }),
   };
 
   return (
-    <div className="register-page-wrapper light-theme">
-      <div className="register-card">
-        <div className="card-header">
-          <h2 className="register-title">Rejoindre <span className="brand-text">ExchaPay</span></h2>
-          <p className="register-subtitle">Créez votre compte en quelques secondes</p>
+    <div className="register-page-wrapper d-flex align-items-center justify-content-center py-2" 
+         style={{ minHeight: '100vh', background: 'radial-gradient(circle at center, #F8FFFE 0%, #E6F0EE 100%)' }}>
+      
+      {/* Animation d'entrée globale du formulaire */}
+      <div className="register-card p-3 p-md-4 shadow-lg bg-white rounded-4 border-0" 
+           data-aos="fade-up"
+           style={{ maxWidth: '550px', width: '95%' }}>
+        
+        <div className="text-center mb-2" data-aos="zoom-in" data-aos-delay="200">
+          <h5 className="fw-bold mb-0" style={{ color: '#0A2540' }}>Créer un compte</h5>
+          <p className="small text-muted mb-2" style={{ fontSize: '0.75rem' }}>
+            Rejoignez l'aventure <span className="fw-bold" style={{ color: '#00C896' }}>ExchaPay</span>
+          </p>
         </div>
 
         {message && (
-          <div className={`status-message ${message.type}`}>
-            <span className="status-icon">{message.type === "success" ? "✓" : "⚠️"}</span>
-            <p>{message.text}</p>
+          <div className="alert p-1 mb-2 border-0 rounded-3 small text-center animate__animated animate__headShake"
+               style={{ fontSize: '0.7rem', color: '#FF6B2B', backgroundColor: '#FFF0EA' }}>
+            {message.text}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="register-form">
-          <div className="input-group-row">
-            <div className="input-field">
-              <label>Prénom</label>
-              <input
-                className={errors.firstname ? "input-error" : ""}
-                type="text"
-                name="firstname"
-                value={formData.firstname}
-                onChange={handleChange}
-                required
-              />
+        <form onSubmit={handleSubmit}>
+          {/* LIGNE 1 : PRENOM & NOM */}
+          <div className="row g-2 mb-2" data-aos="fade-right" data-aos-delay="300">
+            <div className="col-6">
+              <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Prénom</label>
+              <div className="input-group input-group-sm">
+                <span className="input-group-text bg-light border-0"><MdPerson size={14} /></span>
+                <input type="text" name="firstname" className="form-control border-0 bg-light" value={formData.firstname} onChange={handleChange} required />
+              </div>
             </div>
-            <div className="input-field">
-              <label>Nom</label>
-              <input
-                className={errors.lastname ? "input-error" : ""}
-                type="text"
-                name="lastname"
-                value={formData.lastname}
-                onChange={handleChange}
-                required
-              />
+            <div className="col-6">
+              <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Nom</label>
+              <input type="text" name="lastname" className="form-control form-control-sm border-0 bg-light px-2" value={formData.lastname} onChange={handleChange} required />
             </div>
           </div>
 
-          <div className="input-field">
-            <label>Adresse Email</label>
-            <input
-              className={errors.email ? "input-error" : ""}
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="input-group-row">
-            <div className="input-field">
-              <label>Pays</label>
-              <Select
-                options={countries}
-                onChange={handleCountryChange}
-                placeholder="Choisir..."
-                styles={customSelectStyles}
-                required
-              />
-              {/* Le champ country_code est envoyé de manière invisible via formData */}
-            </div>
-            <div className="input-field">
-              <label>Téléphone</label>
-              <input
-                className={errors.telephone ? "input-error" : ""}
-                type="tel"
-                name="telephone"
-                placeholder="+237..."
-                value={formData.telephone}
-                onChange={handleChange}
-                required
-              />
+          {/* LIGNE 2 : EMAIL */}
+          <div className="mb-2" data-aos="fade-right" data-aos-delay="400">
+            <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Adresse Email</label>
+            <div className="input-group input-group-sm">
+              <span className="input-group-text bg-light border-0"><MdEmail size={14} /></span>
+              <input type="email" name="email" className="form-control border-0 bg-light" value={formData.email} onChange={handleChange} required />
             </div>
           </div>
 
-          <div className="input-group-row">
-            <div className="input-field">
-              <label>Mot de passe</label>
-              <input
-                className={errors.password ? "input-error" : ""}
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
+          {/* LIGNE 3 : PAYS & TELEPHONE */}
+          <div className="row g-2 mb-2" data-aos="fade-right" data-aos-delay="500">
+            <div className="col-6">
+              <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Pays</label>
+              <Select options={countries} onChange={handleCountryChange} styles={customSelectStyles} placeholder="Pays..." />
             </div>
-            <div className="input-field">
-              <label>Confirmation</label>
-              <input
-                className={errors.password_confirmation ? "input-error" : ""}
-                type="password"
-                name="password_confirmation"
-                value={formData.password_confirmation}
-                onChange={handleChange}
-                required
-              />
+            <div className="col-6">
+              <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Téléphone</label>
+              <div className="input-group input-group-sm">
+                <span className="input-group-text bg-light border-0"><MdPhone size={14} /></span>
+                <input type="tel" name="telephone" className="form-control border-0 bg-light" value={formData.telephone} onChange={handleChange} required />
+              </div>
             </div>
           </div>
 
-          <button type="submit" className="btn-excha-orange register-submit-btn" disabled={loading}>
-            {loading ? <span className="loader"></span> : "Créer mon compte"}
-          </button>
+          {/* LIGNE 4 : MOT DE PASSE & CONFIRMATION */}
+          <div className="row g-2 mb-3" data-aos="fade-right" data-aos-delay="600">
+            <div className="col-6">
+              <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Mot de passe</label>
+              <div className="input-group input-group-sm">
+                <span className="input-group-text bg-light border-0"><MdLock size={14} /></span>
+                <input type="password" name="password" className="form-control border-0 bg-light" value={formData.password} onChange={handleChange} required />
+              </div>
+            </div>
+            <div className="col-6">
+              <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Confirmation</label>
+              <input type="password" name="password_confirmation" className="form-control form-control-sm border-0 bg-light px-2" value={formData.password_confirmation} onChange={handleChange} required />
+            </div>
+          </div>
+
+          <div data-aos="zoom-in" data-aos-delay="800">
+            <button type="submit" className="btn btn-sm w-100 py-2 rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 btn-register-submit"
+                    style={{ backgroundColor: '#FF6B2B', color: '#fff', border: 'none', fontSize: '0.85rem' }} disabled={loading}>
+              {loading ? <span className="spinner-border spinner-border-sm"></span> : <>Créer mon compte <MdArrowForward /></>}
+            </button>
+          </div>
         </form>
 
-        <div className="footer-link">
-          <p>Déjà inscrit ? <a href="/login" className="text-excha-green">Connectez-vous</a></p>
-        </div>
+        <p className="mt-3 text-center mb-0" data-aos="fade-in" data-aos-delay="1000" style={{ fontSize: '0.75rem', color: '#8A9BB0' }}>
+          Déjà un compte ? <Link to="/login" className="fw-bold text-decoration-none" style={{ color: '#00C896' }}>Se connecter</Link>
+        </p>
       </div>
     </div>
   );

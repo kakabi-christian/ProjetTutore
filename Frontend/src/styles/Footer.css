@@ -1,84 +1,140 @@
-/* ---- FOOTER CUSTOM ---- */
-.footer-custom {
-  position: relative;
-  z-index: 1;
-  background: rgba(10,37,64,0.85);
-  border-top: 1px solid var(--border);
-  color: var(--white);
-  margin-left: -53%;
-  padding-top: 20px;
-  width: 153%;
-  text-align: center;
-  padding-left: 60%;
-  height: 125px;
-
+.footer-container {
+    background-color: #0a2540;
+    color: #ffffff;
+    padding-top: 20px;
+    font-family: 'Inter', sans-serif;
+    border-top: 3px solid var(--excha-green);
 }
 
-.footer-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 40px;
-  text-align: center;
+.footer-brand {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
 }
 
-.footer-logo {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 10px;
+.footer-description {
+    color: #a0aec0;
+    font-size: 0.85rem;
+    max-width: 280px;
 }
 
-
-.footer-tagline {
-  color: var(--gray);
-  font-size: 0.9rem;
-  max-width: 300px;
+.footer-title {
+    color: var(--excha-orange); /* Titres en orange pour le rappel du thème */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
 }
 
-.footer-links {
-  display: flex;
-  gap: 30px;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  flex-wrap: wrap;
-  justify-content: center;
+.footer-links li {
+    margin-bottom: 6px;
 }
 
 .footer-links a {
-  color: var(--gray);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
+    color: #a0aec0;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: 0.3s ease;
 }
 
 .footer-links a:hover {
-  color: var(--green);
-  transform: translateY(-2px);
+    color: var(--excha-orange);
+    padding-left: 4px;
 }
 
-.footer-bottom {
-  width: 100%;
-  padding-top: 30px;
-  border-top: 1px solid var(--border);
+.social-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px; /* Look un peu plus moderne que le cercle */
+    font-size: 0.9rem;
+    transition: 0.3s;
 }
 
-.footer-copy {
-  font-size: 0.8rem;
-  color: var(--gray);
-  margin: 0;
+.social-icon:hover {
+    background: var(--excha-orange);
+    color: white;
+    transform: translateY(-3px);
 }
 
-/* Responsive */
+.btn-excha-orange {
+    background-color: var(--excha-orange);
+    border: none;
+    color: white;
+    transition: 0.3s;
+}
+
+.btn-excha-orange:hover {
+    background-color: #e67e22; /* Orange un peu plus sombre au hover */
+    transform: scale(1.02);
+}
+
+.footer-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
 @media (max-width: 768px) {
-  .footer-links {
-    flex-direction: column;
-    gap: 15px;
-  }
+    .footer-container {
+        text-align: center;
+        /* Réduction du padding global */
+        padding-top: 15px !important;
+        padding-bottom: 10px !important;
+    }
+
+    .footer-brand {
+        font-size: 1.2rem !important; /* Logo plus petit */
+        margin-bottom: 5px !important;
+    }
+
+    .footer-description {
+        margin: 0 auto 10px auto !important;
+        font-size: 0.8rem !important; /* Texte plus discret */
+        max-width: 250px;
+    }
+
+    .footer-title {
+        font-size: 0.85rem !important;
+        margin-top: 15px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .footer-links li {
+        margin-bottom: 4px !important; /* Liens plus serrés */
+    }
+
+    .social-links {
+        justify-content: center;
+        margin-bottom: 10px !important;
+        gap: 8px !important; /* Espace réduit entre les icônes */
+    }
+
+    .social-icon {
+        width: 28px !important; /* Icônes plus petites */
+        height: 28px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .footer-contact li {
+        justify-content: center;
+        display: flex;
+        margin-bottom: 5px !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* Le gros bouton orange "Besoin d'aide" */
+    .btn-excha-orange {
+        padding: 8px 15px !important;
+        font-size: 0.85rem !important;
+        margin-top: 10px !important;
+        width: 90% !important; /* Prend moins de place en largeur */
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Réduire l'espace des colonnes Bootstrap sur mobile */
+    .row > div {
+        margin-bottom: 10px !important;
+    }
 }

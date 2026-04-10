@@ -166,3 +166,12 @@
 .input-field input.input-error + label {
     color: #ff4d4d;
 }
+.btn-register-submit {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-register-submit:hover:not(:disabled) {
+  transform: scale(1.02);
+  background-color: #e85a1e !important;
+  box-shadow: 0 5px 15px rgba(255, 107, 43, 0.3) !important;
+}

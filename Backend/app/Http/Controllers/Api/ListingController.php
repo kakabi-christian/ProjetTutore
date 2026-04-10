@@ -35,29 +35,29 @@ class ListingController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Listing::whereHas('histories', function ($q) {
-                $q->whereHas('listingStatus', function ($statusQuery) {
-                    $statusQuery->where('title', 'active');
-                })->whereIn('listing_history_id', function ($sub) {
-                    $sub->selectRaw('MAX(listing_history_id)')
-                        ->from('listing_histories')
-                        ->whereColumn('listing_id', 'listings.listing_id');
-                });
-            })
-                ->where('amount_available', '>', 0)
-                ->with([
-                    'utilisateur:user_id,lastname,firstname,email',
-                    'paymentMethod:method_payment_id,type,provider,currency',
-                ]);
+            // On commence par charger les relations nécessaires
+            $query = Listing::with([
+                'utilisateur:user_id,lastname,firstname,email',
+                'paymentMethod:method_payment_id,type,provider,currency',
+            ])->where('amount_available', '>', 0);
 
+            // FILTRE DE STATUT SIMPLIFIÉ
+            // Au lieu de la sous-requête complexe, on vérifie simplement s'il existe un historique "active"
+            // (Assure-toi que la relation 'histories' existe dans ton modèle Listing)
+            $query->whereHas('histories.listingStatus', function ($q) {
+                $q->where('title', 'active');
+            });
+
+            // Filtres de devises
             if ($request->filled('currency_from')) {
-                $query->where('currency_from', strtoupper(substr($request->currency_from, 0, 3)));
+                $query->where('currency_from', strtoupper($request->currency_from));
             }
 
             if ($request->filled('currency_to')) {
-                $query->where('currency_to', strtoupper(substr($request->currency_to, 0, 3)));
+                $query->where('currency_to', strtoupper($request->currency_to));
             }
 
+            // Tri sécurisé
             $sort_by = $request->get('sort_by', 'created_at');
             $sort_order = $request->get('sort_order', 'desc');
             $allowed_sorts = ['user_rate', 'amount_available', 'created_at'];
@@ -68,14 +68,21 @@ class ListingController extends Controller
 
             $listings = $query->paginate(10);
 
-            $listings->getCollection()->each->append('discount_percentage');
+            // Ajout de l'attribut calculé pour le frontend
+            $listings->getCollection()->each(function ($listing) {
+                $listing->append('discount_percentage');
+            });
 
             return response()->json($listings);
 
         } catch (\Exception $e) {
             Log::error('[ExchaPay] Erreur ListingController@index : '.$e->getMessage());
 
-            return response()->json(['message' => 'Erreur lors du chargement.'], 500);
+            // Retourne l'erreur réelle en mode debug pour t'aider
+            return response()->json([
+                'message' => 'Erreur lors du chargement.',
+                'debug' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
         }
     }
 
