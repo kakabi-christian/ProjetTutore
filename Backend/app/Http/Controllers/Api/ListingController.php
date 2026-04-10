@@ -47,7 +47,7 @@ class ListingController extends Controller
                 ->where('amount_available', '>', 0)
                 ->with([
                     'utilisateur:user_id,lastname,firstname,email',
-                    'paymentMethod:method_payment_id,type,provider,currency'
+                    'paymentMethod:method_payment_id,type,provider,currency',
                 ]);
 
             if ($request->filled('currency_from')) {
@@ -131,7 +131,7 @@ class ListingController extends Controller
 
         $listing = Listing::create([
             'user_id'           => $utilisateur->user_id,
-            'method_payment_id' => $validatedData['method_payment_id'], // ✅ Nouveau
+            'method_payment_id' => $validatedData['method_payment_id'],
             'currency_from'     => $validatedData['currency_from'],
             'currency_to'       => $validatedData['currency_to'],
             'amount_available'  => $validatedData['amount_available'],
@@ -169,7 +169,7 @@ class ListingController extends Controller
             'utilisateur:user_id,lastname,firstname,email',
             'paymentMethod',
             'reviews',
-            'histories.listingStatus'
+            'histories.listingStatus',
         ])->findOrFail($id);
 
         $listing->append('discount_percentage');
