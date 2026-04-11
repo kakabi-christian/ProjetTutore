@@ -128,7 +128,7 @@ export default function ExchangeModal({ listing, onClose }: ExchangeModalProps) 
                                 className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 bg-excha-orange shadow"
                                 style={{ width: 36, height: 36 }}
                             >
-                                <MdArrowForward size={18} className="text-white" />
+                                <MdArrowForward size={18} className="text-black " />
                             </div>
 
                             <div className="text-center">

@@ -93,13 +93,13 @@ const MarketHeader: React.FC<MarketHeaderProps> = ({ activeTab, setActiveTab }) 
             <small className="d-none d-md-block fw-bold" style={{ fontSize: '0.65rem' }}>Mes posts</small>
           </li>
 
-          <li 
+          {/* <li 
             className={`nav-item text-center cursor-pointer px-3 pt-2 transition-all ${activeTab === "notifs" ? "text-excha-orange border-bottom border-excha-orange border-3" : "text-muted opacity-75"}`}
             onClick={() => setActiveTab("notifs")}
           >
             <MdNotifications size={26} />
             <small className="d-none d-md-block fw-bold" style={{ fontSize: '0.65rem' }}>Notifications</small>
-          </li>
+          </li> */}
         </ul>
 
         {/* DROITE : Actions & Profil */}
