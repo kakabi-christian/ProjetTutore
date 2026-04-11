@@ -4,7 +4,7 @@ import Sidebar from '../contents/Sidebar';
 import TopBarAdmin from '../components/TopBarAdmin';
 const AdminDashboard: React.FC = () => {
     // État pour la réduction de la sidebar admin
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(true);
 
     return (
         <div className="d-flex" style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>

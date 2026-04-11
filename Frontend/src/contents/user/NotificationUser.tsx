@@ -6,12 +6,13 @@ import {
   MdCheckCircle, 
   MdError, 
   MdInfo, 
-  MdWarning 
+  MdWarning,
+  MdArrowBack,
+  MdArrowForward 
 } from 'react-icons/md';
 
 import { type Notification, NotificationType } from '../../models/Notification';
 import notificationService from '../../services/NotificationService';
-// Import pour le formatage des dates
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -21,7 +22,6 @@ export default function NotificationUser() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Charger les notifications
   const fetchNotifications = async (page: number) => {
     setLoading(true);
     try {
@@ -40,7 +40,6 @@ export default function NotificationUser() {
     fetchNotifications(currentPage);
   }, [currentPage]);
 
-  // Marquer une seule comme lue
   const handleMarkAsRead = async (id: number) => {
     try {
       await notificationService.markAsRead(id);
@@ -52,7 +51,6 @@ export default function NotificationUser() {
     }
   };
 
-  // Tout marquer comme lu
   const handleMarkAllRead = async () => {
     try {
       await notificationService.markAllAsRead();
@@ -62,7 +60,6 @@ export default function NotificationUser() {
     }
   };
 
-  // Helper pour l'icône selon le type
   const getIcon = (type: number) => {
     switch (type) {
       case NotificationType.SUCCESS: return <MdCheckCircle className="text-excha-green" size={24} />;
@@ -73,18 +70,19 @@ export default function NotificationUser() {
   };
 
   return (
-    <div className="container-fluid p-4" style={{ backgroundColor: 'var(--white)', minHeight: '100vh' }}>
-      {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+    <div className="container-fluid p-2 p-md-4" style={{ backgroundColor: 'var(--white)', minHeight: '100vh' }}>
+      
+      {/* Header Responsive */}
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
-          <h2 className="fw-bold mb-0" style={{ color: 'var(--blue)' }}>
+          <h2 className="fw-bold mb-0 fs-4 fs-md-2" style={{ color: 'var(--blue)' }}>
             <MdNotifications className="me-2" />
             Mes Notifications
           </h2>
-          <p className="text-muted small">Restez informé de l'état de votre compte ExchaPay.</p>
+          <p className="text-muted small mb-0">Restez informé de l'état de votre compte ExchaPay.</p>
         </div>
         <button 
-          className="btn btn-excha-outline d-flex align-items-center gap-2 py-2 px-3 shadow-sm"
+          className="btn btn-excha-outline d-flex align-items-center justify-content-center gap-2 py-2 px-3 shadow-sm w-100 w-md-auto"
           onClick={handleMarkAllRead}
           disabled={notifications.length === 0 || notifications.every(n => n.is_read)}
         >
@@ -102,16 +100,16 @@ export default function NotificationUser() {
               <p className="mt-2 text-muted">Chargement de vos messages...</p>
             </div>
           ) : notifications.length === 0 ? (
-            <div className="text-center py-5 bg-light rounded-4 border border-dashed">
+            <div className="text-center py-5 bg-light rounded-4 border border-dashed mx-2">
               <MdNotifications size={60} className="text-gray mb-3 opacity-25" />
               <h5 className="text-muted">Aucune notification pour le moment.</h5>
             </div>
           ) : (
-            <div className="list-group shadow-sm rounded-4 overflow-hidden border-0">
+            <div className="list-group shadow-sm rounded-4 overflow-hidden border-0 mx-1 mx-md-0">
               {notifications.map((notif) => (
                 <div 
                   key={notif.notification_id}
-                  className={`list-group-item list-group-item-action p-4 border-start-0 border-end-0 border-top-0 border-bottom d-flex gap-3 align-items-start transition-all ${!notif.is_read ? 'bg-light' : ''}`}
+                  className={`list-group-item list-group-item-action p-3 p-md-4 border-0 border-bottom d-flex gap-2 gap-md-3 align-items-start transition-all ${!notif.is_read ? 'bg-light' : ''}`}
                   style={{ 
                     cursor: 'pointer',
                     borderLeft: !notif.is_read ? '5px solid var(--orange)' : '5px solid transparent',
@@ -119,21 +117,21 @@ export default function NotificationUser() {
                   }}
                   onClick={() => !notif.is_read && handleMarkAsRead(notif.notification_id)}
                 >
-                  <div className="mt-1">
+                  <div className="mt-1 flex-shrink-0">
                     {getIcon(notif.type)}
                   </div>
                   
-                  <div className="flex-grow-1">
-                    <div className="d-flex justify-content-between align-items-center mb-1">
-                      <h6 className={`mb-0 ${!notif.is_read ? 'fw-bold text-dark' : 'text-muted fw-normal'}`}>
+                  <div className="flex-grow-1 min-w-0">
+                    <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-1 gap-1">
+                      <h6 className={`mb-0 text-truncate w-100 ${!notif.is_read ? 'fw-bold text-dark' : 'text-muted fw-normal'}`}>
                         {notif.title}
                       </h6>
-                      <small className="text-muted d-flex align-items-center gap-1" style={{ fontSize: '0.75rem' }}>
+                      <small className="text-muted d-flex align-items-center gap-1 flex-shrink-0" style={{ fontSize: '0.7rem' }}>
                         <MdAccessTime size={14} />
-                        {format(new Date(notif.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
+                        {format(new Date(notif.created_at), "dd/MM à HH:mm", { locale: fr })}
                       </small>
                     </div>
-                    <p className={`mb-0 small ${!notif.is_read ? 'text-dark' : 'text-muted'}`}>
+                    <p className={`mb-0 small ${!notif.is_read ? 'text-dark' : 'text-muted'}`} style={{ lineHeight: '1.4' }}>
                       {notif.message}
                     </p>
                   </div>
@@ -144,28 +142,46 @@ export default function NotificationUser() {
         </div>
       </div>
 
-      {/* Pagination */}
+      {/* Pagination Responsive */}
       {!loading && totalPages > 1 && (
-        <div className="d-flex justify-content-center mt-4">
+        <div className="d-flex justify-content-center mt-5 mb-4">
           <nav>
-            <ul className="pagination gap-2 align-items-center">
+            <ul className="pagination gap-2 gap-md-3 align-items-center">
               <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                <button className="btn btn-outline-secondary rounded-pill px-3 shadow-sm" onClick={() => setCurrentPage(prev => prev - 1)}>
-                  Précédent
+                <button 
+                  className="btn btn-light shadow-sm rounded-circle p-2 p-md-3 d-flex align-items-center justify-content-center" 
+                  onClick={() => setCurrentPage(prev => prev - 1)}
+                  style={{ width: '45px', height: '45px' }}
+                >
+                  <MdArrowBack size={20} />
                 </button>
               </li>
-              <li className="px-3 text-muted fw-bold">
-                Page {currentPage} / {totalPages}
+              <li className="px-2 text-muted fw-bold small">
+                {currentPage} / {totalPages}
               </li>
               <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                <button className="btn btn-outline-secondary rounded-pill px-3 shadow-sm" onClick={() => setCurrentPage(prev => prev + 1)}>
-                  Suivant
+                <button 
+                  className="btn btn-light shadow-sm rounded-circle p-2 p-md-3 d-flex align-items-center justify-content-center" 
+                  onClick={() => setCurrentPage(prev => prev + 1)}
+                  style={{ width: '45px', height: '45px' }}
+                >
+                  <MdArrowForward size={20} />
                 </button>
               </li>
             </ul>
           </nav>
         </div>
       )}
+
+      <style>{`
+        .list-group-item:last-child { border-bottom: none !important; }
+        .transition-all:hover { background-color: rgba(0,0,0,0.02); }
+        
+        @media (max-width: 576px) {
+          .fs-4 { font-size: 1.25rem !important; }
+          .p-3 { padding: 1rem !important; }
+        }
+      `}</style>
     </div>
   );
 }

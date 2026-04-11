@@ -64,17 +64,7 @@ const MarketHeader: React.FC<MarketHeaderProps> = ({ activeTab, setActiveTab }) 
     <nav className="navbar navbar-expand-lg bg-white border-bottom sticky-top py-0 shadow-sm" style={{ height: '70px' }}>
       <div className="container-fluid d-flex justify-content-between align-items-center px-4">
         
-        {/* GAUCHE : Recherche */}
-        <div className="d-flex align-items-center flex-grow-1" style={{ maxWidth: '300px' }}>
-          <div className="input-group bg-light rounded-pill px-3 py-1">
-            <MdSearch size={22} className="text-muted mt-1" />
-            <input 
-              type="text" 
-              className="form-control border-0 bg-transparent shadow-none" 
-              placeholder="Rechercher..." 
-            />
-          </div>
-        </div>
+        
 
         {/* CENTRE : Navigation */}
         <ul className="navbar-nav mx-auto d-flex flex-row gap-2 gap-md-4">
