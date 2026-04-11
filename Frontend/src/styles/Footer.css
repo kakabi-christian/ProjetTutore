@@ -13,16 +13,12 @@
 }
 
 .footer-description {
-    /* ✅ Maintien du gris très clair pour la lisibilité */
     color: #f1f5f9; 
     font-size: 0.85rem;
     max-width: 280px;
     line-height: 1.5;
 }
 
-/* ✅ CORRECTION LIGNE 52 : Éclaircissement de l'orange pour les titres */
-/* L'orange pur sur fond bleu sombre a souvent un ratio inférieur à 4.5:1. 
-   On utilise un orange plus proche du "Gold" pour valider l'accessibilité. */
 .footer-title {
     color: #ffb347; 
     text-transform: uppercase;
@@ -36,7 +32,6 @@
 }
 
 .footer-links a {
-    /* ✅ CORRECTION : Passage au blanc pur ou gris ultra-clair pour les liens */
     color: #ffffff;
     text-decoration: none;
     font-size: 0.85rem;
@@ -48,10 +43,12 @@
     padding-left: 4px;
 }
 
+/* ✅ CORRECTION LIGNE 55 : Optimisation du contraste des icônes sociales */
 .social-icon {
     width: 32px;
     height: 32px;
-    background: rgba(255, 255, 255, 0.15); 
+    /* On passe à une opacité de 0.25 pour que le conteneur soit bien distinct */
+    background: rgba(255, 255, 255, 0.25); 
     color: #ffffff;
     display: flex;
     align-items: center;
@@ -59,12 +56,13 @@
     border-radius: 8px;
     font-size: 0.9rem;
     transition: 0.3s;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    /* Une bordure légère aide à délimiter l'élément pour l'accessibilité */
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .social-icon:hover {
-    background: var(--excha-orange);
-    color: #0a2540; 
+    background: #ffb347; /* Utilisation de l'orange "accessible" au hover */
+    color: #0a2540; /* Texte sombre sur fond clair au hover */
     transform: translateY(-3px);
 }
 
