@@ -5,14 +5,16 @@ use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\KycController;
 use App\Http\Controllers\Api\ListingController;
 use App\Http\Controllers\Api\NotificationController;
-use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\RolePermissionController;
 use App\Http\Controllers\Api\StatisticsController;
+use App\Http\Controllers\Api\PaymentMethodController; // ✅ Ajout du contrôleur
+use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\TypeDocumentController;
-use App\Http\Controllers\Api\UtilisateurController; // ✅ Ajout du contrôleur
+use App\Http\Controllers\Api\UtilisateurController;
+use App\Http\Controllers\Api\WebhookController;
 use App\Services\ExchangeRateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -60,6 +62,16 @@ Route::get('/listings', [ListingController::class, 'index']);
 Route::get('/listings/{id}', [ListingController::class, 'show']);
 Route::get('/listings/{listing_id}/reviews', [ReviewController::class, 'index']);
 
+
+// -------------------------------------------------------
+// WEBHOOK — Route publique (pas d'auth, Flutterwave appelle ici)
+// Ref: https://developer.flutterwave.com/docs/integration-guides/webhooks
+// -------------------------------------------------------
+Route::post('/webhooks/flutterwave', [WebhookController::class, 'handle'])
+    ->name('webhooks.flutterwave');
+
+
+
 // --- ROUTES PROTÉGÉES (auth:sanctum) ---
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -101,6 +113,29 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/listings/{listing_id}/reviews', [ReviewController::class, 'store']);
     Route::put('/reviews/{id}', [ReviewController::class, 'update']);
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
+
+    // Initier un échange : crée la transaction + retourne le payment_link Flutterwave
+    Route::post('/transactions/initiate', [TransactionController::class, 'initiate'])
+        ->name('transactions.initiate');
+
+
+    // Route::get('/transactions/status', function (Request $request) {
+    //     $txRef = $request->query('tx_ref');
+    //     $tx = \App\Models\Transaction::where('flw_tx_ref', $txRef)
+    //         ->where('buyer_id', auth()->id()) // sécurité : seulement ses propres transactions
+    //         ->first();
+
+    //     if (!$tx) {
+    //         return response()->json(['message' => 'Transaction introuvable'], 404);
+    //     }
+
+    //     return response()->json([
+    //         'status'         => $tx->status,
+    //         'transaction_id' => $tx->transaction_id,
+    //         'flw_tx_ref'     => $tx->flw_tx_ref,
+    //     ]);
+    // });
+
 
     // --- ESPACE ADMINISTRATION ---
     Route::middleware('is_admin')->prefix('admin')->group(function () {

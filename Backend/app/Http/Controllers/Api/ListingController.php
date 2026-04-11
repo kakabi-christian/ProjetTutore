@@ -74,7 +74,6 @@ class ListingController extends Controller
             });
 
             return response()->json($listings);
-
         } catch (\Exception $e) {
             Log::error('[ExchaPay] Erreur ListingController@index : '.$e->getMessage());
 
@@ -138,16 +137,16 @@ class ListingController extends Controller
         }
 
         $listing = Listing::create([
-            'user_id' => $utilisateur->user_id,
-            'method_payment_id' => $validatedData['method_payment_id'], // ✅ Nouveau
-            'currency_from' => $validatedData['currency_from'],
-            'currency_to' => $validatedData['currency_to'],
-            'amount_available' => $validatedData['amount_available'],
-            'min_amount' => $validatedData['min_amount'] ?? 0,
-            'user_rate' => $validatedData['user_rate'],
-            'official_rate' => $officialRate,
-            'visual_theme' => $validatedData['visual_theme'] ?? 'default',
-            'description' => $validatedData['description'] ?? null,
+            'user_id'           => $utilisateur->user_id,
+            'method_payment_id' => $validatedData['method_payment_id'],
+            'currency_from'     => $validatedData['currency_from'],
+            'currency_to'       => $validatedData['currency_to'],
+            'amount_available'  => $validatedData['amount_available'],
+            'min_amount'        => $validatedData['min_amount'] ?? 0,
+            'user_rate'         => $validatedData['user_rate'],
+            'official_rate'     => $officialRate,
+            'visual_theme'      => $validatedData['visual_theme'] ?? 'default',
+            'description'       => $validatedData['description'] ?? null,
         ]);
 
         // Statut par défaut : Active

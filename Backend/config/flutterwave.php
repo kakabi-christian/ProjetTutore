@@ -31,5 +31,14 @@ return [
      * URL de base de l'API Flutterwave
      * Par défaut, on pointe sur le Sandbox pour tes tests de développement.
      */
-    'baseUrl' => env('FLW_BASE_URL', 'https://developersandbox-api.flutterwave.com'),
+    'baseUrl' => env('FLW_BASE_URL', 'https://api.flutterwave.com/v3'),
+
+     /**
+     * Secret hash pour valider les webhooks entrants.
+     * Tu choisis cette valeur librement, puis tu la copies dans :
+     * Dashboard Flutterwave → Settings → Webhooks → "Secret hash"
+     *
+     * Ref: https://developer.flutterwave.com/docs/integration-guides/webhooks#verifying-webhooks
+     */
+    'webhookHash' => env('FLW_WEBHOOK_HASH'),
 ];

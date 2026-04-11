@@ -21,13 +21,14 @@ import MethodPaymentUser from './contents/user/MethodPaymentUser';
 import StatsGraphe from './contents/admin/StatsGraphe';
 import HowItWork from './pages/HowItWork';
 import Annonce from './pages/Annonce';
+import PaymentCallbackPage from './pages/Paymentcallbackpage';
+
 function App() {
   return (
     <Router>
-   
-
       <main>
         <Routes>
+          {/* Routes Publiques */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/register" element={<Register />} />
@@ -35,10 +36,11 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/how-it-work" element={<HowItWork />} />
           <Route path="/annonces" element={<Annonce />} />
-
+          
+          {/* Route Callback Paiement (Flutterwave) */}
+          <Route path="/payment/callback" element={<PaymentCallbackPage />} />
 
           {/* Routes Admin (avec enfants) */}
-
           <Route path="/admin/*" element={<AdminDashboard />}>
             <Route path="type-documents" element={<TypeDocumentPage />} />
             <Route path="notifications-admin" element={<NotificationAdmin />} />
@@ -58,14 +60,9 @@ function App() {
             <Route path="profile-user" element={<ProfilePage />} />
             <Route path="market" element={<MarketContentPage />} />
             <Route path="method-payment" element={<MethodPaymentUser />} />
-
-
           </Route>
-
         </Routes>
-
       </main>
-
     </Router>
   );
 }

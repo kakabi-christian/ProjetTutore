@@ -13,12 +13,10 @@ class PaymentStatusSeeder extends Seeder
     public function run(): void
     {
         $statuses = [
-            ['title' => 'pending'],
-            ['title' => 'processing'],
-            ['title' => 'completed'],
-            ['title' => 'failed'],
-            ['title' => 'refunded'],
-            ['title' => 'cancelled'],
+            ['title' => 'PENDING'],
+            ['title' => 'SUCCESS'],
+            ['title' => 'FAILED'],
+            ['title' => 'REFUNDED'],
         ];
 
         foreach ($statuses as $status) {
