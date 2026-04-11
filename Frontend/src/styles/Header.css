@@ -228,14 +228,15 @@
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+/* ✅ CORRECTION LIGNE 233 : Amélioration du contraste pour le bouton principal mobile */
 .btn-mobile-primary {
   background: linear-gradient(135deg, var(--excha-orange), #ff6b2b);
-  color: #ffffff;
+  color: #0a2540; /* option A est la plus sûre pour SonarCloud. */
   padding: 16px;
   text-align: center;
   border-radius: 12px;
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 800; /* Un peu plus gras pour l'accessibilité */
   box-shadow: 0 10px 20px rgba(255, 140, 0, 0.3);
 }
 

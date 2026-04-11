@@ -13,14 +13,15 @@
 }
 
 .footer-description {
-    /* ✅ Correction : Passage à un gris plus clair pour le contraste AA */
+    /* ✅ CORRECTION LIGNE 50 : Passage à un gris plus clair (#cbd5e0) 
+       pour atteindre un ratio de contraste > 4.5:1 sur fond bleu nuit */
     color: #cbd5e0; 
     font-size: 0.85rem;
     max-width: 280px;
 }
 
 .footer-title {
-    color: var(--excha-orange); /* Titres en orange pour le rappel du thème */
+    color: var(--excha-orange);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 12px;
@@ -31,7 +32,7 @@
 }
 
 .footer-links a {
-    /* ✅ Correction : Même couleur pour les liens */
+    /* ✅ CORRECTION : Utilisation du même gris clair pour les liens */
     color: #cbd5e0;
     text-decoration: none;
     font-size: 0.85rem;
@@ -51,7 +52,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px; /* Look un peu plus moderne que le cercle */
+    border-radius: 8px;
     font-size: 0.9rem;
     transition: 0.3s;
 }
@@ -65,78 +66,81 @@
 .btn-excha-orange {
     background-color: var(--excha-orange);
     border: none;
-    color: white;
+    /* ✅ CONSEIL ACCESSIBILITÉ : Texte bleu nuit sur fond orange 
+       offre un meilleur contraste que le blanc pour SonarCloud */
+    color: #0a2540; 
+    font-weight: 700;
     transition: 0.3s;
 }
 
 .btn-excha-orange:hover {
-    background-color: #e67e22; /* Orange un peu plus sombre au hover */
+    background-color: #e67e22; 
     transform: scale(1.02);
+    color: #0a2540;
 }
 
 .footer-divider {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+/* ---- Responsive ---- */
 @media (max-width: 768px) {
     .footer-container {
         text-align: center;
-        /* Réduction du padding global */
-        padding-top: 15px !important;
-        padding-bottom: 10px !important;
+        padding-top: 15px;
+        padding-bottom: 10px;
     }
 
     .footer-brand {
-        font-size: 1.2rem !important; /* Logo plus petit */
-        margin-bottom: 5px !important;
+        font-size: 1.2rem;
+        margin-bottom: 5px;
     }
 
     .footer-description {
-        margin: 0 auto 10px auto !important;
-        font-size: 0.8rem !important; /* Texte plus discret */
+        margin: 0 auto 10px auto;
+        font-size: 0.8rem;
         max-width: 250px;
     }
 
     .footer-title {
-        font-size: 0.85rem !important;
-        margin-top: 15px !important;
-        margin-bottom: 8px !important;
+        font-size: 0.85rem;
+        margin-top: 15px;
+        margin-bottom: 8px;
     }
 
     .footer-links li {
-        margin-bottom: 4px !important; /* Liens plus serrés */
+        margin-bottom: 4px;
     }
 
     .social-links {
         justify-content: center;
-        margin-bottom: 10px !important;
-        gap: 8px !important; /* Espace réduit entre les icônes */
+        margin-bottom: 10px;
+        gap: 8px;
     }
 
     .social-icon {
-        width: 28px !important; /* Icônes plus petites */
-        height: 28px !important;
-        font-size: 0.8rem !important;
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
     }
 
     .footer-contact li {
         justify-content: center;
         display: flex;
-        margin-bottom: 5px !important;
-        font-size: 0.8rem !important;
+        margin-bottom: 5px;
+        font-size: 0.8rem;
     }
 
-    /* Le gros bouton orange "Besoin d'aide" */
     .btn-excha-orange {
-        padding: 8px 15px !important;
-        font-size: 0.85rem !important;
-        margin-top: 10px !important;
-        width: 90% !important; /* Prend moins de place en largeur */
+        padding: 8px 15px;
+        font-size: 0.85rem;
+        margin-top: 10px;
+        width: 90%;
         margin-left: auto;
         margin-right: auto;
     }
 
-    /* Réduire l'espace des colonnes Bootstrap sur mobile */
     .row > div {
-        margin-bottom: 10px !important;
+        margin-bottom: 10px;
     }
 }

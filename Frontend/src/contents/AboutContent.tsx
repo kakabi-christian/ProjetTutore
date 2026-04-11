@@ -28,7 +28,7 @@ export default function AboutContent() {
   return (
     <div className="about-wrapper">
       
-      {/* --- HERO SECTION (Harmonisée avec HowItWork) --- */}
+      {/* --- HERO SECTION --- */}
       <section className="about-hero text-center text-white">
         <div className="container" data-aos="zoom-in">
           <span className="badge rounded-pill bg-excha-green mb-3">NOTRE HISTOIRE & VISION</span>
@@ -74,8 +74,9 @@ export default function AboutContent() {
               { icon: <MdSecurity />, title: "Sécurité", desc: "Escrow robuste pour protéger vos fonds.", delay: 100, color: '#00c896' },
               { icon: <MdFlashOn />, title: "Rapidité", desc: "Matching intelligent et instantané.", delay: 200, color: '#ff8c00' },
               { icon: <MdHandshake />, title: "Transparence", desc: "Zéro frais cachés, taux garantis.", delay: 300, color: '#3498db' }
-            ].map((item, index) => (
-              <div className="col-md-4" key={index} data-aos="fade-up" data-aos-delay={item.delay}>
+            ].map((item) => (
+              /* ✅ CORRECTION LIGNE 78 : Utilisation de item.title comme key */
+              <div className="col-md-4" key={item.title} data-aos="fade-up" data-aos-delay={item.delay}>
                 <div className="p-4 rounded-4 shadow-sm h-100 bg-white text-center border-0 transition-all hover-up">
                   <div className="fs-1 mb-3" style={{ color: item.color }}>
                     {item.icon}
@@ -140,8 +141,9 @@ export default function AboutContent() {
                { title: "Inclusion", icon: <MdPublic /> },
                { title: "Croissance", icon: <MdTrendingUp /> },
                { title: "Liberté", icon: <MdAccountBalanceWallet /> }
-             ].map((task, i) => (
-               <div className="col-6 col-md-2" key={i}>
+             ].map((task) => (
+               /* ✅ CORRECTION LIGNE 144 : Utilisation de task.title comme key */
+               <div className="col-6 col-md-2" key={task.title}>
                  <div className="p-3 rounded-4 bg-white bg-opacity-10 border border-white border-opacity-10">
                    <div className="text-excha-green fs-2 mb-2">{task.icon}</div>
                    <h6 className="fw-bold mb-0">{task.title}</h6>
