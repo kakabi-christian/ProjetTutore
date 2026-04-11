@@ -1,121 +1,73 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
-
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About'; 
+import Register from './pages/Register';
+import Login from './pages/Login';
+import VerifyOtp from './pages/Verify-otp';
+import TypeDocumentPage from './contents/admin/TtpeDocument';
+import AdminDashboard from './pages/AdminDashboard';
+import UserDashboard from './pages/UserDashboard';
+import KycPage from './contents/user/KycPage';
+import NotificationUser from './contents/user/NotificationUser';
+import KycAdmin from './contents/admin/KycAdmin';
+import NotificationAdmin from './contents/admin/NotificationAdmin';
+import FeedbackPage from './contents/user/FeedbackPage';
+import ProfilePage from './components/ProfilePage';
+import RolePage from './contents/admin/RolePage';
+import UserPage from './contents/admin/UserPage';
+import MarketContentPage from './contents/user/MarketContent';
+import StatsAdmin from './contents/admin/StatsAdmin';
+import MethodPaymentUser from './contents/user/MethodPaymentUser';
+import StatsGraphe from './contents/admin/StatsGraphe';
+import HowItWork from './pages/HowItWork';
+import Annonce from './pages/Annonce';
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <Router>
+   
 
-      <div className="ticks"></div>
+      <main>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/how-it-work" element={<HowItWork />} />
+          <Route path="/annonces" element={<Annonce />} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+          {/* Routes Admin (avec enfants) */}
+
+          <Route path="/admin/*" element={<AdminDashboard />}>
+            <Route path="type-documents" element={<TypeDocumentPage />} />
+            <Route path="notifications-admin" element={<NotificationAdmin />} />
+            <Route path="kyc" element={<KycAdmin />} />
+            <Route path="profile-admin" element={<ProfilePage />} />
+            <Route path="roles" element={<RolePage />} />
+            <Route path="users-list" element={<UserPage />} />
+            <Route path="stats" element={<StatsAdmin />} />
+            <Route path="stats-graphe" element={<StatsGraphe />} />
+          </Route>
+
+          {/* Routes User (avec enfants) */}
+          <Route path="/user/*" element={<UserDashboard />}>
+            <Route path="kyc" element={<KycPage />} />
+            <Route path="notifications-user" element={<NotificationUser />} />
+            <Route path="feedback" element={<FeedbackPage />} />
+            <Route path="profile-user" element={<ProfilePage />} />
+            <Route path="market" element={<MarketContentPage />} />
+            <Route path="method-payment" element={<MethodPaymentUser />} />
+
+
+          </Route>
+
+        </Routes>
+
+      </main>
+
+    </Router>
+  );
 }
 
-export default App
+export default App;

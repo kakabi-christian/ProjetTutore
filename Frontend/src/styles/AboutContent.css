@@ -1,0 +1,72 @@
+.about-wrapper {
+    background-color: #ffffff;
+    overflow-x: hidden;
+}
+
+/* Réutilisation du style Hero de HowItWork */
+.about-hero {
+    background-color: #0a2540;
+    padding: 140px 0 100px 0;
+    clip-path: ellipse(150% 100% at 50% 0%);
+}
+
+.bg-excha-green {
+    background-color: #00c896 !important;
+}
+
+.text-excha-orange {
+    color: #ff8c00 !important;
+}
+
+.text-excha-blue {
+    color: #0a2540;
+}
+
+.bg-excha-blue {
+    background-color: #0a2540;
+}
+
+/* Animation flottante du Logo */
+.animate-float {
+    animation: floating 3s infinite ease-in-out;
+}
+
+@keyframes floating {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+/* Effets de survol sur les cartes */
+.hover-up {
+    transition: all 0.3s ease;
+}
+
+.hover-up:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+}
+
+/* ✅ CORRECTION LIGNE 51 : Amélioration du contraste */
+.btn-excha-orange {
+    background-color: #ff8c00;
+    /* On utilise le bleu foncé du projet pour un contraste maximal (8:1+) */
+    color: #0a2540; 
+    font-weight: 700; /* On épaissit un peu le texte pour la lisibilité */
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-excha-orange:hover {
+    transform: scale(1.05);
+    background-color: #e67e00; /* Un orange un peu plus soutenu au survol */
+    color: #0a2540;
+}
+
+@media (max-width: 768px) {
+    .about-hero {
+        padding: 100px 20px 60px 20px;
+    }
+    .about-hero h1 {
+        font-size: 2.2rem;
+    }
+}

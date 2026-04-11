@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+<<<<<<< HEAD
     <title>{{ $documentationTitle }}</title>
+=======
+    <title>{{config('l5-swagger.documentations.'.$documentation.'.api.title')}}</title>
+>>>>>>> main
     <link rel="stylesheet" type="text/css" href="{{ l5_swagger_asset($documentation, 'swagger-ui.css') }}">
     <link rel="icon" type="image/png" href="{{ l5_swagger_asset($documentation, 'favicon-32x32.png') }}" sizes="32x32"/>
     <link rel="icon" type="image/png" href="{{ l5_swagger_asset($documentation, 'favicon-16x16.png') }}" sizes="16x16"/>
@@ -25,6 +29,7 @@
       background: #fafafa;
     }
     </style>
+<<<<<<< HEAD
     @if(config('l5-swagger.defaults.ui.display.dark_mode'))
         <style>
             body#dark-mode,
@@ -117,12 +122,18 @@
 </head>
 
 <body @if(config('l5-swagger.defaults.ui.display.dark_mode')) id="dark-mode" @endif>
+=======
+</head>
+
+<body>
+>>>>>>> main
 <div id="swagger-ui"></div>
 
 <script src="{{ l5_swagger_asset($documentation, 'swagger-ui-bundle.js') }}"></script>
 <script src="{{ l5_swagger_asset($documentation, 'swagger-ui-standalone-preset.js') }}"></script>
 <script>
     window.onload = function() {
+<<<<<<< HEAD
         const urls = [];
 
         @foreach($urlsToDocs as $title => $url)
@@ -134,6 +145,12 @@
             dom_id: '#swagger-ui',
             urls: urls,
             "urls.primaryName": "{{ $documentationTitle }}",
+=======
+        // Build a system
+        const ui = SwaggerUIBundle({
+            dom_id: '#swagger-ui',
+            url: "{!! $urlToDocs !!}",
+>>>>>>> main
             operationsSorter: {!! isset($operationsSorter) ? '"' . $operationsSorter . '"' : 'null' !!},
             configUrl: {!! isset($configUrl) ? '"' . $configUrl . '"' : 'null' !!},
             validatorUrl: {!! isset($validatorUrl) ? '"' . $validatorUrl . '"' : 'null' !!},

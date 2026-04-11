@@ -1,0 +1,109 @@
+.admin-sidebar {
+    width: 260px;
+    height: 100vh;
+    background: #1a1c23; /* Un bleu-noir profond */
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.sidebar-header {
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    font-size: 2rem;
+    color: #ff8c00; /* Ton orange ExchaPay */
+}
+
+.brand-name {
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: 0.5px;
+}
+
+.brand-name small {
+    display: block;
+    font-size: 0.7rem;
+    color: #4cd137; /* Ton vert ExchaPay */
+    text-transform: uppercase;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1.5rem 0;
+    overflow-y: auto;
+}
+
+.nav-section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    padding: 0 1.5rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1.5rem;
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.nav-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: #ffffff;
+}
+
+.nav-item.active {
+    background: rgba(255, 140, 0, 0.1);
+    color: #ff8c00;
+    border-left-color: #ff8c00;
+}
+
+.nav-icon {
+    font-size: 1.25rem;
+    margin-right: 12px;
+}
+
+.sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
+    background: transparent;
+    border: none;
+    color: #ff4d4d;
+    cursor: pointer;
+    transition: background 0.3s;
+    border-radius: 8px;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 77, 77, 0.1);
+}

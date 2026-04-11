@@ -1,5 +1,9 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use L5Swagger\L5SwaggerServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
+    AppServiceProvider::class,
+    L5SwaggerServiceProvider::class,
 ];

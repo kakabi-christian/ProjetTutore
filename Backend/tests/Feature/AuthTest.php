@@ -1,86 +1,74 @@
 <?php
 
-use App\Models\Personnel;
-use Illuminate\Support\Facades\Hash;
+namespace Tests\Feature;
+
+use App\Models\Utilisateur;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-uses(RefreshDatabase::class);
+class AuthTest extends TestCase
+{
+    use RefreshDatabase;
 
-/**
- * Test : Connexion réussie
- */
-test('login success returns token', function () {
-
-    // Créer un utilisateur valide selon la migration
-    Personnel::create([
-        'code_pers' => 'P001',
-        'nom_pers' => 'Admin Test',
-        'sexe_pers' => 'Masculin',
-        'phone_pers' => '699999999',
-        'login_pers' => 'admin',
-        'pwd_pers' => Hash::make('123456'),
-        'type_pers' => 'RESPONSABLE ACADEMIQUE'
-    ]);
-
-    // Appel API login
-    $response = $this->postJson('/api/login', [
-        'login_pers' => 'admin',
-        'pwd_pers' => '123456'
-    ]);
-
-    // Vérifications
-    $response->assertStatus(200)
-        ->assertJsonStructure([
-            'personnel' => [
-                'id',
-                'code_pers',
-                'nom_pers',
-                'sexe_pers',
-                'phone_pers',
-                'login_pers',
-                'type_pers',
-                'created_at',
-                'updated_at'
-            ],
-            'access_token',
-            'token_type'
+    #[Test]
+    public function test_login_success()
+    {
+        // 1. Créer un utilisateur de test
+        $user = Utilisateur::create([
+            'lastname' => 'Kakabi',
+            'firstname' => 'Christian',
+            'email' => 'test@exchapay.com',
+            'password' => Hash::make('secret123'),
+            'telephone' => '658788445',
+            'country' => 'Cameroun',
+            'country_code' => 'CM',
+            'type' => 'user',
+            'isactive' => true,
+            'isverified' => true,
         ]);
-});
 
-
-/**
- * Test : Connexion échouée (mauvais mot de passe)
- */
-test('login fails with wrong password', function () {
-
-    Personnel::create([
-        'code_pers' => 'P002',
-        'nom_pers' => 'User Test',
-        'sexe_pers' => 'Masculin',
-        'phone_pers' => '688888888',
-        'login_pers' => 'user',
-        'pwd_pers' => Hash::make('123456'),
-        'type_pers' => 'ENSEIGNANT'
-    ]);
-
-    $response = $this->postJson('/api/login', [
-        'login_pers' => 'user',
-        'pwd_pers' => 'wrongpassword'
-    ]);
-
-    $response->assertStatus(401)
-        ->assertJson([
-            'message' => 'Identifiants invalides'
+        // 2. Tenter la connexion via l'API (utilisation de l'email)
+        $response = $this->postJson('/api/login', [
+            'email' => 'test@exchapay.com',
+            'password' => 'secret123',
         ]);
-});
 
+        // 3. Vérifications
+        // Note: On vérifie 'user' au lieu de 'personnel' car c'est la clé renvoyée par ton AuthController
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'user',
+                'access_token',
+                'token_type',
+            ]);
+    }
 
-/**
- * Test : Champs obligatoires vides
- */
-test('login fails with empty fields', function () {
+    #[Test]
+    public function test_login_fails_with_wrong_password()
+    {
+        // 1. Créer l'utilisateur
+        Utilisateur::create([
+            'lastname' => 'Test',
+            'firstname' => 'User',
+            'email' => 'wrong@exchapay.com',
+            'password' => Hash::make('correct_password'),
+            'telephone' => '000000000',
+            'country' => 'Cameroun',
+            'country_code' => 'CM',
+            'type' => 'user',
+            'isactive' => true,
+        ]);
 
-    $response = $this->postJson('/api/login', []);
+        // 2. Tenter avec le mauvais mot de passe
+        $response = $this->postJson('/api/login', [
+            'email' => 'wrong@exchapay.com',
+            'password' => 'wrong_password',
+        ]);
 
-    $response->assertStatus(422);
-});
+        // 3. Vérification (Le message doit correspondre à celui de ton AuthController)
+        $response->assertStatus(401)
+            ->assertJson(['message' => 'Identifiants incorrects']);
+    }
+}

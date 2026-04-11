@@ -1,4 +1,4 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # 1. Mise à jour de l'index et installation des dépendances système
 # Ajout de apk update pour garantir la fraicheur des dépôts

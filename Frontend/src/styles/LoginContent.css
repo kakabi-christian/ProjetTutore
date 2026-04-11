@@ -1,0 +1,132 @@
+/* Utilisation de theme.css */
+.login-page-wrapper.light-theme {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--white); /* Ton blanc cassé #F8FFFE */
+    padding: 20px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 15px 35px rgba(10, 37, 64, 0.08);
+    border: 1px solid rgba(138, 155, 176, 0.1);
+}
+
+.login-title {
+    color: var(--blue);
+    font-weight: 800;
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+}
+
+.brand-text {
+    color: var(--green);
+}
+
+.login-subtitle {
+    color: var(--gray);
+    font-size: 0.9rem;
+    margin-bottom: 30px;
+}
+
+.input-box {
+    margin-bottom: 20px;
+}
+
+.label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.input-box label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--blue);
+}
+
+.forgot-link {
+    font-size: 0.8rem;
+    color: var(--orange);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.input-box input {
+    width: 100%;
+    padding: 14px 18px;
+    background: #ffffff;
+    border: 1.5px solid rgba(138, 155, 176, 0.2);
+    border-radius: 12px;
+    color: var(--blue);
+    transition: all 0.3s ease;
+}
+
+.input-box input:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(0, 200, 150, 0.1);
+}
+
+.login-submit-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+/* Alertes */
+.status-alert {
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-alert.success {
+    background-color: rgba(0, 200, 150, 0.1);
+    color: var(--green-dark);
+    border: 1px solid var(--green);
+}
+
+.status-alert.error {
+    background-color: #fff1f1;
+    color: #d32f2f;
+    border: 1px solid #ffcdd2;
+}
+
+.register-redirect {
+    text-align: center;
+    margin-top: 25px;
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.register-redirect a {
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.loader {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

@@ -1,15 +1,20 @@
 {
     "openapi": "3.0.0",
     "info": {
+<<<<<<< HEAD
         "title": "API Suivie Academique",
         "description": "Documentation API de suivi académique",
         "contact": {
             "email": "ton.email@example.com"
         },
+=======
+        "title": "ProjetTutore API",
+>>>>>>> main
         "version": "1.0.0"
     },
     "servers": [
         {
+<<<<<<< HEAD
             "url": "http://127.0.0.1:8000/api",
             "description": "API Server"
         }
@@ -66,12 +71,27 @@
                 ],
                 "summary": "Create a new filiere",
                 "operationId": "e5313008bb0405f32bc0d40c3b634aec",
+=======
+            "url": "http://localhost:8000/api",
+            "description": "Primary API Server"
+        }
+    ],
+    "paths": {
+        "/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Inscription d'un nouvel utilisateur",
+                "operationId": "5d4fa5d5607ed675ba93907e1fc94534",
+>>>>>>> main
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
+<<<<<<< HEAD
                                     "code_filiere",
                                     "label_filiere"
                                 ],
@@ -87,6 +107,833 @@
                                     "desc_filiere": {
                                         "type": "string",
                                         "example": "Description",
+=======
+                                    "firstname",
+                                    "lastname",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "firstname": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "lastname": {
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "pseudonyme": {
+                                        "type": "string",
+                                        "example": "johndoe"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Inscription réussie"
+                    }
+                }
+            }
+        },
+        "/forgot-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Mot de passe oublié, envoi d'OTP",
+                "operationId": "f46fe87b31c0dadd30642d353886e6f1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Code envoyé"
+                    },
+                    "404": {
+                        "description": "Utilisateur non trouvé"
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Connexion de l'utilisateur",
+                "operationId": "67d6d0fdd54fba132e1b6f55ca254183",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connexion réussie"
+                    },
+                    "401": {
+                        "description": "Identifiants incorrects"
+                    },
+                    "403": {
+                        "description": "Compte non vérifié ou suspendu"
+                    }
+                }
+            }
+        },
+        "/verify-otp": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Vérification OTP",
+                "operationId": "90ba319582b91e975d64eb01b6436a65",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Compte vérifié"
+                    },
+                    "404": {
+                        "description": "Non trouvé"
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Déconnexion",
+                "operationId": "28d48c13fca984400ac8de99f54ee13a",
+                "responses": {
+                    "200": {
+                        "description": "Déconnexion réussie"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/feedback": {
+            "post": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Enregistre ou met à jour le feedback d'un utilisateur",
+                "operationId": "caf6291a5737e74d76b9314188012091",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "comment",
+                                    "note"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "123e4567-e89b-12d3..."
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "example": "Super application!"
+                                    },
+                                    "note": {
+                                        "type": "integer",
+                                        "example": 5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Feedback mis à jour avec succès"
+                    },
+                    "201": {
+                        "description": "Feedback enregistré"
+                    },
+                    "500": {
+                        "description": "Erreur serveur"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/kycs": {
+            "get": {
+                "tags": [
+                    "KYC (Admin)"
+                ],
+                "summary": "Liste des dossiers KYC (Admin)",
+                "operationId": "a34bc1fc533aa62901aa622ee4b62cd4",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Nombre d'éléments par page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste récupérée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/kyc/submit": {
+            "post": {
+                "tags": [
+                    "KYC"
+                ],
+                "summary": "Soumission d'un dossier KYC",
+                "operationId": "61ebc04d4bac324a451e780faba65c7a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "country_of_issue": {
+                                        "type": "string",
+                                        "example": "FR"
+                                    },
+                                    "documents[0][type_document_id]": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "documents[0][file]": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Dossier soumis"
+                    },
+                    "403": {
+                        "description": "Dossier déjà soumis ou approuvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/kycs/{id}": {
+            "get": {
+                "tags": [
+                    "KYC (Admin)"
+                ],
+                "summary": "Afficher un dossier KYC précis et ses documents (Admin)",
+                "operationId": "bad06264a0201d873c0cb61e55e11816",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dossier trouvé"
+                    },
+                    "404": {
+                        "description": "Dossier introuvable"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/kycs/{id}/approve": {
+            "post": {
+                "tags": [
+                    "KYC (Admin)"
+                ],
+                "summary": "Approuver un dossier KYC (Admin)",
+                "operationId": "62657966eb87d0a10f0458fadb048c09",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Approuvé"
+                    },
+                    "404": {
+                        "description": "Introuvable"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/kycs/{id}/reject": {
+            "post": {
+                "tags": [
+                    "KYC (Admin)"
+                ],
+                "summary": "Rejeter un dossier KYC avec motif (Admin)",
+                "operationId": "5d5f20e6f3f7688f5362ec188c2c875a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "reason"
+                                ],
+                                "properties": {
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "Document illisible"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Rejeté"
+                    },
+                    "404": {
+                        "description": "Introuvable"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/my-kyc": {
+            "get": {
+                "tags": [
+                    "KYC"
+                ],
+                "summary": "Récupérer l'état de son dernier KYC",
+                "operationId": "e8ac2e828588751581bb6cf5c3cd378d",
+                "responses": {
+                    "200": {
+                        "description": "Statut récupéré"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/kycs/pending-count": {
+            "get": {
+                "tags": [
+                    "KYC (Admin)"
+                ],
+                "summary": "Récupère le nombre de dossiers KYC en attente (Admin)",
+                "operationId": "6d43c9eff104d7ae7c5609b3168e4f0c",
+                "responses": {
+                    "200": {
+                        "description": "Nombre de KYC en attente"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/listings": {
+            "get": {
+                "tags": [
+                    "Listings"
+                ],
+                "summary": "Liste des annonces",
+                "operationId": "0c014ef6c84a38a711a9dfa90af19ed5",
+                "parameters": [
+                    {
+                        "name": "currency_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "currency_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "min_amount",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "exchange_rate",
+                                "amount_available",
+                                "created_at"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_order",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des annonces"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Listings"
+                ],
+                "summary": "Publier une nouvelle annonce",
+                "operationId": "e1c7a71d62affda164d97989f5903699",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "currency_from",
+                                    "currency_to",
+                                    "amount_available",
+                                    "exchange_rate"
+                                ],
+                                "properties": {
+                                    "currency_from": {
+                                        "type": "string",
+                                        "example": "USD"
+                                    },
+                                    "currency_to": {
+                                        "type": "string",
+                                        "example": "EUR"
+                                    },
+                                    "amount_available": {
+                                        "type": "number",
+                                        "example": 100.5
+                                    },
+                                    "exchange_rate": {
+                                        "type": "number",
+                                        "example": 0.92
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Annonce créée avec succès"
+                    },
+                    "403": {
+                        "description": "KYC requis"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/listings/{id}": {
+            "get": {
+                "tags": [
+                    "Listings"
+                ],
+                "summary": "Afficher une annonce",
+                "operationId": "1f5d43b628ab16b04a86b5494a0255ea",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détail de l'annonce"
+                    },
+                    "404": {
+                        "description": "Annonce introuvable"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Listings"
+                ],
+                "summary": "Modifier une annonce",
+                "operationId": "2271e0ff5b518140f02106073fc8d1cf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "currency_from": {
+                                        "type": "string",
+                                        "example": "USD"
+                                    },
+                                    "currency_to": {
+                                        "type": "string",
+                                        "example": "EUR"
+                                    },
+                                    "amount_available": {
+                                        "type": "number",
+                                        "example": 150
+                                    },
+                                    "exchange_rate": {
+                                        "type": "number",
+                                        "example": 0.95
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Annonce mise à jour"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Listings"
+                ],
+                "summary": "Supprimer une annonce",
+                "operationId": "d9557f5899a494fc1bd64cbb2afb5a81",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Annonce supprimée"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    },
+                    "422": {
+                        "description": "Transactions en cours"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Récupérer les notifications (Personnelles + Broadcast)",
+                "operationId": "b1274a2aaae8a4295a7e1925e8d8090f",
+                "responses": {
+                    "200": {
+                        "description": "Liste des notifications"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/notifications/unread-count": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Récupérer uniquement le nombre de notifications NON LUES",
+                "operationId": "85697ee523a5dace428185c95efb9f2f",
+                "responses": {
+                    "200": {
+                        "description": "Nombre de notifications non lues"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/notifications/{id}/mark-as-read": {
+            "patch": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Marquer une notification spécifique comme lue",
+                "operationId": "949c12e654c0d6c8830bf691ed7cc54f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notification marquée comme lue"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/notifications/mark-all-as-read": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Marquer TOUTES les notifications comme lues",
+                "operationId": "b593c48d89ddf587f9f2f3e522622dcd",
+                "responses": {
+                    "200": {
+                        "description": "Toutes les notifications ont été marquées comme lues"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/notifications": {
+            "post": {
+                "tags": [
+                    "Notifications (Admin)"
+                ],
+                "summary": "Créer une notification (Admin)",
+                "operationId": "3ea51599e555edd0fd445988dfd53a33",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Titre de la notif"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Message"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "info"
+                                    },
+                                    "user_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+>>>>>>> main
                                         "nullable": true
                                     }
                                 },
@@ -97,6 +944,7 @@
                 },
                 "responses": {
                     "201": {
+<<<<<<< HEAD
                         "description": "Filiere created successfully"
                     },
                     "422": {
@@ -122,11 +970,38 @@
                         "required": true,
                         "schema": {
                             "type": "string"
+=======
+                        "description": "Notification envoyée avec succès"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/notifications/{id}": {
+            "delete": {
+                "tags": [
+                    "Notifications (Admin)"
+                ],
+                "summary": "Supprimer une notification spécifique (Admin)",
+                "operationId": "a580007590de07ab4c7f2827e5f56589",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+>>>>>>> main
                         }
                     }
                 ],
                 "responses": {
                     "200": {
+<<<<<<< HEAD
                         "description": "Filiere found",
                         "content": {
                             "application/json": {
@@ -173,6 +1048,142 @@
                         "required": true,
                         "schema": {
                             "type": "string"
+=======
+                        "description": "Notification supprimée définitivement"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/permissions": {
+            "get": {
+                "tags": [
+                    "Permissions (Admin)"
+                ],
+                "summary": "Liste des permissions avec pagination (Admin)",
+                "operationId": "21725b0eb1839b78be969a1cd2865345",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des permissions récupérée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/reviews/{listing_id}": {
+            "get": {
+                "tags": [
+                    "Reviews"
+                ],
+                "summary": "Liste les avis pour une annonce spécifique",
+                "operationId": "d11fd3e4498ccc6fd504e2653d865473",
+                "parameters": [
+                    {
+                        "name": "listing_id",
+                        "in": "path",
+                        "description": "ID de l'annonce",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des avis"
+                    }
+                }
+            }
+        },
+        "/listings/{listing_id}/reviews": {
+            "post": {
+                "tags": [
+                    "Reviews"
+                ],
+                "summary": "Ajouter un nouvel avis à une annonce",
+                "operationId": "136828289ea58a432bd4cd680037d3a4",
+                "parameters": [
+                    {
+                        "name": "listing_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "rating"
+                                ],
+                                "properties": {
+                                    "rating": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "example": "Très bon échange"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Avis ajouté avec succès"
+                    },
+                    "403": {
+                        "description": "Interdit (auto-évaluation ou pas de transaction)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/reviews/{id}": {
+            "put": {
+                "tags": [
+                    "Reviews"
+                ],
+                "summary": "Modifier son avis",
+                "operationId": "7975450987e8c86c41616386aea7575a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+>>>>>>> main
                         }
                     }
                 ],
@@ -182,12 +1193,22 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
+<<<<<<< HEAD
                                     "label_filiere": {
                                         "type": "string"
                                     },
                                     "desc_filiere": {
                                         "type": "string",
                                         "nullable": true
+=======
+                                    "rating": {
+                                        "type": "integer",
+                                        "example": 4
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "example": "Un peu lent mais correct"
+>>>>>>> main
                                     }
                                 },
                                 "type": "object"
@@ -197,6 +1218,7 @@
                 },
                 "responses": {
                     "200": {
+<<<<<<< HEAD
                         "description": "Updated successfully"
                     },
                     "404": {
@@ -220,11 +1242,39 @@
                         "required": true,
                         "schema": {
                             "type": "string"
+=======
+                        "description": "Avis mis à jour avec succès"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Reviews"
+                ],
+                "summary": "Supprimer un avis (Auteur ou Admin)",
+                "operationId": "c6da8f2af574635e95538fb5b99a0c90",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+>>>>>>> main
                         }
                     }
                 ],
                 "responses": {
                     "200": {
+<<<<<<< HEAD
                         "description": "Deleted successfully"
                     },
                     "404": {
@@ -248,18 +1298,1600 @@
                         "required": true,
                         "schema": {
                             "type": "string"
+=======
+                        "description": "Avis supprimé avec succès"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/roles": {
+            "get": {
+                "tags": [
+                    "Rôles"
+                ],
+                "summary": "Liste paginée des rôles",
+                "operationId": "ca86f0a206144dfbd695b749b4b28f9d",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Nombre d'éléments par page (défaut: 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "example": 10
+>>>>>>> main
                         }
                     }
                 ],
                 "responses": {
                     "200": {
+<<<<<<< HEAD
                         "description": "Search results",
+=======
+                        "description": "Liste des rôles récupérée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Role"
+                                                    }
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Rôles"
+                ],
+                "summary": "Créer un nouveau rôle",
+                "operationId": "341b8b162b61267c7bd187500aea5bc4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Role"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Rôle créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Rôle créé avec succès."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Role"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Données invalides"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/roles/{id}": {
+            "get": {
+                "tags": [
+                    "Rôles"
+                ],
+                "summary": "Afficher un rôle spécifique",
+                "operationId": "15c404caf238f1861c81f68205d328e5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du rôle",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails du rôle récupérés avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Role"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Rôle introuvable"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Rôles"
+                ],
+                "summary": "Mettre à jour un rôle existant",
+                "operationId": "c73ab816ae8fb7c34a995d37ba577082",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du rôle",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Role"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Rôle mis à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Rôle mis à jour avec succès."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Role"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Rôle introuvable"
+                    },
+                    "422": {
+                        "description": "Données invalides"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Rôles"
+                ],
+                "summary": "Supprimer un rôle",
+                "operationId": "ffa6ef115d86b00cc6c54a6210019f9c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du rôle",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rôle supprimé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Rôle supprimé avec succès."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Suppression impossible — rôle attribué à des utilisateurs",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Impossible de supprimer ce rôle car il est attribué à des utilisateurs."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Rôle introuvable"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/role-permissions": {
+            "post": {
+                "tags": [
+                    "Rôles & Permissions"
+                ],
+                "summary": "Assigner des permissions à un rôle",
+                "description": "Remplace toutes les permissions existantes du rôle par les nouvelles fournies (stratégie sync : supprime puis réinsère).",
+                "operationId": "2a7c04cd7e648a9298d3f2dd7e19b11a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "role_id",
+                                    "permissions"
+                                ],
+                                "properties": {
+                                    "role_id": {
+                                        "description": "ID du rôle cible",
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "permissions": {
+                                        "description": "Liste des IDs de permissions à assigner",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 5
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Permissions assignées avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Les permissions ont été assignées avec succès."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Données invalides"
+                    },
+                    "500": {
+                        "description": "Erreur serveur lors de la transaction",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur lors de l'assignation : ..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/type-documents": {
+            "get": {
+                "tags": [
+                    "Types de documents"
+                ],
+                "summary": "Liste paginée des types de documents",
+                "description": "Afficher la liste des types de documents avec pagination.",
+                "operationId": "4b4757021aab053527bb7ce5d7c7c5ed",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Nombre d'éléments par page (défaut: 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "example": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Numéro de la page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste récupérée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Liste des types de documents récupérée avec succès."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/TypeDocument"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "from": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "to": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Une erreur est survenue lors de la récupération des types de documents."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Types de documents"
+                ],
+                "summary": "Créer un nouveau type de document",
+                "description": "Créer un nouveau type de document.",
+                "operationId": "78788ae483cf736ede792351f2f2e3fe",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TypeDocument"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Type de document créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Type de document créé avec succès."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/TypeDocument"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Données invalides"
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Une erreur est survenue lors de la création du type de document."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/type-documents/{id}": {
+            "get": {
+                "tags": [
+                    "Types de documents"
+                ],
+                "summary": "Afficher un type de document spécifique",
+                "description": "Afficher un type de document spécifique.",
+                "operationId": "45edc1267af724ac4bed3a2478cadd0b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du type de document",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Type de document récupéré avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Type de document récupéré avec succès."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/TypeDocument"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Type de document non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Type de document non trouvé."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Une erreur est survenue lors de la récupération du type de document."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Types de documents"
+                ],
+                "summary": "Mettre à jour un type de document",
+                "description": "Mettre à jour un type de document.",
+                "operationId": "3da29fe27d675218cecbc696038a7fc2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du type de document",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TypeDocument"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Type de document mis à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Type de document mis à jour avec succès."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/TypeDocument"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Type de document non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Type de document non trouvé."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Données invalides"
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Une erreur est survenue lors de la mise à jour du type de document."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Types de documents"
+                ],
+                "summary": "Supprimer un type de document",
+                "description": "Supprimer un type de document.",
+                "operationId": "3ed87e275cedbf2d3484a6d03c525a42",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du type de document",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Type de document supprimé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Type de document supprimé avec succès."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Type de document non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Type de document non trouvé."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Une erreur est survenue lors de la suppression du type de document."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/utilisateurs/profile": {
+            "get": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Profil de l'utilisateur connecté",
+                "description": "Récupère les informations du profil de l'utilisateur connecté.",
+                "operationId": "5fd48d6087de64498a7403d85bdfb2c8",
+                "responses": {
+                    "200": {
+                        "description": "Profil récupéré avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/Utilisateur"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Mettre à jour le profil de l'utilisateur connecté",
+                "description": "Met à jour le profil de l'utilisateur connecté.",
+                "operationId": "d9835a977b072c3fedb2dad62f212d27",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "lastname",
+                                    "firstname",
+                                    "email",
+                                    "telephone",
+                                    "country"
+                                ],
+                                "properties": {
+                                    "lastname": {
+                                        "type": "string",
+                                        "example": "Dupont"
+                                    },
+                                    "firstname": {
+                                        "type": "string",
+                                        "example": "Jean"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean.dupont@example.com"
+                                    },
+                                    "telephone": {
+                                        "type": "string",
+                                        "example": "+33612345678"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "France"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil mis à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profil mis à jour avec succès."
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/Utilisateur"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Données invalides"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/utilisateurs/admins": {
+            "get": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Liste paginée des administrateurs (collaborateurs)",
+                "description": "🛡️ ADMIN : Récupère la liste des administrateurs (Collaborateurs) avec pagination.",
+                "operationId": "e4814f0d73472342196d1e1f6545bf65",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Nombre d'éléments par page (défaut: 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "example": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Numéro de la page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des administrateurs récupérée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Utilisateur"
+                                            }
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 50
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 5
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur lors de la récupération des administrateurs"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Créer un nouveau collaborateur administrateur",
+                "description": "Crée un compte admin, lui assigne un rôle et lui envoie ses identifiants par mail.",
+                "operationId": "1aa0b15a6bb107f01223e7e032ba8425",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "lastname",
+                                    "firstname",
+                                    "email",
+                                    "telephone",
+                                    "country",
+                                    "role_id"
+                                ],
+                                "properties": {
+                                    "lastname": {
+                                        "type": "string",
+                                        "example": "Dupont"
+                                    },
+                                    "firstname": {
+                                        "type": "string",
+                                        "example": "Jean"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean.dupont@example.com"
+                                    },
+                                    "telephone": {
+                                        "type": "string",
+                                        "example": "+33612345678"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "France"
+                                    },
+                                    "role_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Administrateur créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Administrateur créé avec succès. Un mail a été envoyé."
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/Utilisateur"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Données invalides"
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur lors de la création de l'administrateur."
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/utilisateurs/admins/{id}": {
+            "put": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Mettre à jour un collaborateur administrateur",
+                "description": "🛡️ ADMIN : Modifier un collaborateur existant.",
+                "operationId": "aea7d35110f1a32db3f238aab85e8953",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du collaborateur",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "lastname",
+                                    "firstname",
+                                    "email",
+                                    "telephone",
+                                    "country",
+                                    "role_id",
+                                    "isactive"
+                                ],
+                                "properties": {
+                                    "lastname": {
+                                        "type": "string",
+                                        "example": "Dupont"
+                                    },
+                                    "firstname": {
+                                        "type": "string",
+                                        "example": "Jean"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean.dupont@example.com"
+                                    },
+                                    "telephone": {
+                                        "type": "string",
+                                        "example": "+33612345678"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "France"
+                                    },
+                                    "role_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "isactive": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Collaborateur mis à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Collaborateur mis à jour avec succès."
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/Utilisateur"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Collaborateur introuvable",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Collaborateur introuvable."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Données invalides",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Données invalides."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur lors de la mise à jour."
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Supprimer un collaborateur administrateur",
+                "description": "Un administrateur ne peut pas supprimer son propre compte.",
+                "operationId": "4725a716f3df390c9aaddf2d93fb2e86",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du collaborateur à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Collaborateur supprimé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Collaborateur supprimé avec succès."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Auto-suppression interdite",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Vous ne pouvez pas supprimer votre propre compte."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Collaborateur introuvable",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Collaborateur introuvable."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur lors de la suppression."
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/utilisateurs/password": {
+            "post": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Changer le mot de passe de l'utilisateur connecté",
+                "description": "Change le mot de passe de l'utilisateur connecté.",
+                "operationId": "121f47133068f605f62e6cd5af51bc5c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "old_password",
+                                    "new_password",
+                                    "new_password_confirmation"
+                                ],
+                                "properties": {
+                                    "old_password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "ancienMotDePasse"
+                                    },
+                                    "new_password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "nouveauMotDePasse1!"
+                                    },
+                                    "new_password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "nouveauMotDePasse1!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mot de passe modifié avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mot de passe modifié avec succès."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Ancien mot de passe incorrect ou données invalides",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "L'ancien mot de passe est incorrect."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/utilisateurs": {
+            "get": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Liste des utilisateurs simples actifs",
+                "description": "Récupère la liste des utilisateurs simples (type 'user').",
+                "operationId": "bac62e6432bdb54e46d818a4f242c5c5",
+                "responses": {
+                    "200": {
+                        "description": "Liste récupérée avec succès",
+>>>>>>> main
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "array",
                                     "items": {
                                         "properties": {
+<<<<<<< HEAD
                                             "code_filiere": {
                                                 "type": "string"
                                             },
@@ -276,6 +2908,24 @@
                                             "updated_at": {
                                                 "type": "string",
                                                 "format": "date-time"
+=======
+                                            "user_id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "firstname": {
+                                                "type": "string",
+                                                "example": "Jean"
+                                            },
+                                            "lastname": {
+                                                "type": "string",
+                                                "example": "Dupont"
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "format": "email",
+                                                "example": "jean.dupont@example.com"
+>>>>>>> main
                                             }
                                         },
                                         "type": "object"
@@ -284,6 +2934,7 @@
                             }
                         }
                     },
+<<<<<<< HEAD
                     "404": {
                         "description": "No results found"
                     },
@@ -291,13 +2942,210 @@
                         "description": "No search term provided"
                     }
                 }
+=======
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur lors de la récupération des utilisateurs"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Role": {
+                "properties": {
+                    "role_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "admin"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Administrateur du système"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "TypeDocument": {
+                "properties": {
+                    "type_document_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Carte d'identité"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Document d'identité"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Utilisateur": {
+                "properties": {
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Dupont"
+                    },
+                    "firstname": {
+                        "type": "string",
+                        "example": "Jean"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "jean.dupont@example.com"
+                    },
+                    "telephone": {
+                        "type": "string",
+                        "example": "+33612345678"
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "France"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "admin",
+                            "user"
+                        ],
+                        "example": "admin"
+                    },
+                    "isactive": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "isverified": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer"
+>>>>>>> main
             }
         }
     },
     "tags": [
         {
+<<<<<<< HEAD
             "name": "Filieres",
             "description": "Filieres"
+=======
+            "name": "Rôles",
+            "description": "Gestion des rôles"
+        },
+        {
+            "name": "Rôles & Permissions",
+            "description": "Gestion de l'assignation des permissions aux rôles"
+        },
+        {
+            "name": "Types de documents",
+            "description": "Gestion des types de documents"
+        },
+        {
+            "name": "Utilisateurs",
+            "description": "Gestion des utilisateurs et des collaborateurs"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Feedback",
+            "description": "Feedback"
+        },
+        {
+            "name": "KYC (Admin)",
+            "description": "KYC (Admin)"
+        },
+        {
+            "name": "KYC",
+            "description": "KYC"
+        },
+        {
+            "name": "Listings",
+            "description": "Listings"
+        },
+        {
+            "name": "Notifications",
+            "description": "Notifications"
+        },
+        {
+            "name": "Notifications (Admin)",
+            "description": "Notifications (Admin)"
+        },
+        {
+            "name": "Permissions (Admin)",
+            "description": "Permissions (Admin)"
+        },
+        {
+            "name": "Reviews",
+            "description": "Reviews"
+>>>>>>> main
         }
     ]
 }
