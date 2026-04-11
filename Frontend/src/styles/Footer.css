@@ -12,9 +12,6 @@
     font-weight: 800;
 }
 
-/* ✅ CORRECTION LIGNE 50-51 : Passage à #e2e8f0 
-   Ce gris très clair garantit un ratio de contraste élevé (> 4.5:1) 
-   pour les petits textes sur fond bleu sombre. */
 .footer-description {
     color: #e2e8f0; 
     font-size: 0.85rem;
@@ -23,7 +20,6 @@
 }
 
 .footer-title {
-    /* Éclaircissement subtil de l'orange pour l'accessibilité des titres */
     color: #ffa533; 
     text-transform: uppercase;
     letter-spacing: 1.2px;
@@ -36,7 +32,6 @@
 }
 
 .footer-links a {
-    /* ✅ CORRECTION : Utilisation du gris clair e2e8f0 pour les liens */
     color: #e2e8f0;
     text-decoration: none;
     font-size: 0.85rem;
@@ -48,30 +43,31 @@
     padding-left: 4px;
 }
 
+/* ✅ CORRECTION LIGNE 55 : Augmentation du contraste des icônes sociales */
 .social-icon {
     width: 32px;
     height: 32px;
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
+    /* Augmentation de l'opacité du fond pour une meilleure visibilité (de 0.05 à 0.15) */
+    background: rgba(255, 255, 255, 0.15); 
+    color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
     font-size: 0.9rem;
     transition: 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Ajout d'une légère bordure */
 }
 
 .social-icon:hover {
     background: var(--excha-orange);
-    color: white;
+    color: #0a2540; /* Texte sombre sur fond orange au hover pour le contraste */
     transform: translateY(-3px);
 }
 
 .btn-excha-orange {
     background-color: var(--excha-orange);
     border: none;
-    /* ✅ CONTRASTE OPTIMAL : Texte bleu nuit sur fond orange 
-       pour valider les critères d'accessibilité. */
     color: #0a2540; 
     font-weight: 700;
     transition: 0.3s;
@@ -84,11 +80,12 @@
 }
 
 .footer-divider {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.12); /* Un peu plus visible */
 }
 
 .footer-bottom {
-    color: #cbd5e0;
+    /* ✅ CORRECTION : Gris plus clair pour le petit texte en bas */
+    color: #e2e8f0;
     font-size: 0.75rem;
 }
 
