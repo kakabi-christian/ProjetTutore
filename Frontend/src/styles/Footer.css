@@ -43,12 +43,12 @@
     padding-left: 4px;
 }
 
-/* ✅ CORRECTION LIGNE 55 : Optimisation du contraste des icônes sociales */
+/* ✅ CORRECTION STRATÉGIQUE LIGNE 55 : Suppression des opacités rgba */
 .social-icon {
     width: 32px;
     height: 32px;
-    /* On passe à une opacité de 0.25 pour que le conteneur soit bien distinct */
-    background: rgba(255, 255, 255, 0.25); 
+    /* Utilisation d'une couleur solide calculée pour le contraste */
+    background-color: #1a3a5a; 
     color: #ffffff;
     display: flex;
     align-items: center;
@@ -56,13 +56,13 @@
     border-radius: 8px;
     font-size: 0.9rem;
     transition: 0.3s;
-    /* Une bordure légère aide à délimiter l'élément pour l'accessibilité */
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    /* Bordure solide pour une délimitation claire */
+    border: 1px solid #2d4e70;
 }
 
 .social-icon:hover {
-    background: #ffb347; /* Utilisation de l'orange "accessible" au hover */
-    color: #0a2540; /* Texte sombre sur fond clair au hover */
+    background-color: #ffb347; /* Orange accessible */
+    color: #0a2540; /* Texte sombre sur fond clair pour le contraste */
     transform: translateY(-3px);
 }
 
@@ -81,7 +81,8 @@
 }
 
 .footer-divider {
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    /* Utilisation d'une couleur solide très proche du fond au lieu de rgba */
+    border-top: 1px solid #1a3550;
 }
 
 .footer-bottom {
