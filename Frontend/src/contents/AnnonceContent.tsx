@@ -15,27 +15,23 @@ export default function AnnonceContent() {
 
     const fetchRecentListings = async () => {
       try {
-        // 1. Appel au service
         const response: any = await ListingService.getAllListings(1, { 
           sort_by: 'created_at', 
           sort_order: 'desc' 
         });
         
-        // 2. Extraction sécurisée avec typage dynamique pour éviter l'erreur TS(2339)
         let fetchedData: Listing[] = [];
 
-        if (response && response.data) {
-          // Si c'est une pagination Laravel { data: { data: [...] } }
-          if (Array.isArray(response.data.data)) {
-            fetchedData = response.data.data;
-          } 
-          // Si c'est une liste simple { data: [...] }
-          else if (Array.isArray(response.data)) {
-            fetchedData = response.data;
+        // ✅ CORRECTION LIGNE 27 : Utilisation de l'optional chaining (?.)
+        const dataRoot = response?.data;
+        if (dataRoot) {
+          if (Array.isArray(dataRoot.data)) {
+            fetchedData = dataRoot.data;
+          } else if (Array.isArray(dataRoot)) {
+            fetchedData = dataRoot;
           }
         }
         
-        // 3. Limitation aux 6 plus récents et mise à jour du state
         setListings(fetchedData.slice(0, 6));
 
       } catch (error) {
@@ -50,7 +46,6 @@ export default function AnnonceContent() {
 
   return (
     <div className="annonce-container p-2">
-      {/* SECTION 1 : En-tête (Toujours visible) */}
       <div className="text-center mb-5" data-aos="fade-down" style={{ marginTop:'5%' }}>
         <h2 className="fw-bold text-excha-blue mb-2">Marché de Change en Temps Réel</h2>
         <p className="text-muted mx-auto" style={{ maxWidth: '600px', fontSize: '0.95rem' }}>
@@ -63,15 +58,16 @@ export default function AnnonceContent() {
                 <LuShieldCheck className="me-1 text-excha-green" /> Sécurité Escrow
             </span>
             <span className="badge bg-excha-green text-white px-3 py-2 rounded-pill small">
-                {!loading ? listings.length : '...'} Offres en direct
+                {/* ✅ CORRECTION LIGNE 66 : Suppression de la négation inattendue (!loading) */}
+                {loading ? '...' : listings.length} Offres en direct
             </span>
         </div>
       </div>
 
-      {/* SECTION 2 : Grille des annonces ou Loader */}
       {loading ? (
         <div className="text-center py-5">
-          <div className="spinner-border text-excha-green" role="status"></div>
+          {/* ✅ CORRECTION LIGNE 74 : Utilisation de <output> pour l'accessibilité */}
+          <output className="spinner-border text-excha-green"></output>
           <p className="mt-2 text-muted small">Analyse du marché en cours...</p>
         </div>
       ) : (
@@ -85,13 +81,12 @@ export default function AnnonceContent() {
 
           <div className="row g-3">
             {listings.length > 0 ? (
-              listings.map((listing, index) => (
+              listings.map((listing) => (
+                // ✅ CORRECTION : Utilisation de listing_id unique au lieu de l'index
                 <div className="col-12 col-md-6 col-lg-4" 
-                     key={listing.listing_id || index} 
-                     data-aos="zoom-in" 
-                     data-aos-delay={index * 50}>
+                     key={listing.listing_id} 
+                     data-aos="zoom-in">
                   <div className="card listing-card border-0 shadow-sm h-100 transition-all hover-shadow">
-                    
                     <div className="card-header bg-white border-0 pt-3">
                       <div className="d-flex justify-content-between align-items-center">
                         <div className="currency-pair d-flex align-items-center gap-2">
@@ -158,4 +153,3 @@ export default function AnnonceContent() {
     </div>
   );
 }
-// ###################################################

@@ -3,8 +3,8 @@
   --excha-orange: #ff8c00;
   --dark-blue-footer: #0a2540;
   --white: #f8fffe;
-  /* ✅ CORRECTION CONTRASTE : Opacité augmentée pour la lisibilité sur fond sombre */
-  --text-gray: rgba(248, 255, 254, 0.9); 
+  /* ✅ CORRECTION CONTRASTE : Texte de navigation presque opaque pour fond sombre */
+  --text-gray: rgba(248, 255, 254, 0.95); 
 }
 
 .navbar-custom {
@@ -64,14 +64,14 @@
   font-size: 0.9rem;
 }
 
+/* ✅ CORRECTION LIGNE 73 : Texte sombre sur fond clair pour un contraste optimal */
 .btn-primary-gradient {
   padding: 10px 22px;
   border: none;
   border-radius: 8px;
-  /* ✅ CORRECTION LIGNE 71 : Vert légèrement assombri pour booster le contraste du texte blanc */
-  background: linear-gradient(135deg, #00ad82, #008a69);
-  color: #ffffff; 
-  font-weight: 600;
+  background: linear-gradient(135deg, var(--excha-green), #00ad82);
+  color: #0a2540; 
+  font-weight: 700; 
   font-size: 0.85rem;
   cursor: pointer;
   transition: transform 0.2s, filter 0.2s;
@@ -79,7 +79,7 @@
 
 .btn-primary-gradient:hover {
   transform: translateY(-1px);
-  filter: brightness(1.1);
+  filter: brightness(1.05);
 }
 
 /* ---- Hamburger Animé ---- */
@@ -210,15 +210,22 @@
   opacity: 1;
 }
 
+/* ✅ CORRECTION LIGNE 226 : Augmentation de l'opacité pour le contraste AA */
 .btn-mobile-secondary {
   color: #ffffff; 
   text-decoration: none;
   font-weight: 600;
   font-size: 1.1rem;
   padding: 15px;
-  border: 2px solid rgba(255, 255, 255, 0.5); /* ✅ Visibilité accrue */
+  /* Passage de 0.6 à 0.85 pour une meilleure distinction sur fond sombre */
+  border: 2px solid rgba(255, 255, 255, 0.85); 
   border-radius: 12px;
   text-align: center;
+  transition: background-color 0.3s;
+}
+
+.btn-mobile-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .btn-mobile-primary {

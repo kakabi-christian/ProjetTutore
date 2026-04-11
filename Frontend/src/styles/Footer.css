@@ -13,7 +13,8 @@
 }
 
 .footer-description {
-    color: #a0aec0;
+    /* ✅ Correction : Passage à un gris plus clair pour le contraste AA */
+    color: #cbd5e0; 
     font-size: 0.85rem;
     max-width: 280px;
 }
@@ -30,7 +31,8 @@
 }
 
 .footer-links a {
-    color: #a0aec0;
+    /* ✅ Correction : Même couleur pour les liens */
+    color: #cbd5e0;
     text-decoration: none;
     font-size: 0.85rem;
     transition: 0.3s ease;

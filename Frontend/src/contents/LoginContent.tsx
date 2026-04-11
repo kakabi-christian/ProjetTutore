@@ -97,7 +97,6 @@ export default function LoginContent() {
         )}
 
         <form onSubmit={handleSubmit} className="login-form">
-          {/* ✅ CORRECTION LIGNE 106 : Liaison Label/Input Email */}
           <div className="mb-4" data-aos="fade-up" data-aos-delay="400">
             <label htmlFor="login-email" className="form-label small fw-bold mb-2" style={{ color: '#1A4B8C' }}>Adresse Email</label>
             <div className="input-group">
@@ -116,7 +115,6 @@ export default function LoginContent() {
             </div>
           </div>
 
-          {/* ✅ CORRECTION : Liaison Label/Input Mot de passe */}
           <div className="mb-3" data-aos="fade-up" data-aos-delay="600">
             <div className="d-flex justify-content-between mb-2">
               <label htmlFor="login-password" className="form-label small fw-bold" style={{ color: '#1A4B8C' }}>Mot de passe</label>
@@ -151,7 +149,8 @@ export default function LoginContent() {
                       fontSize: '1rem'
                     }}>
               {loading ? (
-                <span className="spinner-border spinner-border-sm" role="status"></span>
+                /* ✅ CORRECTION LIGNE 154 : Remplacement de role="status" par <output> */
+                <output className="spinner-border spinner-border-sm"></output>
               ) : (
                 <>Se connecter <MdArrowForward /></>
               )}

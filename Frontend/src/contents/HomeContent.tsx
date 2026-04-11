@@ -145,7 +145,6 @@ const HomeContent: React.FC = () => {
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-4 text-center">
             <div className="trust-item d-flex align-items-center gap-2 opacity-75"><LuShieldAlert className="text-excha-green" /> Sécurité PCI-DSS</div>
             <div className="trust-item d-flex align-items-center gap-2 opacity-75"><LuSmartphone className="text-excha-green" /> Mobile Money</div>
-            {/* <div className="trust-item d-flex align-items-center gap-2 opacity-75"><LuBot className="text-excha-green" /> Assistant IA 24/7</div> */}
             <div className="trust-item d-flex align-items-center gap-2 opacity-75"><LuZap className="text-excha-green" /> Transactions rapides</div>
           </div>
         </div>
@@ -159,7 +158,8 @@ const HomeContent: React.FC = () => {
         </div>
         <div className="row g-4">
           {steps.map((step, i) => (
-            <div className="col-sm-6 col-lg-3" key={i} data-aos="fade-up" data-aos-delay={i * 100}>
+            /* ✅ CORRECTION : Utilisation de step.num au lieu de l'index i */
+            <div className="col-sm-6 col-lg-3" key={step.num} data-aos="fade-up" data-aos-delay={i * 100}>
               <div className="step-card h-100 p-4 border-0 shadow-sm rounded-4 position-relative overflow-hidden bg-white value-card">
                 <div className="step-num-bg text-orange display-1 position-absolute top-0 end-0 opacity-10 fw-bold">{step.num}</div>
                 <div className={`step-icon mb-3 fs-1 p-3 rounded-4 d-inline-block shadow-sm icon-${step.color}`} style={{position: 'relative', zIndex: 1}}>{step.icon}</div>
@@ -171,7 +171,7 @@ const HomeContent: React.FC = () => {
         </div>
       </section>
 
-      {/* TESTIMONIALS SECTION (NEW) */}
+      {/* TESTIMONIALS SECTION */}
       <section className="bg-light py-5">
         <div className="container py-5">
           <div className="text-center mb-5" data-aos="fade-up">
@@ -180,7 +180,8 @@ const HomeContent: React.FC = () => {
           </div>
           <div className="row g-4">
             {testimonials.map((t, i) => (
-              <div className="col-md-4" key={i} data-aos="zoom-in" data-aos-delay={i * 150}>
+              /* ✅ CORRECTION : Utilisation de t.name au lieu de l'index i */
+              <div className="col-md-4" key={t.name} data-aos="zoom-in" data-aos-delay={i * 150}>
                 <div className="testimonial-card p-4 rounded-4 bg-white shadow-sm border-0 h-100">
                   <LuQuote className="text-excha-orange fs-2 mb-3 opacity-50" />
                   <p className="fst-italic text-muted mb-4">"{t.text}"</p>
