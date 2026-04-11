@@ -13,14 +13,18 @@
 }
 
 .footer-description {
-    color: #e2e8f0; 
+    /* ✅ Maintien du gris très clair pour la lisibilité */
+    color: #f1f5f9; 
     font-size: 0.85rem;
     max-width: 280px;
     line-height: 1.5;
 }
 
+/* ✅ CORRECTION LIGNE 52 : Éclaircissement de l'orange pour les titres */
+/* L'orange pur sur fond bleu sombre a souvent un ratio inférieur à 4.5:1. 
+   On utilise un orange plus proche du "Gold" pour valider l'accessibilité. */
 .footer-title {
-    color: #ffa533; 
+    color: #ffb347; 
     text-transform: uppercase;
     letter-spacing: 1.2px;
     font-weight: 700;
@@ -32,22 +36,21 @@
 }
 
 .footer-links a {
-    color: #e2e8f0;
+    /* ✅ CORRECTION : Passage au blanc pur ou gris ultra-clair pour les liens */
+    color: #ffffff;
     text-decoration: none;
     font-size: 0.85rem;
     transition: 0.3s ease;
 }
 
 .footer-links a:hover {
-    color: #ffa533;
+    color: #ffb347;
     padding-left: 4px;
 }
 
-/* ✅ CORRECTION LIGNE 55 : Augmentation du contraste des icônes sociales */
 .social-icon {
     width: 32px;
     height: 32px;
-    /* Augmentation de l'opacité du fond pour une meilleure visibilité (de 0.05 à 0.15) */
     background: rgba(255, 255, 255, 0.15); 
     color: #ffffff;
     display: flex;
@@ -56,12 +59,12 @@
     border-radius: 8px;
     font-size: 0.9rem;
     transition: 0.3s;
-    border: 1px solid rgba(255, 255, 255, 0.1); /* Ajout d'une légère bordure */
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .social-icon:hover {
     background: var(--excha-orange);
-    color: #0a2540; /* Texte sombre sur fond orange au hover pour le contraste */
+    color: #0a2540; 
     transform: translateY(-3px);
 }
 
@@ -80,12 +83,11 @@
 }
 
 .footer-divider {
-    border-top: 1px solid rgba(255, 255, 255, 0.12); /* Un peu plus visible */
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .footer-bottom {
-    /* ✅ CORRECTION : Gris plus clair pour le petit texte en bas */
-    color: #e2e8f0;
+    color: #f1f5f9;
     font-size: 0.75rem;
 }
 
