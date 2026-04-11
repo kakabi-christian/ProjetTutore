@@ -5,8 +5,8 @@ import type { SingleValue } from "react-select";
 import { authService } from "../services/authService";
 import type { UserRegistration } from "../models/Utilisateur";
 import { MdPerson, MdEmail, MdPhone, MdLock, MdArrowForward } from "react-icons/md";
-import AOS from 'aos'; // 1. Import AOS
-import 'aos/dist/aos.css'; // 2. Style AOS
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 import "../styles/RegisterContent.css";
 import "../theme.css";
 
@@ -35,11 +35,10 @@ export default function RegisterContent() {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
-    // 3. Initialisation de AOS
     AOS.init({
       duration: 1000,
       once: true,
-      easing: 'ease-out-back' // Un petit effet de rebond pour le dynamisme
+      easing: 'ease-out-back'
     });
 
     const fetchCountries = async () => {
@@ -117,7 +116,6 @@ export default function RegisterContent() {
     <div className="register-page-wrapper d-flex align-items-center justify-content-center py-2" 
          style={{ minHeight: '100vh', background: 'radial-gradient(circle at center, #F8FFFE 0%, #E6F0EE 100%)' }}>
       
-      {/* Animation d'entrée globale du formulaire */}
       <div className="register-card p-3 p-md-4 shadow-lg bg-white rounded-4 border-0" 
            data-aos="fade-up"
            style={{ maxWidth: '550px', width: '95%' }}>
@@ -140,38 +138,45 @@ export default function RegisterContent() {
           {/* LIGNE 1 : PRENOM & NOM */}
           <div className="row g-2 mb-2" data-aos="fade-right" data-aos-delay="300">
             <div className="col-6">
-              <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Prénom</label>
+              <label htmlFor="firstname" className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Prénom</label>
               <div className="input-group input-group-sm">
                 <span className="input-group-text bg-light border-0"><MdPerson size={14} /></span>
-                <input type="text" name="firstname" className="form-control border-0 bg-light" value={formData.firstname} onChange={handleChange} required />
+                <input id="firstname" type="text" name="firstname" className="form-control border-0 bg-light" value={formData.firstname} onChange={handleChange} required />
               </div>
             </div>
             <div className="col-6">
-              <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Nom</label>
-              <input type="text" name="lastname" className="form-control form-control-sm border-0 bg-light px-2" value={formData.lastname} onChange={handleChange} required />
+              <label htmlFor="lastname" className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Nom</label>
+              <input id="lastname" type="text" name="lastname" className="form-control form-control-sm border-0 bg-light px-2" value={formData.lastname} onChange={handleChange} required />
             </div>
           </div>
 
           {/* LIGNE 2 : EMAIL */}
           <div className="mb-2" data-aos="fade-right" data-aos-delay="400">
-            <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Adresse Email</label>
+            <label htmlFor="email" className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Adresse Email</label>
             <div className="input-group input-group-sm">
               <span className="input-group-text bg-light border-0"><MdEmail size={14} /></span>
-              <input type="email" name="email" className="form-control border-0 bg-light" value={formData.email} onChange={handleChange} required />
+              <input id="email" type="email" name="email" className="form-control border-0 bg-light" value={formData.email} onChange={handleChange} required />
             </div>
           </div>
 
           {/* LIGNE 3 : PAYS & TELEPHONE */}
           <div className="row g-2 mb-2" data-aos="fade-right" data-aos-delay="500">
             <div className="col-6">
-              <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Pays</label>
-              <Select options={countries} onChange={handleCountryChange} styles={customSelectStyles} placeholder="Pays..." />
+              <label htmlFor="country-select" className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Pays</label>
+              <Select 
+                id="country-select" 
+                inputId="country-select" 
+                options={countries} 
+                onChange={handleCountryChange} 
+                styles={customSelectStyles} 
+                placeholder="Pays..." 
+              />
             </div>
             <div className="col-6">
-              <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Téléphone</label>
+              <label htmlFor="telephone" className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Téléphone</label>
               <div className="input-group input-group-sm">
                 <span className="input-group-text bg-light border-0"><MdPhone size={14} /></span>
-                <input type="tel" name="telephone" className="form-control border-0 bg-light" value={formData.telephone} onChange={handleChange} required />
+                <input id="telephone" type="tel" name="telephone" className="form-control border-0 bg-light" value={formData.telephone} onChange={handleChange} required />
               </div>
             </div>
           </div>
@@ -179,15 +184,15 @@ export default function RegisterContent() {
           {/* LIGNE 4 : MOT DE PASSE & CONFIRMATION */}
           <div className="row g-2 mb-3" data-aos="fade-right" data-aos-delay="600">
             <div className="col-6">
-              <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Mot de passe</label>
+              <label htmlFor="password" className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Mot de passe</label>
               <div className="input-group input-group-sm">
                 <span className="input-group-text bg-light border-0"><MdLock size={14} /></span>
-                <input type="password" name="password" className="form-control border-0 bg-light" value={formData.password} onChange={handleChange} required />
+                <input id="password" type="password" name="password" className="form-control border-0 bg-light" value={formData.password} onChange={handleChange} required />
               </div>
             </div>
             <div className="col-6">
-              <label className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Confirmation</label>
-              <input type="password" name="password_confirmation" className="form-control form-control-sm border-0 bg-light px-2" value={formData.password_confirmation} onChange={handleChange} required />
+              <label htmlFor="password_confirmation" className="form-label fw-bold mb-1" style={{ color: '#1A4B8C', fontSize: '0.7rem' }}>Confirmation</label>
+              <input id="password_confirmation" type="password" name="password_confirmation" className="form-control form-control-sm border-0 bg-light px-2" value={formData.password_confirmation} onChange={handleChange} required />
             </div>
           </div>
 

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { authService } from "../services/authService";
 import { MdEmail, MdLock, MdArrowForward, MdErrorOutline, MdCheckCircleOutline } from "react-icons/md";
-import AOS from 'aos'; // 1. Importation de AOS
-import 'aos/dist/aos.css'; // 2. Importation du style AOS
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 import "../styles/LoginContent.css"; 
 import "../theme.css";
 
@@ -20,10 +20,9 @@ export default function LoginContent() {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
-    // 3. Initialisation de AOS au montage du composant
     AOS.init({
       duration: 1000,
-      once: true, // L'animation ne se joue qu'une fois
+      once: true,
       easing: 'ease-out-quart',
     });
 
@@ -69,14 +68,12 @@ export default function LoginContent() {
 
   return (
     <div className="login-page-wrapper d-flex align-items-center justify-content-center" 
-         style={{ minHeight: '100vh', background: 'radial-gradient(circle at center, #F8FFFE 0%, #E6F0EE 100%)' }}>
+          style={{ minHeight: '100vh', background: 'radial-gradient(circle at center, #F8FFFE 0%, #E6F0EE 100%)' }}>
       
-      {/* 4. Ajout de l'attribut data-aos pour l'animation de la carte */}
       <div className="login-card p-4 p-md-5 shadow-2xl bg-white rounded-5 border-0" 
-           data-aos="zoom-in-up"
-           style={{ maxWidth: '450px', width: '90%' }}>
+            data-aos="zoom-in-up"
+            style={{ maxWidth: '450px', width: '90%' }}>
         
-        {/* Header avec Logo/Identité */}
         <div className="text-center mb-5" data-aos="fade-down" data-aos-delay="200">
           <h2 className="fw-bold mb-2" style={{ color: '#0A2540' }}>Bon retour !</h2>
           <p style={{ color: '#8A9BB0' }}>
@@ -84,15 +81,14 @@ export default function LoginContent() {
           </p>
         </div>
 
-        {/* Messages d'alerte */}
         {message && (
           <div className={`d-flex align-items-center p-3 mb-4 rounded-4`} 
-               data-aos="shake"
-               style={{ 
-                 backgroundColor: message.type === 'success' ? '#E6F9F4' : '#FFF0EA',
-                 borderLeft: `5px solid ${message.type === 'success' ? '#00C896' : '#FF6B2B'}`,
-                 color: message.type === 'success' ? '#009E76' : '#FF6B2B'
-               }}>
+                data-aos="shake"
+                style={{ 
+                  backgroundColor: message.type === 'success' ? '#E6F9F4' : '#FFF0EA',
+                  borderLeft: `5px solid ${message.type === 'success' ? '#00C896' : '#FF6B2B'}`,
+                  color: message.type === 'success' ? '#009E76' : '#FF6B2B'
+                }}>
             <span className="fs-4 me-3">
               {message.type === "success" ? <MdCheckCircleOutline /> : <MdErrorOutline />}
             </span>
@@ -101,12 +97,13 @@ export default function LoginContent() {
         )}
 
         <form onSubmit={handleSubmit} className="login-form">
-          {/* Champ Email avec délai pour effet cascade */}
+          {/* ✅ CORRECTION LIGNE 106 : Liaison Label/Input Email */}
           <div className="mb-4" data-aos="fade-up" data-aos-delay="400">
-            <label className="form-label small fw-bold mb-2" style={{ color: '#1A4B8C' }}>Adresse Email</label>
+            <label htmlFor="login-email" className="form-label small fw-bold mb-2" style={{ color: '#1A4B8C' }}>Adresse Email</label>
             <div className="input-group">
               <span className="input-group-text bg-light border-0 px-3" style={{ color: '#8A9BB0' }}><MdEmail /></span>
               <input 
+                id="login-email"
                 type="email" 
                 className="form-control form-control-lg border-0 bg-light fs-6"
                 style={{ borderRadius: '0 12px 12px 0' }}
@@ -119,10 +116,10 @@ export default function LoginContent() {
             </div>
           </div>
 
-          {/* Champ Mot de passe */}
+          {/* ✅ CORRECTION : Liaison Label/Input Mot de passe */}
           <div className="mb-3" data-aos="fade-up" data-aos-delay="600">
             <div className="d-flex justify-content-between mb-2">
-              <label className="form-label small fw-bold" style={{ color: '#1A4B8C' }}>Mot de passe</label>
+              <label htmlFor="login-password" className="form-label small fw-bold" style={{ color: '#1A4B8C' }}>Mot de passe</label>
               <Link to="/forgot-password" style={{ color: '#FF6B2B' }} className="small fw-bold text-decoration-none hover-underline">
                 Oublié ?
               </Link>
@@ -130,6 +127,7 @@ export default function LoginContent() {
             <div className="input-group">
               <span className="input-group-text bg-light border-0 px-3" style={{ color: '#8A9BB0' }}><MdLock /></span>
               <input 
+                id="login-password"
                 type="password" 
                 className="form-control form-control-lg border-0 bg-light fs-6"
                 style={{ borderRadius: '0 12px 12px 0' }}
@@ -142,7 +140,6 @@ export default function LoginContent() {
             </div>
           </div>
 
-          {/* Bouton de Connexion */}
           <div data-aos="fade-up" data-aos-delay="800">
             <button type="submit" 
                     className="btn w-100 mt-4 py-3 rounded-pill fw-bold shadow-lg d-flex align-items-center justify-content-center gap-2 btn-login-submit" 
@@ -162,7 +159,6 @@ export default function LoginContent() {
           </div>
         </form>
 
-        {/* Footer Card */}
         <div className="mt-5 text-center" data-aos="fade-in" data-aos-delay="1000">
           <p className="small mb-0" style={{ color: '#8A9BB0' }}>
             Pas encore de compte ? 

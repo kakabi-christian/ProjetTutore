@@ -6,6 +6,13 @@ import { Link } from "react-router-dom";
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // ✅ Fonction pour gérer la fermeture via le clavier (Touche Entrée ou Espace)
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      setMenuOpen(false);
+    }
+  };
+
   return (
     <header className="main-header">
       <nav className="navbar-custom">
@@ -25,13 +32,15 @@ const Header: React.FC = () => {
         <div className="nav-cta">
           <Link to="/login" className="login-link">Connexion</Link>
           <Link to="/register">
-            <button className="btn-primary-gradient">S'inscrire</button>
+            <button className="btn-primary-gradient" type="button">S'inscrire</button>
           </Link>
 
           <button
+            type="button"
             className={`hamburger ${menuOpen ? "open" : ""}`}
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Menu"
+            aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-expanded={menuOpen}
           >
             <span />
             <span />
@@ -40,10 +49,17 @@ const Header: React.FC = () => {
         </div>
       </nav>
 
-      {/* Overlay mobile */}
-      <div className={`menu-overlay ${menuOpen ? "active" : ""}`} onClick={() => setMenuOpen(false)}></div>
+      {/* ✅ CORRECTION LIGNE 44 : Ajout du rôle, du tabIndex et du Keyboard Listener */}
+      <div 
+        className={`menu-overlay ${menuOpen ? "active" : ""}`} 
+        onClick={() => setMenuOpen(false)}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={menuOpen ? 0 : -1} 
+        aria-label="Fermer le menu"
+      ></div>
 
-      <div className={`mobile-menu ${menuOpen ? "open" : ""}`}>
+      <div className={`mobile-menu ${menuOpen ? "open" : ""}`} aria-hidden={!menuOpen}>
         <ul className="mobile-nav-list">
           <li><Link to="/" onClick={() => setMenuOpen(false)}>Accueil</Link></li>
           <li><Link to="/about" onClick={() => setMenuOpen(false)}>À propos</Link></li>

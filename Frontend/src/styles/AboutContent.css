@@ -46,15 +46,20 @@
     box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
 }
 
+/* ✅ CORRECTION LIGNE 51 : Amélioration du contraste */
 .btn-excha-orange {
     background-color: #ff8c00;
-    color: white;
-    transition: transform 0.3s ease;
+    /* On utilise le bleu foncé du projet pour un contraste maximal (8:1+) */
+    color: #0a2540; 
+    font-weight: 700; /* On épaissit un peu le texte pour la lisibilité */
+    transition: all 0.3s ease;
+    border: none;
 }
 
 .btn-excha-orange:hover {
     transform: scale(1.05);
-    color: white;
+    background-color: #e67e00; /* Un orange un peu plus soutenu au survol */
+    color: #0a2540;
 }
 
 @media (max-width: 768px) {

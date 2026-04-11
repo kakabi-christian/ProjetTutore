@@ -13,7 +13,6 @@ import {
 
 const HowItWorkContent: React.FC = () => {
   useEffect(() => {
-    // Initialisation avec once: false pour que l'animation se répète au scroll
     AOS.init({ 
       duration: 800, 
       once: false, 
@@ -23,24 +22,28 @@ const HowItWorkContent: React.FC = () => {
 
   const steps = [
     {
+      id: "step-register", // ✅ Ajout d'un ID unique
       icon: <LuUserPlus />,
       title: "Inscription & Profil",
       desc: "Créez votre compte en quelques secondes et validez votre identité pour garantir la sécurité de la communauté.",
       color: "blue"
     },
     {
+      id: "step-search",
       icon: <LuSearch />,
       title: "Trouvez une offre",
       desc: "Parcourez les annonces disponibles ou publiez la vôtre avec votre devise (EUR, XAF, USD...) et votre taux.",
       color: "green"
     },
     {
+      id: "step-escrow",
       icon: <LuShieldCheck />,
       title: "Escrow Sécurisé",
       desc: "Une fois le match trouvé, ExchaPay bloque les fonds. Personne ne perd son argent, la transaction est protégée.",
       color: "orange"
     },
     {
+      id: "step-exchange",
       icon: <LuArrowRightLeft />,
       title: "Échange & Validation",
       desc: "Les parties procèdent à l'échange via Mobile Money ou virement. Dès confirmation, les fonds escrow sont libérés.",
@@ -66,8 +69,9 @@ const HowItWorkContent: React.FC = () => {
         <div className="row g-5 align-items-center">
           <div className="col-lg-6" data-aos="fade-right">
             <div className="steps-timeline">
-              {steps.map((step, index) => (
-                <div className="step-item d-flex gap-4 mb-5" key={index}>
+              {/* ✅ CORRECTION LIGNE 70 : Utilisation de step.id au lieu de index */}
+              {steps.map((step) => (
+                <div className="step-item d-flex gap-4 mb-5" key={step.id}>
                   <div className={`step-icon-wrapper icon-${step.color}`}>
                     {step.icon}
                   </div>
@@ -92,8 +96,6 @@ const HowItWorkContent: React.FC = () => {
           </div>
         </div>
       </section>
-
-      
     </div>
   );
 };

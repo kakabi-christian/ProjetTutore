@@ -14,9 +14,7 @@ import {
   LuZap,
   LuShieldAlert,
   LuSmartphone,
-  LuBot,
   LuQuote,
-  LuChevronDown
 } from "react-icons/lu";
 import { FaArrowRight } from "react-icons/fa6";
 
