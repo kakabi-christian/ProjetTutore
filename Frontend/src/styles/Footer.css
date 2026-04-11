@@ -12,18 +12,22 @@
     font-weight: 800;
 }
 
+/* ✅ CORRECTION LIGNE 50-51 : Passage à #e2e8f0 
+   Ce gris très clair garantit un ratio de contraste élevé (> 4.5:1) 
+   pour les petits textes sur fond bleu sombre. */
 .footer-description {
-    /* ✅ CORRECTION LIGNE 50 : Passage à un gris plus clair (#cbd5e0) 
-       pour atteindre un ratio de contraste > 4.5:1 sur fond bleu nuit */
-    color: #cbd5e0; 
+    color: #e2e8f0; 
     font-size: 0.85rem;
     max-width: 280px;
+    line-height: 1.5;
 }
 
 .footer-title {
-    color: var(--excha-orange);
+    /* Éclaircissement subtil de l'orange pour l'accessibilité des titres */
+    color: #ffa533; 
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
+    font-weight: 700;
     margin-bottom: 12px;
 }
 
@@ -32,15 +36,15 @@
 }
 
 .footer-links a {
-    /* ✅ CORRECTION : Utilisation du même gris clair pour les liens */
-    color: #cbd5e0;
+    /* ✅ CORRECTION : Utilisation du gris clair e2e8f0 pour les liens */
+    color: #e2e8f0;
     text-decoration: none;
     font-size: 0.85rem;
     transition: 0.3s ease;
 }
 
 .footer-links a:hover {
-    color: var(--excha-orange);
+    color: #ffa533;
     padding-left: 4px;
 }
 
@@ -66,8 +70,8 @@
 .btn-excha-orange {
     background-color: var(--excha-orange);
     border: none;
-    /* ✅ CONSEIL ACCESSIBILITÉ : Texte bleu nuit sur fond orange 
-       offre un meilleur contraste que le blanc pour SonarCloud */
+    /* ✅ CONTRASTE OPTIMAL : Texte bleu nuit sur fond orange 
+       pour valider les critères d'accessibilité. */
     color: #0a2540; 
     font-weight: 700;
     transition: 0.3s;
@@ -83,7 +87,12 @@
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* ---- Responsive ---- */
+.footer-bottom {
+    color: #cbd5e0;
+    font-size: 0.75rem;
+}
+
+/* ---- Responsive (Mobile) ---- */
 @media (max-width: 768px) {
     .footer-container {
         text-align: center;
@@ -132,7 +141,7 @@
     }
 
     .btn-excha-orange {
-        padding: 8px 15px;
+        padding: 10px 15px;
         font-size: 0.85rem;
         margin-top: 10px;
         width: 90%;

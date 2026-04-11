@@ -35,7 +35,6 @@ const Header: React.FC = () => {
             S'inscrire
           </Link>
 
-          {/* ✅ CORRECTION : Utilisation stricte de <button> pour le hamburger */}
           <button
             type="button"
             className={`hamburger ${menuOpen ? "open" : ""}`}
@@ -50,12 +49,13 @@ const Header: React.FC = () => {
         </div>
       </nav>
 
-      {/* ✅ CORRECTION LIGNE 60 : Overlay interactif conforme aux normes WCAG */}
+      {/* ✅ CORRECTION FINALE LIGNE 61 : Suppression du role="presentation" */}
+      {/* On garde onClick et onKeyDown pour l'interaction utilisateur, 
+          mais on utilise aria-hidden pour ne pas polluer l'expérience des lecteurs d'écran */}
       <div 
         className={`menu-overlay ${menuOpen ? "active" : ""}`} 
         onClick={() => setMenuOpen(false)}
         onKeyDown={handleKeyDown}
-        role="presentation" /* Utilisation de presentation si c'est juste un décor cliquable, ou suppression du role si Sonar insiste */
         tabIndex={-1} 
         aria-hidden="true"
       ></div>
