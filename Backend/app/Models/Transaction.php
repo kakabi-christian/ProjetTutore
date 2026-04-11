@@ -33,20 +33,22 @@ class Transaction extends Model
     ];
 
     protected $casts = [
-        'amount_from'  => 'float',
-        'amount_to'    => 'float',
-        'exchange_rate'=> 'float',
-        'buyer_fee'    => 'float',
-        'seller_fee'   => 'float',
-        'created_at'   => 'datetime',
-        'updated_at'   => 'datetime',
+        'amount_from' => 'float',
+        'amount_to' => 'float',
+        'exchange_rate' => 'float',
+        'buyer_fee' => 'float',
+        'seller_fee' => 'float',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // -------------------------------------------------------
     // Constantes de statut — évite les magic strings partout
     // -------------------------------------------------------
-    const STATUS_PENDING   = 'PENDING';
+    const STATUS_PENDING = 'PENDING';
+
     const STATUS_COMPLETED = 'COMPLETED';
+
     const STATUS_CANCELLED = 'CANCELLED';
 
     // -------------------------------------------------------
@@ -89,7 +91,7 @@ class Transaction extends Model
      */
     public function generateFlwTxRef(): string
     {
-        return 'EXCHA-' . $this->transaction_id . '-' . time();
+        return 'EXCHA-'.$this->transaction_id.'-'.time();
     }
 
     /**

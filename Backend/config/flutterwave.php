@@ -33,7 +33,7 @@ return [
      */
     'baseUrl' => env('FLW_BASE_URL', 'https://api.flutterwave.com/v3'),
 
-     /**
+    /**
      * Secret hash pour valider les webhooks entrants.
      * Tu choisis cette valeur librement, puis tu la copies dans :
      * Dashboard Flutterwave → Settings → Webhooks → "Secret hash"

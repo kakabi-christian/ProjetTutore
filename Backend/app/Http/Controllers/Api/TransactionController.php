@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\PaymentHistory;
 use App\Models\PaymentStatus;
 use App\Models\Transaction;
+use App\Models\Utilisateur;
 use App\Services\FlutterwaveService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,12 +50,12 @@ class TransactionController extends Controller
     public function initiate(Request $request)
     {
         $validated = $request->validate([
-            'listing_id'     => 'required|integer|exists:listings,listing_id',
-            'amount_from'    => 'required|numeric|min:0.01',
+            'listing_id' => 'required|integer|exists:listings,listing_id',
+            'amount_from' => 'required|numeric|min:0.01',
             'payment_method' => 'required|in:MOBILE_MONEY,CARD',
         ]);
 
-        /** @var \App\Models\Utilisateur $buyer */
+        /** @var Utilisateur $buyer */
         $buyer = Auth::user();
 
         // --- 1. Charger l'annonce ---
@@ -65,13 +66,13 @@ class TransactionController extends Controller
 
         if ($listing->user_id === $buyer->user_id) {
             return response()->json([
-                'message' => 'Vous ne pouvez pas acheter votre propre annonce.'
+                'message' => 'Vous ne pouvez pas acheter votre propre annonce.',
             ], 422);
         }
 
         if ((float) $listing->amount_available < (float) $validated['amount_from']) {
             return response()->json([
-                'message'   => 'Montant demandé supérieur au disponible sur cette annonce.',
+                'message' => 'Montant demandé supérieur au disponible sur cette annonce.',
                 'available' => $listing->amount_available,
             ], 422);
         }
@@ -87,24 +88,24 @@ class TransactionController extends Controller
         // L'acheteur PAIE en currency_to (XAF) pour RECEVOIR currency_from (USD)
 
         $exchangeRate = (float) $listing->user_rate;  // 1 USD = 600.5 XAF
-        $amountFrom   = (float) $validated['amount_from']; // USD que l'acheteur veut recevoir
+        $amountFrom = (float) $validated['amount_from']; // USD que l'acheteur veut recevoir
 
         // XAF que l'acheteur doit verser
         $amountTo = round($amountFrom * $exchangeRate, 2); // 500 * 600.5 = 300 250 XAF
 
         // Frais plateforme calculés sur ce que chaque partie verse
-        $buyerFee  = round($amountTo * 0.01, 2);     // 1% sur XAF versé par l'acheteur
+        $buyerFee = round($amountTo * 0.01, 2);     // 1% sur XAF versé par l'acheteur
         $sellerFee = round($amountFrom * 0.01, 2);   // 1% sur USD reçu par le vendeur
 
         // Total réellement débité à l'acheteur via Flutterwave (en XAF)
         $totalChargedToBuyer = round($amountTo + $buyerFee, 2); // 300 250 + 3002.5 = 303 252.5 XAF
 
-        Log::info("TransactionController@initiate: Calculs", [
-            'buyer_id'               => $buyer->user_id,
-            'listing_id'             => $listing->listing_id,
-            'amount_from'            => $amountFrom,
-            'amount_to'              => $amountTo,
-            'buyer_fee'              => $buyerFee,
+        Log::info('TransactionController@initiate: Calculs', [
+            'buyer_id' => $buyer->user_id,
+            'listing_id' => $listing->listing_id,
+            'amount_from' => $amountFrom,
+            'amount_to' => $amountTo,
+            'buyer_fee' => $buyerFee,
             'total_charged_to_buyer' => $totalChargedToBuyer,
         ]);
 
@@ -114,14 +115,14 @@ class TransactionController extends Controller
 
             // 4a. Créer la Transaction
             $transaction = Transaction::create([
-                'buyer_id'             => $buyer->user_id,
-                'seller_id'            => $listing->user_id,
-                'listing_id'           => $listing->listing_id,
-                'amount_from'          => $amountFrom,
-                'amount_to'            => $amountTo,
-                'exchange_rate'        => $exchangeRate,
-                'buyer_fee'            => $buyerFee,
-                'seller_fee'           => $sellerFee,
+                'buyer_id' => $buyer->user_id,
+                'seller_id' => $listing->user_id,
+                'listing_id' => $listing->listing_id,
+                'amount_from' => $amountFrom,
+                'amount_to' => $amountTo,
+                'exchange_rate' => $exchangeRate,
+                'buyer_fee' => $buyerFee,
+                'seller_fee' => $sellerFee,
                 'buyer_payment_method' => $validated['payment_method'],
             ]);
 
@@ -131,35 +132,35 @@ class TransactionController extends Controller
 
             // 4c. Créer le Payment (sans champ status — géré via PaymentHistory)
             $payment = Payment::create([
-                'user_id'           => $buyer->user_id,
-                'transaction_id'    => $transaction->transaction_id,
+                'user_id' => $buyer->user_id,
+                'transaction_id' => $transaction->transaction_id,
                 'method_payment_id' => null, // Flutterwave gère le choix final
-                'amount'            => $totalChargedToBuyer,
-                'currency'          => $listing->currency_to,
+                'amount' => $totalChargedToBuyer,
+                'currency' => $listing->currency_to,
             ]);
 
             // 4d. Créer le premier PaymentHistory → statut PENDING
             $pendingStatus = PaymentStatus::firstOrCreate(['title' => 'PENDING']);
             PaymentHistory::create([
-                'payment_id'        => $payment->payment_id,
+                'payment_id' => $payment->payment_id,
                 'payment_status_id' => $pendingStatus->payment_status_id,
-                'date'              => now(),
+                'date' => now(),
             ]);
 
             // 4e. Créer l'Escrow
             Escrow::create([
                 'transaction_id' => $transaction->transaction_id,
-                'buyer_amount'   => $totalChargedToBuyer,
-                'seller_amount'  => $amountTo,
-                'locked_at'      => now(),
-                'released_at'    => null,
+                'buyer_amount' => $totalChargedToBuyer,
+                'seller_amount' => $amountTo,
+                'locked_at' => now(),
+                'released_at' => null,
             ]);
 
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("TransactionController@initiate: Erreur DB", [
-                'msg'   => $e->getMessage(),
+            Log::error('TransactionController@initiate: Erreur DB', [
+                'msg' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
@@ -176,40 +177,40 @@ class TransactionController extends Controller
             : 'card';
 
         $flwResult = $this->flwService->initializePayment([
-            'tx_ref'          => $flwTxRef,
-            'amount'          => $totalChargedToBuyer,
-            'currency'        => $listing->currency_to,
-            'customer_email'  => $buyer->email,
-            'customer_name'   => trim($buyer->firstname . ' ' . $buyer->lastname),
+            'tx_ref' => $flwTxRef,
+            'amount' => $totalChargedToBuyer,
+            'currency' => $listing->currency_to,
+            'customer_email' => $buyer->email,
+            'customer_name' => trim($buyer->firstname.' '.$buyer->lastname),
             'payment_options' => $flwPaymentOption,
 
             // Flutterwave redirigera l'user ici après paiement
             // Ref: https://developer.flutterwave.com/docs/collecting-payments/standard#redirect-parameters
-            'redirect_url' => config('app.frontend_url') . '/payment/callback?tx_ref=' . $flwTxRef,
+            'redirect_url' => config('app.frontend_url').'/payment/callback?tx_ref='.$flwTxRef,
 
             'description' => "Échange {$amountFrom} {$listing->currency_from} → {$amountTo} {$listing->currency_to}",
 
             'meta' => [
                 'transaction_id' => $transaction->transaction_id,
-                'listing_id'     => $listing->listing_id,
-                'payment_id'     => $payment->payment_id,
+                'listing_id' => $listing->listing_id,
+                'payment_id' => $payment->payment_id,
             ],
         ]);
 
         // --- 6. Si Flutterwave échoue, on annule ---
-        if (!$flwResult['success']) {
+        if (! $flwResult['success']) {
             $transaction->update(['status' => Transaction::STATUS_CANCELLED]);
 
             $failedStatus = PaymentStatus::firstOrCreate(['title' => 'FAILED']);
             PaymentHistory::create([
-                'payment_id'        => $payment->payment_id,
+                'payment_id' => $payment->payment_id,
                 'payment_status_id' => $failedStatus->payment_status_id,
-                'date'              => now(),
+                'date' => now(),
             ]);
 
-            Log::error("TransactionController@initiate: Flutterwave a échoué", [
+            Log::error('TransactionController@initiate: Flutterwave a échoué', [
                 'transaction_id' => $transaction->transaction_id,
-                'flw_message'    => $flwResult['message'],
+                'flw_message' => $flwResult['message'],
             ]);
 
             return response()->json([
@@ -220,17 +221,17 @@ class TransactionController extends Controller
 
         // --- 7. Retour au frontend ---
         return response()->json([
-            'message'        => 'Transaction initiée avec succès',
-            'payment_link'   => $flwResult['payment_link'],
+            'message' => 'Transaction initiée avec succès',
+            'payment_link' => $flwResult['payment_link'],
             'transaction_id' => $transaction->transaction_id,
-            'flw_tx_ref'     => $flwTxRef,
+            'flw_tx_ref' => $flwTxRef,
             'summary' => [
-                'amount_from'   => $amountFrom,
+                'amount_from' => $amountFrom,
                 'currency_from' => $listing->currency_from,
-                'amount_to'     => $amountTo,
-                'currency_to'   => $listing->currency_to,
-                'buyer_fee'     => $buyerFee,
-                'total_to_pay'  => $totalChargedToBuyer,
+                'amount_to' => $amountTo,
+                'currency_to' => $listing->currency_to,
+                'buyer_fee' => $buyerFee,
+                'total_to_pay' => $totalChargedToBuyer,
                 'exchange_rate' => $exchangeRate,
             ],
         ], 201);

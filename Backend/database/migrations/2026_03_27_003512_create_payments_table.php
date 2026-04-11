@@ -28,10 +28,10 @@ return new class extends Migration
 
             // Ex: "MTN_MOMO", "ORANGE_MONEY", "VISA", "MASTERCARD"
             $table->string('provider')->nullable();
- 
+
             // ID côté Flutterwave (leur `id` dans la réponse de vérification)
             $table->string('flw_payment_id')->nullable();
- 
+
             // Timestamp exact de la confirmation par Flutterwave
             $table->timestamp('paid_at')->nullable();
 

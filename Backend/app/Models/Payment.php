@@ -29,16 +29,19 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'amount'   => 'float',
-        'paid_at'  => 'datetime',
+        'amount' => 'float',
+        'paid_at' => 'datetime',
     ];
 
     // -------------------------------------------------------
     // Constantes de statut
     // -------------------------------------------------------
-    const STATUS_PENDING  = 'PENDING';
-    const STATUS_SUCCESS  = 'SUCCESS';
-    const STATUS_FAILED   = 'FAILED';
+    const STATUS_PENDING = 'PENDING';
+
+    const STATUS_SUCCESS = 'SUCCESS';
+
+    const STATUS_FAILED = 'FAILED';
+
     const STATUS_REFUNDED = 'REFUNDED';
 
     // -------------------------------------------------------

@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
+use Exception;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Exception;
 
 /**
  * Service Flutterwave
@@ -14,15 +15,18 @@ use Exception;
 class FlutterwaveService
 {
     protected string $baseUrl;
+
     protected string $secretKey;
+
     protected string $publicKey;
+
     protected bool $isLocal;
 
     protected int $cacheDuration = 86400;
 
     public function __construct()
     {
-        $this->baseUrl   = config('flutterwave.baseUrl');
+        $this->baseUrl = config('flutterwave.baseUrl');
         $this->secretKey = config('flutterwave.secretKey');
         $this->publicKey = config('flutterwave.publicKey');
 
@@ -34,7 +38,7 @@ class FlutterwaveService
      * Retourne un client Http pré-configuré.
      * En local : SSL désactivé. En prod : SSL activé.
      */
-    private function http(): \Illuminate\Http\Client\PendingRequest
+    private function http(): PendingRequest
     {
         $client = Http::withToken($this->secretKey)->timeout(30);
 
@@ -55,7 +59,7 @@ class FlutterwaveService
      */
     public function getMobileNetworks(string $countryCode): array
     {
-        $cacheKey = "flw_networks_" . strtolower($countryCode);
+        $cacheKey = 'flw_networks_'.strtolower($countryCode);
 
         return Cache::remember($cacheKey, $this->cacheDuration, function () use ($countryCode) {
             try {
@@ -66,19 +70,21 @@ class FlutterwaveService
                 $data = $response->json();
 
                 if ($response->failed() || ($data['status'] ?? '') !== 'success') {
-                    Log::error("FlutterwaveService@getMobileNetworks: Échec", [
+                    Log::error('FlutterwaveService@getMobileNetworks: Échec', [
                         'status' => $response->status(),
-                        'body'   => $data,
+                        'body' => $data,
                     ]);
+
                     return null;
                 }
 
                 return $data;
 
             } catch (Exception $e) {
-                Log::emergency("FlutterwaveService@getMobileNetworks: Exception", [
+                Log::emergency('FlutterwaveService@getMobileNetworks: Exception', [
                     'msg' => $e->getMessage(),
                 ]);
+
                 return null;
             }
         }) ?? ['status' => 'error', 'data' => [], 'message' => 'Réseaux mobiles indisponibles'];
@@ -90,7 +96,7 @@ class FlutterwaveService
      */
     public function getBanks(string $countryCode): array
     {
-        $cacheKey = "flw_banks_" . strtolower($countryCode);
+        $cacheKey = 'flw_banks_'.strtolower($countryCode);
 
         return Cache::remember($cacheKey, $this->cacheDuration, function () use ($countryCode) {
             try {
@@ -99,19 +105,21 @@ class FlutterwaveService
                 $data = $response->json();
 
                 if ($response->failed() || ($data['status'] ?? '') !== 'success') {
-                    Log::error("FlutterwaveService@getBanks: Échec", [
+                    Log::error('FlutterwaveService@getBanks: Échec', [
                         'status' => $response->status(),
-                        'body'   => $data,
+                        'body' => $data,
                     ]);
+
                     return null;
                 }
 
                 return $data;
 
             } catch (Exception $e) {
-                Log::critical("FlutterwaveService@getBanks: Exception", [
+                Log::critical('FlutterwaveService@getBanks: Exception', [
                     'msg' => $e->getMessage(),
                 ]);
+
                 return null;
             }
         }) ?? ['status' => 'error', 'data' => [], 'message' => 'Banques indisponibles'];
@@ -125,36 +133,35 @@ class FlutterwaveService
     /**
      * Initialise un paiement et retourne le lien Flutterwave.
      *
-     * @param  array $data
      * @return array ['success' => bool, 'payment_link' => string|null, 'message' => string]
      */
     public function initializePayment(array $data): array
     {
-        Log::info("FlutterwaveService@initializePayment: Début", [
-            'tx_ref'   => $data['tx_ref'],
-            'amount'   => $data['amount'],
+        Log::info('FlutterwaveService@initializePayment: Début', [
+            'tx_ref' => $data['tx_ref'],
+            'amount' => $data['amount'],
             'currency' => $data['currency'],
         ]);
 
         try {
             $payload = [
-                'tx_ref'          => $data['tx_ref'],
-                'amount'          => $data['amount'],
-                'currency'        => $data['currency'],
-                'redirect_url'    => $data['redirect_url'],
+                'tx_ref' => $data['tx_ref'],
+                'amount' => $data['amount'],
+                'currency' => $data['currency'],
+                'redirect_url' => $data['redirect_url'],
                 'payment_options' => $data['payment_options'] ?? 'mobilemoney,card',
-                'customer'        => [
+                'customer' => [
                     'email' => $data['customer_email'],
-                    'name'  => $data['customer_name'],
+                    'name' => $data['customer_name'],
                 ],
                 'customizations' => [
-                    'title'       => 'ExchaPay',
+                    'title' => 'ExchaPay',
                     'description' => $data['description'] ?? 'Échange de devises sécurisé',
                 ],
                 'meta' => $data['meta'] ?? [],
             ];
 
-            Log::debug("FlutterwaveService@initializePayment: Payload envoyé", $payload);
+            Log::debug('FlutterwaveService@initializePayment: Payload envoyé', $payload);
 
             // POST /v3/payments
             // Ref: https://developer.flutterwave.com/reference/endpoints/payments#initiate-payment
@@ -162,46 +169,46 @@ class FlutterwaveService
 
             $responseData = $response->json();
 
-            Log::debug("FlutterwaveService@initializePayment: Réponse Flutterwave", [
+            Log::debug('FlutterwaveService@initializePayment: Réponse Flutterwave', [
                 'http_status' => $response->status(),
-                'flw_status'  => $responseData['status'] ?? null,
+                'flw_status' => $responseData['status'] ?? null,
                 'flw_message' => $responseData['message'] ?? null,
-                'has_link'    => isset($responseData['data']['link']),
+                'has_link' => isset($responseData['data']['link']),
             ]);
 
             if ($response->failed() || ($responseData['status'] ?? '') !== 'success') {
-                Log::error("FlutterwaveService@initializePayment: Réponse KO", [
+                Log::error('FlutterwaveService@initializePayment: Réponse KO', [
                     'http_status' => $response->status(),
-                    'body'        => $responseData,
+                    'body' => $responseData,
                 ]);
 
                 return [
-                    'success'      => false,
+                    'success' => false,
                     'payment_link' => null,
-                    'message'      => $responseData['message'] ?? 'Erreur Flutterwave inconnue',
+                    'message' => $responseData['message'] ?? 'Erreur Flutterwave inconnue',
                 ];
             }
 
             return [
-                'success'      => true,
+                'success' => true,
                 'payment_link' => $responseData['data']['link'],
-                'message'      => 'Lien généré avec succès',
+                'message' => 'Lien généré avec succès',
             ];
 
         } catch (Exception $e) {
             // C'est ici que tombe l'erreur SSL ou timeout
-            Log::emergency("FlutterwaveService@initializePayment: EXCEPTION", [
+            Log::emergency('FlutterwaveService@initializePayment: EXCEPTION', [
                 'message' => $e->getMessage(),
-                'class'   => get_class($e),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
+                'class' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
 
             return [
-                'success'      => false,
+                'success' => false,
                 'payment_link' => null,
                 // On expose le vrai message pour t'aider à déboguer
-                'message'      => 'Exception: ' . $e->getMessage(),
+                'message' => 'Exception: '.$e->getMessage(),
             ];
         }
     }
@@ -215,12 +222,11 @@ class FlutterwaveService
      * Vérifie une transaction par son ID Flutterwave.
      * TOUJOURS appeler cette méthode côté backend avant de finaliser.
      *
-     * @param  string $flwTransactionId
      * @return array ['success' => bool, 'data' => array|null, 'message' => string]
      */
     public function verifyTransaction(string $flwTransactionId): array
     {
-        Log::info("FlutterwaveService@verifyTransaction: Vérification", [
+        Log::info('FlutterwaveService@verifyTransaction: Vérification', [
             'flw_transaction_id' => $flwTransactionId,
         ]);
 
@@ -231,21 +237,21 @@ class FlutterwaveService
             $responseData = $response->json();
 
             if ($response->failed() || ($responseData['status'] ?? '') !== 'success') {
-                Log::error("FlutterwaveService@verifyTransaction: Échec", [
-                    'flw_id'  => $flwTransactionId,
+                Log::error('FlutterwaveService@verifyTransaction: Échec', [
+                    'flw_id' => $flwTransactionId,
                     'message' => $responseData['message'] ?? 'Inconnu',
                 ]);
 
                 return [
                     'success' => false,
-                    'data'    => null,
+                    'data' => null,
                     'message' => $responseData['message'] ?? 'Vérification échouée',
                 ];
             }
 
             $txData = $responseData['data'];
 
-            Log::info("FlutterwaveService@verifyTransaction: OK", [
+            Log::info('FlutterwaveService@verifyTransaction: OK', [
                 'flw_id' => $flwTransactionId,
                 'status' => $txData['status'],
                 'amount' => $txData['amount'],
@@ -254,20 +260,20 @@ class FlutterwaveService
 
             return [
                 'success' => true,
-                'data'    => $txData,
+                'data' => $txData,
                 'message' => 'Vérification réussie',
             ];
 
         } catch (Exception $e) {
-            Log::emergency("FlutterwaveService@verifyTransaction: EXCEPTION", [
+            Log::emergency('FlutterwaveService@verifyTransaction: EXCEPTION', [
                 'message' => $e->getMessage(),
-                'class'   => get_class($e),
+                'class' => get_class($e),
             ]);
 
             return [
                 'success' => false,
-                'data'    => null,
-                'message' => 'Exception: ' . $e->getMessage(),
+                'data' => null,
+                'message' => 'Exception: '.$e->getMessage(),
             ];
         }
     }
