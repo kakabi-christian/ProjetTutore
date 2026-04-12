@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { 
   MdHome, 
   MdPeople, 
-  MdCollectionsBookmark, // 🆕 Icône plus adaptée pour "Mes Publications"
+  MdCollectionsBookmark,
   MdNotifications, 
   MdSearch,
   MdLogout,
   MdPerson,
-  MdKeyboardArrowDown
+  MdKeyboardArrowDown,
+  MdSwapHoriz,
 } from "react-icons/md";
 import { authService } from "../services/authService";
 import type { User } from "../models/Utilisateur";
@@ -84,22 +85,23 @@ const MarketHeader: React.FC<MarketHeaderProps> = ({ activeTab, setActiveTab }) 
             <small className="d-none d-md-block fw-bold" style={{ fontSize: '0.65rem' }}>Réseau</small>
           </li>
 
-          {/* 🏷️ Onglet Publications avec nouvelle icône */}
+          {/* 🏷️ Onglet Publications */}
           <li 
             className={`nav-item text-center cursor-pointer px-3 pt-2 transition-all ${activeTab === "publications" ? "text-excha-orange border-bottom border-excha-orange border-3" : "text-muted opacity-75"}`}
             onClick={() => setActiveTab("publications")}
           >
             <MdCollectionsBookmark size={24} />
-            <small className="d-none d-md-block fw-bold" style={{ fontSize: '0.65rem' }}>Mes posts</small>
+            <small className="d-none d-md-block fw-bold" style={{ fontSize: '0.65rem' }}>Mes annonces</small>
           </li>
 
-          {/* <li 
-            className={`nav-item text-center cursor-pointer px-3 pt-2 transition-all ${activeTab === "notifs" ? "text-excha-orange border-bottom border-excha-orange border-3" : "text-muted opacity-75"}`}
-            onClick={() => setActiveTab("notifs")}
+          {/* 💸 Onglet Transactions */}
+          <li
+            className={`nav-item text-center cursor-pointer px-3 pt-2 transition-all ${activeTab === "transactions" ? "text-excha-orange border-bottom border-excha-orange border-3" : "text-muted opacity-75"}`}
+            onClick={() => setActiveTab("transactions")}
           >
-            <MdNotifications size={26} />
-            <small className="d-none d-md-block fw-bold" style={{ fontSize: '0.65rem' }}>Notifications</small>
-          </li> */}
+            <MdSwapHoriz size={26} />
+            <small className="d-none d-md-block fw-bold" style={{ fontSize: '0.65rem' }}>Mes échanges</small>
+          </li>
         </ul>
 
         {/* DROITE : Actions & Profil */}

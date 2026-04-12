@@ -206,7 +206,7 @@ export default function PaymentCallbackPage() {
                 {/* Action : succès */}
                 {status === "success" && (
                     <button
-                        onClick={() => navigate("/dashboard")}
+                        onClick={() => navigate("/user/market")}
                         className="btn btn-success w-100 rounded-pill py-3 fw-bold"
                     >
                         Voir mes transactions

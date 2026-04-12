@@ -115,22 +115,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/transactions/initiate', [TransactionController::class, 'initiate'])
         ->name('transactions.initiate');
 
-    // Route::get('/transactions/status', function (Request $request) {
-    //     $txRef = $request->query('tx_ref');
-    //     $tx = \App\Models\Transaction::where('flw_tx_ref', $txRef)
-    //         ->where('buyer_id', auth()->id()) // sécurité : seulement ses propres transactions
-    //         ->first();
+    // Transactions de l'utilisateur connecté (acheteur OU vendeur)
+    Route::get('/transactions/my', [TransactionController::class, 'myTransactions'])
+        ->name('transactions.my');
 
-    //     if (!$tx) {
-    //         return response()->json(['message' => 'Transaction introuvable'], 404);
-    //     }
+    // Actions vendeur sur une transaction
+    Route::post('/transactions/{id}/accept', [TransactionController::class, 'accept'])
+        ->name('transactions.accept');
 
-    //     return response()->json([
-    //         'status'         => $tx->status,
-    //         'transaction_id' => $tx->transaction_id,
-    //         'flw_tx_ref'     => $tx->flw_tx_ref,
-    //     ]);
-    // });
+    Route::post('/transactions/{id}/cancel', [TransactionController::class, 'cancel'])
+        ->name('transactions.cancel');
+
+    Route::get('/transactions/status', [TransactionController::class, 'status'])
+        ->name('transactions.status');
 
     // --- ESPACE ADMINISTRATION ---
     Route::middleware('is_admin')->prefix('admin')->group(function () {

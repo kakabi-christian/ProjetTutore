@@ -42,12 +42,15 @@ return new class extends Migration
             $table->float('exchange_rate');
             $table->float('buyer_fee')->default(0);
             $table->float('seller_fee')->default(0);
-            $table->enum('status', ['PENDING', 'COMPLETED', 'CANCELLED'])->default('PENDING');
+            $table->enum('status', ['PENDING', 'AWAITING_SELLER', 'AWAITING_SELLER_PAYMENT', 'COMPLETED', 'CANCELLED'])->default('PENDING');
 
             $table->string('flw_tx_ref')->nullable()->unique();
 
             // ID retourné par Flutterwave après paiement réussi
             $table->string('flw_tx_id')->nullable();
+
+            $table->string('flw_seller_tx_ref')->nullable()->unique();
+            $table->string('flw_seller_tx_id')->nullable();
 
             // Méthode choisie par l'acheteur : MOBILE_MONEY ou CARD
             $table->enum('buyer_payment_method', ['MOBILE_MONEY', 'CARD'])
