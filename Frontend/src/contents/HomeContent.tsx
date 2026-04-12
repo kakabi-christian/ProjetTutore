@@ -4,6 +4,7 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import '../styles/HomeContent.css';
 import '../theme.css';
+import { Link } from 'react-router-dom';
 
 import { 
   LuPencilLine, 
@@ -70,10 +71,14 @@ const HomeContent: React.FC = () => {
               
               <div className="hero-actions d-flex flex-wrap justify-content-center justify-content-lg-start gap-3 mb-5">
                 <button className="btn btn-excha-orange px-4 py-3 shadow d-flex align-items-center gap-2 rounded-pill fw-bold">
-                  Commencer l'échange <FaArrowRight />
+                  <Link to="/login" style={{ textDecoration:'none', color: 'white' }}>
+                    Commencer l'échange <FaArrowRight />
+                  </Link>
                 </button>
                 <button className="btn btn-excha-outline px-4 py-3 d-flex align-items-center gap-2 rounded-pill fw-bold">
-                  <LuPlay /> Voir comment ça marche
+                  <Link to="/how-it-work" style={{ textDecoration:'none' }}>
+                    <LuPlay /> Voir comment ça marche
+                  </Link>
                 </button>
               </div>
 
