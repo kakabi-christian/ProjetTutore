@@ -4,17 +4,15 @@ import SidebarUser from '../contents/SidebarUser';
 import TopBarUser from '../components/TopBarUser';
 
 export default function UserDashboard() {
-  // Par défaut : réduit (true) pour le look moderne
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const location = useLocation();
 
-  // Détection du redimensionnement pour le responsive
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
-      if (mobile) setIsCollapsed(true); // Fermer d'office au changement vers mobile
+      if (mobile) setIsCollapsed(true);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -22,16 +20,18 @@ export default function UserDashboard() {
 
   const isMarketPage = location.pathname.includes('/user/market');
 
-  // Gestion dynamique de la marge gauche
   const getMarginLeft = () => {
-    if (isMobile) return '0'; // Pas de marge sur mobile
-    return isCollapsed ? '80px' : '280px'; // Marge variable sur PC
+    if (isMobile) return '0';
+    return isCollapsed ? '80px' : '280px';
   };
+
+  // Fonction centrale pour basculer la sidebar
+  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
   return (
     <div className="d-flex" style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
       
-      {/* 1. BACKDROP MOBILE (Flou sombre quand le menu est ouvert sur mobile) */}
+      {/* 1. BACKDROP MOBILE */}
       {!isCollapsed && isMobile && (
         <div 
           onClick={() => setIsCollapsed(true)}
@@ -40,7 +40,7 @@ export default function UserDashboard() {
             inset: 0,
             backgroundColor: 'rgba(10, 37, 64, 0.5)',
             backdropFilter: 'blur(2px)',
-            zIndex: 999
+            zIndex: 1500 // Entre la sidebar et le contenu
           }}
         />
       )}
@@ -50,7 +50,7 @@ export default function UserDashboard() {
         <SidebarUser isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       </div>
 
-      {/* 3. ZONE DE DROITE (Contenu principal) */}
+      {/* 3. ZONE DE DROITE */}
       <div 
         className="d-flex flex-column flex-grow-1" 
         style={{ 
@@ -60,14 +60,17 @@ export default function UserDashboard() {
           width: '100%'
         }}
       >
-        {/* On passe setIsCollapsed à la TopBar pour que le bouton hamburger puisse l'ouvrir */}
+        {/* TopBar classique (si pas sur le marché) */}
         {!isMarketPage && (
-          <TopBarUser onMenuClick={() => setIsCollapsed(!isCollapsed)} />
+          <TopBarUser onMenuClick={toggleSidebar} />
         )}
 
         <main className={`${isMarketPage ? 'p-0' : 'p-3 p-md-4'} flex-grow-1`}>
           <div className="container-fluid p-0 animate__animated animate__fadeIn">
-            <Outlet />
+            {/* CRITIQUE : On passe toggleSidebar dans le context de l'Outlet.
+               Toutes les pages enfants pourront y accéder via useOutletContext()
+            */}
+            <Outlet context={{ toggleSidebar }} />
           </div>
         </main>
 
@@ -82,23 +85,20 @@ export default function UserDashboard() {
         body { overflow-x: hidden; }
         .animate__fadeIn { animation-duration: 0.5s; }
 
-        /* Styles Responsive Spécifiques */
         @media (max-width: 768px) {
           .sidebar-wrapper {
             position: fixed;
-            z-index: 1000;
+            z-index: 2000; 
             height: 100vh;
-            left: ${isCollapsed ? '-280px' : '0'}; /* Sort de l'écran si fermé */
+            left: ${isCollapsed ? '-280px' : '0'};
             transition: left 0.3s ease;
           }
           
-          /* Ajustement de la sidebar pour qu'elle soit toujours large sur mobile */
           .sidebar-wrapper > div {
             width: 280px !important; 
           }
         }
 
-        /* Animation fluide pour les changements de largeur */
         .flex-grow-1 {
           will-change: margin-left;
         }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useOutletContext } from 'react-router-dom'; // Ajouté pour la sidebar
 import MarketHeader from '../../components/MarketHeader';
 import MarketHome from './tabs/MarketHome';
 import MarketNetwork from './tabs/MarketNetwork';
@@ -8,6 +9,9 @@ import MarketTransaction from './tabs/MarketTransaction';
 import ListingService from "../../services/ListingService";
 
 export default function MarketContentPage() {
+  // On récupère la fonction du dashboard parent
+  const { toggleSidebar } = useOutletContext<{ toggleSidebar: () => void }>();
+  
   const [activeTab, setActiveTab] = useState("accueil");
   const [liveAssets, setLiveAssets] = useState<any[]>([]); // État pour les taux réels
   
@@ -211,7 +215,11 @@ export default function MarketContentPage() {
         </div>
       </div>
 
-      <MarketHeader activeTab={activeTab} setActiveTab={setActiveTab} />
+      <MarketHeader 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        onMenuClick={toggleSidebar} // Liaison du clic vers le dashboard
+      />
 
       <main className="w-100 py-3 px-0 px-md-3">
         <div className="animate__animated animate__fadeIn">

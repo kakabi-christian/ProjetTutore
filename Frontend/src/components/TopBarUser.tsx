@@ -92,13 +92,7 @@ const TopBarUser: React.FC<TopBarUserProps> = ({ onMenuClick }) => {
                     <MdMenu size={30} />
                 </button>
 
-                <div className="d-flex align-items-center cursor-pointer" onClick={() => navigate('/user/dashboard')}>
-                    <MdSwapHorizontalCircle className="text-excha-green me-1 me-md-2" size={32} />
-                    <div className="d-flex flex-column">
-                        <span className="fw-bold" style={{ color: isDarkMode ? 'var(--white)' : 'var(--blue)', fontSize: '1.1rem', lineHeight: 1 }}>ExchaPay</span>
-                        <small className="text-excha-green fw-bold text-uppercase d-none d-sm-block" style={{ fontSize: '0.55rem', letterSpacing: '1px' }}>Espace Client</small>
-                    </div>
-                </div>
+                
             </div>
 
             {/* 🛠️ DROITE : Actions */}
