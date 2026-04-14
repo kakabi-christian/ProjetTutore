@@ -4,7 +4,8 @@ import MarketHome from './tabs/MarketHome';
 import MarketNetwork from './tabs/MarketNetwork';
 import MarketNotifications from './tabs/MarketNotifications';
 import MarketPublication from './tabs/MarketPublication';
-import ListingService from "../../services/ListingService"; // Import du service
+import MarketTransaction from './tabs/MarketTransaction';
+import ListingService from "../../services/ListingService";
 
 export default function MarketContentPage() {
   const [activeTab, setActiveTab] = useState("accueil");
@@ -59,11 +60,12 @@ export default function MarketContentPage() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "accueil": return <MarketHome />;
-      case "reseau": return <MarketNetwork />;
+      case "accueil":      return <MarketHome />;
+      case "reseau":       return <MarketNetwork />;
       case "publications": return <MarketPublication />;
-      case "notifs": return <MarketNotifications />;
-      default: return <MarketHome />;
+      case "notifs":       return <MarketNotifications />;
+      case "transactions": return <MarketTransaction />;
+      default:             return <MarketHome />;
     }
   };
 

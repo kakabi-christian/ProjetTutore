@@ -26,10 +26,14 @@ class Transaction extends Model
         'buyer_fee',
         'seller_fee',
         'status',
-        // --- Flutterwave ---
+        // --- Flutterwave --- Paiement acheteur
         'flw_tx_ref',           // Notre référence unique qu'on génère
         'flw_tx_id',            // L'ID retourné par Flutterwave après paiement
         'buyer_payment_method', // MOBILE_MONEY | CARD
+
+        // Paiement vendeur
+        'flw_seller_tx_ref',
+        'flw_seller_tx_id',
     ];
 
     protected $casts = [
@@ -43,14 +47,18 @@ class Transaction extends Model
     ];
 
     // -------------------------------------------------------
-    // Constantes de statut — évite les magic strings partout
+    // Statuts — flux complet
     // -------------------------------------------------------
-    const STATUS_PENDING = 'PENDING';
-
-    const STATUS_COMPLETED = 'COMPLETED';
-
-    const STATUS_CANCELLED = 'CANCELLED';
-
+    // Acheteur paie XAF à la plateforme
+    const STATUS_PENDING                 = 'PENDING';
+    // Paiement acheteur confirmé par webhook Flutterwave
+    const STATUS_AWAITING_SELLER         = 'AWAITING_SELLER';
+    // Vendeur a accepté, lien de paiement généré, en attente de son paiement USD
+    const STATUS_AWAITING_SELLER_PAYMENT = 'AWAITING_SELLER_PAYMENT';
+    // Paiement vendeur confirmé → échange terminé
+    const STATUS_COMPLETED               = 'COMPLETED';
+    // Annulé à n'importe quelle étape
+    const STATUS_CANCELLED               = 'CANCELLED';
     // -------------------------------------------------------
     // Relations
     // -------------------------------------------------------
@@ -91,7 +99,17 @@ class Transaction extends Model
      */
     public function generateFlwTxRef(): string
     {
-        return 'EXCHA-'.$this->transaction_id.'-'.time();
+        return 'EXCHA-' . $this->transaction_id . '-' . time();
+    }
+
+    /**
+     * Référence Flutterwave pour le paiement VENDEUR.
+     * Format : EXCHA-S-{id}-{timestamp}
+     * Préfixe "S" permet au webhook de distinguer les deux types.
+     */
+    public function generateFlwSellerTxRef(): string
+    {
+        return 'EXCHA-S-' . $this->transaction_id . '-' . time();
     }
 
     /**
@@ -100,5 +118,10 @@ class Transaction extends Model
     public function isPending(): bool
     {
         return $this->status === self::STATUS_PENDING;
+    }
+
+    public function isAwaitingSeller(): bool
+    {
+        return $this->status === self::STATUS_AWAITING_SELLER;
     }
 }

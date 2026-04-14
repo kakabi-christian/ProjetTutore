@@ -216,7 +216,6 @@ export default function ExchangeModal({ listing, onClose }: ExchangeModalProps) 
                         {loading ? (
                             <>
                                 <span className="spinner-border spinner-border-sm" role="status" />
-                                Redirection en cours...
                             </>
                         ) : (
                             <>
