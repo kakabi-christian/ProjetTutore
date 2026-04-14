@@ -99,6 +99,7 @@ export default function RegisterContent() {
     }
   };
 
+  // Styles mis à jour avec la gestion du z-index pour le portail
   const customSelectStyles = {
     control: (base: any) => ({
       ...base,
@@ -110,6 +111,8 @@ export default function RegisterContent() {
     }),
     valueContainer: (base: any) => ({ ...base, padding: "0 8px" }),
     indicatorsContainer: (base: any) => ({ ...base, height: "30px" }),
+    menuPortal: (base: any) => ({ ...base, zIndex: 9999 }), // Priorité d'affichage
+    menu: (base: any) => ({ ...base, zIndex: 9999 }),
   };
 
   return (
@@ -170,6 +173,7 @@ export default function RegisterContent() {
                 onChange={handleCountryChange} 
                 styles={customSelectStyles} 
                 placeholder="Pays..." 
+                menuPortalTarget={document.body} // Téléporte le menu hors du flux DOM
               />
             </div>
             <div className="col-6">

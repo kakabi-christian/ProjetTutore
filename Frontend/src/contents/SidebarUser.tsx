@@ -9,7 +9,8 @@ import {
   MdAccountCircle,
   MdMenu,
   MdPublic,
-  MdPayments // ✅ Nouvelle icône pour les méthodes de paiement
+  MdPayments,
+  MdClose // Import de l'icône de fermeture
 } from "react-icons/md";
 import { authService } from "../services/authService";
 import notificationService from "../services/NotificationService";
@@ -23,8 +24,12 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+
     const fetchUnreadCount = async () => {
       try {
         const count = await notificationService.getUnreadCount();
@@ -33,9 +38,13 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
         console.error("Erreur compteur notifications:", error);
       }
     };
+
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 120000);
-    return () => clearInterval(interval);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearInterval(interval);
+    };
   }, []);
 
   const confirmLogout = async () => {
@@ -68,17 +77,18 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
       <div
         className="d-flex flex-column flex-shrink-0 p-2 shadow"
         style={{ 
-          width: isCollapsed ? "80px" : "280px", 
+          width: isCollapsed && !isMobile ? "80px" : "280px", 
           minHeight: "100vh", 
           backgroundColor: "var(--blue)", 
-          transition: "width 0.3s ease",
+          transition: "all 0.3s ease",
           position: "fixed",
-          zIndex: 1000
+          zIndex: 2000, // Z-index élevé pour passer devant le contenu mobile
+          left: isMobile && isCollapsed ? "-280px" : "0", // Sortie de l'écran sur mobile si réduit
         }}
       >
-        {/* Header Logo */}
-        <div className={`d-flex align-items-center mb-4 mt-2 ${isCollapsed ? 'justify-content-center' : 'px-3 justify-content-between'}`}>
-          {!isCollapsed && (
+        {/* Header Logo & Toggle Button */}
+        <div className={`d-flex align-items-center mb-4 mt-2 ${isCollapsed && !isMobile ? 'justify-content-center' : 'px-3 justify-content-between'}`}>
+          {(!isCollapsed || isMobile) && (
             <div className="d-flex align-items-center text-decoration-none">
               <MdSwapHorizontalCircle className="text-excha-green me-2" size={32} />
               <div className="d-flex flex-column">
@@ -87,22 +97,26 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
               </div>
             </div>
           )}
-          <button className="btn text-excha-green p-0 border-0" onClick={() => setIsCollapsed(!isCollapsed)}>
-            <MdMenu size={28} />
+          
+          {/* Bouton Toggle : Devient un bouton "Fermer" sur mobile ouvert */}
+          <button 
+            className="btn text-excha-green p-0 border-0" 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          >
+            {isMobile && !isCollapsed ? <MdClose size={28} /> : <MdMenu size={28} />}
           </button>
         </div>
 
         <hr className="mx-2" style={{ backgroundColor: "rgba(255,255,255,0.1)", border: 'none', height: '1px' }} />
 
         <ul className="nav nav-pills flex-column mb-auto px-1">
-          
           {/* 🌐 RÉSEAU D'ÉCHANGES */}
           <li style={navItemStyle}>
-            <NavLink to="/user/market" className={navLinkClasses}>
-              <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
+            <NavLink to="/user/market" className={navLinkClasses} onClick={() => isMobile && setIsCollapsed(true)}>
+              <div className="d-flex align-items-center justify-content-center" style={{ minWidth: (isCollapsed && !isMobile) ? '64px' : '64px', height: '100%' }}>
                 <MdPublic size={26} />
               </div>
-              {!isCollapsed ? (
+              {(!isCollapsed || isMobile) ? (
                 <span className="text-nowrap" style={{ fontSize: '1rem' }}>Réseau d'Échanges</span>
               ) : (
                 <span className="sidebar-tooltip">Réseau d'Échanges</span>
@@ -110,13 +124,13 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
             </NavLink>
           </li>
 
-          {/* 💳 MES COMPTES / MÉTHODES DE PAIEMENT */}
+          {/* 💳 MES COMPTES */}
           <li style={navItemStyle}>
-            <NavLink to="/user/method-payment" className={navLinkClasses}>
+            <NavLink to="/user/method-payment" className={navLinkClasses} onClick={() => isMobile && setIsCollapsed(true)}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
                 <MdPayments size={26} />
               </div>
-              {!isCollapsed ? (
+              {(!isCollapsed || isMobile) ? (
                 <span className="text-nowrap" style={{ fontSize: '1rem' }}>Mes Comptes</span>
               ) : (
                 <span className="sidebar-tooltip">Mes Comptes</span>
@@ -126,11 +140,11 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
 
           {/* KYC */}
           <li style={navItemStyle}>
-            <NavLink to="/user/kyc" className={navLinkClasses}>
+            <NavLink to="/user/kyc" className={navLinkClasses} onClick={() => isMobile && setIsCollapsed(true)}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
                 <MdDescription size={26} />
               </div>
-              {!isCollapsed ? (
+              {(!isCollapsed || isMobile) ? (
                 <span className="text-nowrap" style={{ fontSize: '1rem' }}>Vérification (KYC)</span>
               ) : (
                 <span className="sidebar-tooltip">Vérification (KYC)</span>
@@ -140,17 +154,17 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
 
           {/* Notifications */}
           <li style={navItemStyle}>
-            <NavLink to="/user/notifications-user" className={navLinkClasses}>
+            <NavLink to="/user/notifications-user" className={navLinkClasses} onClick={() => isMobile && setIsCollapsed(true)}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
                 <MdNotifications size={26} />
-                {isCollapsed && unreadCount > 0 && (
+                {(isCollapsed && !isMobile) && unreadCount > 0 && (
                   <span className="badge rounded-pill bg-danger position-absolute" 
                         style={{ top: '10px', right: '18px', fontSize: '0.6rem', padding: '0.3em 0.5em' }}>
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </div>
-              {!isCollapsed ? (
+              {(!isCollapsed || isMobile) ? (
                 <div className="d-flex align-items-center justify-content-between flex-grow-1 pe-3">
                   <span className="text-nowrap" style={{ fontSize: '1rem' }}>Notifications</span>
                   {unreadCount > 0 && (
@@ -167,11 +181,11 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
 
           {/* Feedback */}
           <li style={navItemStyle}>
-            <NavLink to="/user/feedback" className={navLinkClasses}>
+            <NavLink to="/user/feedback" className={navLinkClasses} onClick={() => isMobile && setIsCollapsed(true)}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
                 <MdRateReview size={26} />
               </div>
-              {!isCollapsed ? (
+              {(!isCollapsed || isMobile) ? (
                 <span className="text-nowrap" style={{ fontSize: '1rem' }}>Laisser un avis</span>
               ) : (
                 <span className="sidebar-tooltip">Laisser un avis</span>
@@ -181,11 +195,11 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
 
           {/* Profil */}
           <li style={navItemStyle}>
-            <NavLink to="/user/profile-user" className={navLinkClasses}>
+            <NavLink to="/user/profile-user" className={navLinkClasses} onClick={() => isMobile && setIsCollapsed(true)}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
                 <MdAccountCircle size={26} />
               </div>
-              {!isCollapsed ? (
+              {(!isCollapsed || isMobile) ? (
                 <span className="text-nowrap" style={{ fontSize: '1rem' }}>Mon Profil</span>
               ) : (
                 <span className="sidebar-tooltip">Mon Profil</span>
@@ -211,7 +225,7 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
             <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px' }}>
               <MdLogout size={24} className="text-excha-orange" />
             </div>
-            {!isCollapsed ? (
+            {(!isCollapsed || isMobile) ? (
               <span className="fw-bold" style={{ fontSize: '1rem' }}>Déconnexion</span>
             ) : (
               <span className="sidebar-tooltip" style={{ top: '10px' }}>Déconnexion</span>
@@ -220,9 +234,9 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
         </div>
       </div>
 
-      {/* MODAL DE DÉCONNEXION (Inchangée) */}
+      {/* MODAL DE DÉCONNEXION */}
       {showLogoutModal && (
-        <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(10, 37, 64, 0.6)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
+        <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(10, 37, 64, 0.6)', backdropFilter: 'blur(4px)', zIndex: 3000 }}>
           <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '20px' }}>
               <div className="modal-body p-4 text-center">

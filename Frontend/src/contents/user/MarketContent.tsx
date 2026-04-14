@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useOutletContext } from 'react-router-dom'; // Ajouté pour la sidebar
 import MarketHeader from '../../components/MarketHeader';
 import MarketHome from './tabs/MarketHome';
 import MarketNetwork from './tabs/MarketNetwork';
 import MarketNotifications from './tabs/MarketNotifications';
 import MarketPublication from './tabs/MarketPublication';
-import ListingService from "../../services/ListingService"; // Import du service
+import MarketTransaction from './tabs/MarketTransaction';
+import ListingService from "../../services/ListingService";
 
 export default function MarketContentPage() {
+  // On récupère la fonction du dashboard parent
+  const { toggleSidebar } = useOutletContext<{ toggleSidebar: () => void }>();
+  
   const [activeTab, setActiveTab] = useState("accueil");
   const [liveAssets, setLiveAssets] = useState<any[]>([]); // État pour les taux réels
   
@@ -59,11 +64,12 @@ export default function MarketContentPage() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "accueil": return <MarketHome />;
-      case "reseau": return <MarketNetwork />;
+      case "accueil":      return <MarketHome />;
+      case "reseau":       return <MarketNetwork />;
       case "publications": return <MarketPublication />;
-      case "notifs": return <MarketNotifications />;
-      default: return <MarketHome />;
+      case "notifs":       return <MarketNotifications />;
+      case "transactions": return <MarketTransaction />;
+      default:             return <MarketHome />;
     }
   };
 
@@ -209,7 +215,11 @@ export default function MarketContentPage() {
         </div>
       </div>
 
-      <MarketHeader activeTab={activeTab} setActiveTab={setActiveTab} />
+      <MarketHeader 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        onMenuClick={toggleSidebar} // Liaison du clic vers le dashboard
+      />
 
       <main className="w-100 py-3 px-0 px-md-3">
         <div className="animate__animated animate__fadeIn">

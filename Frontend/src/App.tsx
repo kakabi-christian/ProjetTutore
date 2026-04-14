@@ -39,6 +39,7 @@ function App() {
           
           {/* Route Callback Paiement (Flutterwave) */}
           <Route path="/payment/callback" element={<PaymentCallbackPage />} />
+           <Route path="/payment/seller-callback" element={<PaymentCallbackPage />} />
 
           {/* Routes Admin (avec enfants) */}
           <Route path="/admin/*" element={<AdminDashboard />}>
