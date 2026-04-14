@@ -59,7 +59,7 @@ class FlutterwaveService
      */
     public function getMobileNetworks(string $countryCode): array
     {
-        $cacheKey = 'flw_networks_' . strtolower($countryCode);
+        $cacheKey = 'flw_networks_'.strtolower($countryCode);
 
         return Cache::remember($cacheKey, $this->cacheDuration, function () use ($countryCode) {
             try {
@@ -95,7 +95,7 @@ class FlutterwaveService
      */
     public function getBanks(string $countryCode): array
     {
-        $cacheKey = 'flw_banks_' . strtolower($countryCode);
+        $cacheKey = 'flw_banks_'.strtolower($countryCode);
 
         return Cache::remember($cacheKey, $this->cacheDuration, function () use ($countryCode) {
             try {
@@ -205,7 +205,7 @@ class FlutterwaveService
                 'success' => false,
                 'payment_link' => null,
                 // On expose le vrai message pour t'aider à déboguer
-                'message' => 'Exception: ' . $e->getMessage(),
+                'message' => 'Exception: '.$e->getMessage(),
             ];
         }
     }
@@ -269,7 +269,7 @@ class FlutterwaveService
             return [
                 'success' => false,
                 'data' => null,
-                'message' => 'Exception: ' . $e->getMessage(),
+                'message' => 'Exception: '.$e->getMessage(),
             ];
         }
     }
@@ -285,15 +285,15 @@ class FlutterwaveService
      * Appelé quand le vendeur annule une transaction après paiement confirmé.
      * Flutterwave reverse les fonds vers le compte de l'acheteur.
      *
-     * @param  string     $flwTransactionId  L'ID Flutterwave de la transaction (flw_tx_id)
-     * @param  float|null $amount            Montant à rembourser (null = remboursement total)
+     * @param  string  $flwTransactionId  L'ID Flutterwave de la transaction (flw_tx_id)
+     * @param  float|null  $amount  Montant à rembourser (null = remboursement total)
      * @return array ['success' => bool, 'message' => string, 'data' => array|null]
      */
     public function refundTransaction(string $flwTransactionId, ?float $amount = null): array
     {
-        Log::info("FlutterwaveService@refundTransaction: Remboursement initié", [
+        Log::info('FlutterwaveService@refundTransaction: Remboursement initié', [
             'flw_transaction_id' => $flwTransactionId,
-            'amount'             => $amount ?? 'total',
+            'amount' => $amount ?? 'total',
         ]);
 
         try {
@@ -304,41 +304,43 @@ class FlutterwaveService
 
             // POST /v3/transactions/{id}/refund
             // Ref: https://developer.flutterwave.com/reference/endpoints/transactions#initiate-a-refund
-            $response     = $this->http()->post("{$this->baseUrl}/transactions/{$flwTransactionId}/refund", $payload);
+            $response = $this->http()->post("{$this->baseUrl}/transactions/{$flwTransactionId}/refund", $payload);
             $responseData = $response->json();
 
-            Log::debug("FlutterwaveService@refundTransaction: Réponse", [
+            Log::debug('FlutterwaveService@refundTransaction: Réponse', [
                 'http_status' => $response->status(),
-                'flw_status'  => $responseData['status'] ?? null,
-                'body'        => $responseData,
+                'flw_status' => $responseData['status'] ?? null,
+                'body' => $responseData,
             ]);
 
             if ($response->failed() || ($responseData['status'] ?? '') !== 'success') {
-                Log::error("FlutterwaveService@refundTransaction: Échec", [
+                Log::error('FlutterwaveService@refundTransaction: Échec', [
                     'flw_transaction_id' => $flwTransactionId,
-                    'body'               => $responseData,
+                    'body' => $responseData,
                 ]);
+
                 return [
                     'success' => false,
                     'message' => $responseData['message'] ?? 'Remboursement échoué',
-                    'data'    => null,
+                    'data' => null,
                 ];
             }
 
             return [
                 'success' => true,
                 'message' => 'Remboursement initié avec succès',
-                'data'    => $responseData['data'] ?? null,
+                'data' => $responseData['data'] ?? null,
             ];
         } catch (Exception $e) {
-            Log::emergency("FlutterwaveService@refundTransaction: EXCEPTION", [
+            Log::emergency('FlutterwaveService@refundTransaction: EXCEPTION', [
                 'message' => $e->getMessage(),
-                'class'   => get_class($e),
+                'class' => get_class($e),
             ]);
+
             return [
                 'success' => false,
-                'message' => 'Exception: ' . $e->getMessage(),
-                'data'    => null,
+                'message' => 'Exception: '.$e->getMessage(),
+                'data' => null,
             ];
         }
     }

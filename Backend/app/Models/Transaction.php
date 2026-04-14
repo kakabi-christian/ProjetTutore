@@ -50,15 +50,19 @@ class Transaction extends Model
     // Statuts — flux complet
     // -------------------------------------------------------
     // Acheteur paie XAF à la plateforme
-    const STATUS_PENDING                 = 'PENDING';
+    const STATUS_PENDING = 'PENDING';
+
     // Paiement acheteur confirmé par webhook Flutterwave
-    const STATUS_AWAITING_SELLER         = 'AWAITING_SELLER';
+    const STATUS_AWAITING_SELLER = 'AWAITING_SELLER';
+
     // Vendeur a accepté, lien de paiement généré, en attente de son paiement USD
     const STATUS_AWAITING_SELLER_PAYMENT = 'AWAITING_SELLER_PAYMENT';
+
     // Paiement vendeur confirmé → échange terminé
-    const STATUS_COMPLETED               = 'COMPLETED';
+    const STATUS_COMPLETED = 'COMPLETED';
+
     // Annulé à n'importe quelle étape
-    const STATUS_CANCELLED               = 'CANCELLED';
+    const STATUS_CANCELLED = 'CANCELLED';
     // -------------------------------------------------------
     // Relations
     // -------------------------------------------------------
@@ -99,7 +103,7 @@ class Transaction extends Model
      */
     public function generateFlwTxRef(): string
     {
-        return 'EXCHA-' . $this->transaction_id . '-' . time();
+        return 'EXCHA-'.$this->transaction_id.'-'.time();
     }
 
     /**
@@ -109,7 +113,7 @@ class Transaction extends Model
      */
     public function generateFlwSellerTxRef(): string
     {
-        return 'EXCHA-S-' . $this->transaction_id . '-' . time();
+        return 'EXCHA-S-'.$this->transaction_id.'-'.time();
     }
 
     /**
