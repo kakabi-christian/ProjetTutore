@@ -146,11 +146,12 @@ export default function LoginContent() {
                       backgroundColor: '#FF6B2B', 
                       color: '#fff', 
                       border: 'none',
-                      fontSize: '1rem'
+                      fontSize: '1rem',
+                      height: '56px', // Fixe la hauteur pour éviter le saut au chargement
+                      minHeight: '56px'
                     }}>
               {loading ? (
-                /* ✅ CORRECTION LIGNE 154 : Remplacement de role="status" par <output> */
-                <output className="spinner-border spinner-border-sm"></output>
+                <span className="spinner-border spinner-border-sm" style={{ width: '1.2rem', height: '1.2rem' }}></span>
               ) : (
                 <>Se connecter <MdArrowForward /></>
               )}

@@ -82,11 +82,7 @@ const TopBarAdmin: React.FC = () => {
             
             {/* 🚀 GAUCHE : Branding ExchaPay */}
             <div className="d-flex align-items-center cursor-pointer" onClick={() => navigate('/user/dashboard')}>
-                <MdSwapHorizontalCircle className="text-excha-green me-2" size={32} />
-                <div className="d-flex flex-column d-none d-md-flex">
-                    <span className="fw-bold" style={{ color: isDarkMode ? 'var(--white)' : 'var(--blue)', fontSize: '1.2rem', lineHeight: 1 }}>ExchaPay</span>
-                    <small className="text-excha-green fw-bold text-uppercase" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Welcome to the DashBoard</small>
-                </div>
+                
             </div>
 
             {/* 🛠️ DROITE : Actions */}

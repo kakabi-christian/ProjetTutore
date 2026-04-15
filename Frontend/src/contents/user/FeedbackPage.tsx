@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { MdStar, MdSend, MdRateReview, MdCheckCircle } from 'react-icons/md';
+import { MdStar, MdSend, MdRateReview, MdCheckCircle, MdErrorOutline } from 'react-icons/md';
 import type { User } from '../../models/Utilisateur';
 import FeedbackService from '../../services/FeedbacService';
-import TopBarUser from '../../components/TopBarUser';
 
 export default function FeedbackPage() {
   // États pour l'utilisateur et le formulaire
@@ -53,7 +52,6 @@ export default function FeedbackPage() {
       });
       setSubmitted(true);
     } catch (err: any) {
-      // Capture l'erreur 422 de Laravel ou les erreurs réseaux
       const serverMessage = err.response?.data?.message || "Une erreur est survenue lors de l'envoi.";
       setError(serverMessage);
     } finally {
@@ -63,20 +61,26 @@ export default function FeedbackPage() {
 
   if (submitted) {
     return (
-      <div className="container-fluid d-flex align-items-center justify-content-center" style={{ minHeight: '80vh' }}>
-        <TopBarUser />
-        <div className="text-center p-5 shadow-lg" style={{ backgroundColor: 'var(--blue)', borderRadius: '20px', maxWidth: '500px' }}>
-          <MdCheckCircle size={80} className="text-excha-green mb-4" />
-          <h2 className="fw-bold text-white mb-3">Merci pour votre avis !</h2>
-          <p style={{ color: 'var(--gray)' }}>Votre retour nous aide à améliorer ExchaPay pour toute la communauté.</p>
+      <div className="container-fluid d-flex align-items-center justify-content-center px-3" style={{ minHeight: '70vh' }}>
+        <div className="text-center p-4 p-md-5 shadow-lg w-100 animate__animated animate__zoomIn" 
+             style={{ 
+               backgroundColor: '#0A2540', 
+               borderRadius: '24px', 
+               maxWidth: '450px' 
+             }}>
+          <MdCheckCircle size={70} className="text-excha-green mb-4" />
+          <h2 className="fw-bold text-white mb-3 h4">Merci pour votre avis !</h2>
+          <p className="mb-4" style={{ color: '#8A9BB0', fontSize: '0.9rem' }}>
+            Votre retour nous aide à améliorer ExchaPay pour toute la communauté.
+          </p>
           <button 
-            className="btn btn-excha-orange px-4 mt-3 fw-bold" 
+            className="btn btn-excha-orange w-100 py-3 fw-bold" 
             onClick={() => {
                 setSubmitted(false);
                 setRating(0);
                 setComment('');
             }}
-            style={{ borderRadius: '10px' }}
+            style={{ borderRadius: '12px' }}
           >
             Modifier mon avis
           </button>
@@ -88,25 +92,25 @@ export default function FeedbackPage() {
   return (
     <div className="container-fluid py-4">
       <div className="row justify-content-center">
-        <div className="col-12 col-lg-8">
+        <div className="col-12 col-md-10 col-lg-7">
           
           <div className="mb-4 d-flex align-items-center">
-            <div className="p-3 bg-white shadow-sm rounded-3 me-3">
+            <div className="p-3 bg-white shadow-sm rounded-3 me-3 d-none d-sm-block">
               <MdRateReview size={32} className="text-excha-orange" />
             </div>
             <div>
-              <h2 className="fw-bold mb-0" style={{ color: 'var(--blue)' }}>Votre avis compte</h2>
-              <p className="text-muted mb-0">Partagez votre expérience sur ExchaPay</p>
+              <h2 className="fw-bold mb-0 h3" style={{ color: 'var(--blue)' }}>Votre avis compte</h2>
+              <p className="text-muted mb-0 small">Partagez votre expérience sur ExchaPay</p>
             </div>
           </div>
 
-          <div className="card border-0 shadow-sm" style={{ borderRadius: '15px', overflow: 'hidden' }}>
+          <div className="card border-0 shadow-sm" style={{ borderRadius: '20px', overflow: 'hidden' }}>
             <div className="card-body p-4 p-md-5">
               <form onSubmit={handleSubmit}>
                 
                 <div className="mb-5 text-center">
-                  <h5 className="fw-bold mb-3" style={{ color: 'var(--blue)' }}>Quelle note nous donnez-vous ?</h5>
-                  <div className="d-flex justify-content-center gap-2">
+                  <h5 className="fw-bold mb-4" style={{ color: 'var(--blue)' }}>Quelle note nous donnez-vous ?</h5>
+                  <div className="d-flex justify-content-center gap-1 gap-sm-3">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
@@ -117,20 +121,20 @@ export default function FeedbackPage() {
                         onMouseLeave={() => setHover(0)}
                       >
                         <MdStar
-                          size={48}
+                          size={42}
                           style={{ 
                             transition: 'all 0.2s ease',
                             cursor: 'pointer',
-                            transform: (hover || rating) >= star ? 'scale(1.1)' : 'scale(1)'
+                            transform: (hover || rating) >= star ? 'scale(1.15)' : 'scale(1)'
                           }}
-                          color={(hover || rating) >= star ? 'var(--orange)' : '#D1D9E6'}
+                          color={(hover || rating) >= star ? '#FF6B2B' : '#E2E8F0'}
                         />
                       </button>
                     ))}
                   </div>
                   {rating > 0 && (
-                    <div className="mt-3 animate__animated animate__fadeIn">
-                       <span className="badge bg-excha-orange px-3 py-2" style={{ fontSize: '0.9rem' }}>
+                    <div className="mt-4 animate__animated animate__fadeIn">
+                       <span className="badge rounded-pill bg-excha-orange px-4 py-2" style={{ fontSize: '0.85rem' }}>
                         {rating === 5 ? 'Excellent ! 😍' : rating === 4 ? 'Très bien 👍' : rating === 3 ? 'Satisfaisant 🙂' : 'À améliorer 🛠️'}
                        </span>
                     </div>
@@ -138,17 +142,17 @@ export default function FeedbackPage() {
                 </div>
 
                 <div className="mb-4">
-                  <label className="form-label fw-bold" style={{ color: 'var(--blue)' }}>Votre retour détaillé</label>
+                  <label className="form-label fw-bold small" style={{ color: 'var(--blue)' }}>Votre retour détaillé</label>
                   <textarea
-                    className="form-control"
+                    className="form-control border-0"
                     rows={5}
                     placeholder="Qu'est-ce qui vous a plu ? Que pouvons-nous simplifier ?"
                     style={{ 
-                      borderRadius: '12px', 
-                      backgroundColor: '#F8FAFC',
-                      border: '1.5px solid #E2E8F0',
-                      resize: 'none',
-                      padding: '15px'
+                      borderRadius: '16px', 
+                      backgroundColor: '#F1F4F9',
+                      padding: '15px',
+                      fontSize: '0.95rem',
+                      resize: 'none'
                     }}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
@@ -157,23 +161,23 @@ export default function FeedbackPage() {
                 </div>
 
                 {error && (
-                  <div className="alert alert-danger border-0 mb-4 d-flex align-items-center" style={{ borderRadius: '10px' }}>
-                    <small className="fw-bold">{error}</small>
+                  <div className="alert alert-danger border-0 mb-4 py-2 d-flex align-items-center" style={{ borderRadius: '10px', fontSize: '0.85rem' }}>
+                    <MdErrorOutline className="me-2" size={18} /> {error}
                   </div>
                 )}
 
-                <div className="d-grid mt-2">
+                <div className="d-grid">
                   <button
                     type="submit"
-                    className="btn btn-excha-orange py-3 fw-bold d-flex align-items-center justify-content-center gap-2 shadow"
+                    className="btn btn-excha-orange py-3 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
                     disabled={loading}
-                    style={{ borderRadius: '12px', fontSize: '1.1rem' }}
+                    style={{ borderRadius: '14px', fontSize: '1rem' }}
                   >
                     {loading ? (
                       <span className="spinner-border spinner-border-sm"></span>
                     ) : (
                       <>
-                        <MdSend size={22} />
+                        <MdSend size={20} />
                         Envoyer mon feedback
                       </>
                     )}
@@ -184,8 +188,8 @@ export default function FeedbackPage() {
             </div>
           </div>
 
-          <div className="text-center mt-4" style={{ color: 'var(--gray)' }}>
-            <small>Votre avis aide la communauté **ExchaPay** à grandir.</small>
+          <div className="text-center mt-4 pb-4" style={{ color: '#8A9BB0' }}>
+            <small>Votre avis aide la communauté <strong>ExchaPay</strong> à grandir.</small>
           </div>
         </div>
       </div>
