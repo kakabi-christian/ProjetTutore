@@ -8,25 +8,30 @@ use Illuminate\Support\Facades\Log;
 class ExchangeRateService
 {
     protected $apiKey;
-
     protected $baseUrl;
 
     public function __construct()
     {
-        $this->apiKey = env('MASSIVE_API_KEY', 's9y6ojWFpCZ6fRO0XLly7CaZA7wnEbe0');
+        /** * SÉCURITÉ : On retire la clé en dur. 
+         * La valeur doit être définie dans ton fichier .env sous MASSIVE_API_KEY.
+         */
+        $this->apiKey = env('MASSIVE_API_KEY');
         $this->baseUrl = rtrim(env('MASSIVE_API_URL', 'https://api.massive.com/v3'), '/');
     }
 
-    public function getLiveRate(string $from, string $to)
+    /**
+     * Récupère le taux de change en direct.
+     * Ajout d'un type de retour ?float pour la clarté Sonar.
+     */
+    public function getLiveRate(string $from, string $to): ?float
     {
-        try {
-            // Construction du ticker type "C:USDXAF" pour le Forex chez Massive
-            $ticker = 'C:'.strtoupper($from).strtoupper($to);
+        $ticker = 'C:' . strtoupper($from) . strtoupper($to);
 
+        try {
             $response = Http::withoutVerifying()
-                ->timeout(10) // Évite le 502 en coupant la connexion si l'API est lente
+                ->timeout(10)
                 ->withHeaders([
-                    'Authorization' => 'Bearer '.$this->apiKey,
+                    'Authorization' => 'Bearer ' . $this->apiKey,
                     'Accept' => 'application/json',
                 ])
                 ->get("{$this->baseUrl}/market/forex/rate", [
@@ -34,42 +39,48 @@ class ExchangeRateService
                 ]);
 
             if ($response->successful()) {
-                $data = $response->json();
-
-                // Selon leur doc: les résultats sont souvent dans 'results'
-                if (isset($data['results']['rate'])) {
-                    return $data['results']['rate'];
-                }
-
-                // Fallback si la structure est différente
-                return $data['rate'] ?? ($data['results'][0]['rate'] ?? null);
+                return $this->extractRateFromResponse($response->json());
             }
 
-            Log::error("Massive API Error [{$response->status()}]: ".$response->body());
-
-            // --- SOLUTION DE SECOURS (IMPORTANT) ---
-            // Si l'API Massive échoue (404), on utilise une API de secours gratuite
-            return $this->getFallbackRate($from, $to);
+            Log::error("Massive API Error [{$response->status()}]: " . $response->body());
 
         } catch (\Exception $e) {
-            Log::error('ExchangeRateService Exception: '.$e->getMessage());
-
-            return $this->getFallbackRate($from, $to);
+            Log::error('ExchangeRateService Exception: ' . $e->getMessage());
         }
+
+        // --- SOLUTION DE SECOURS ---
+        return $this->getFallbackRate($from, $to);
     }
 
     /**
-     * API de secours au cas où Massive est en maintenance ou renvoie 404
+     * Extrait le taux selon les différentes structures possibles de l'API.
+     * Cette méthode privée réduit la complexité cognitive de getLiveRate.
      */
-    private function getFallbackRate($from, $to)
+    private function extractRateFromResponse(array $data): ?float
+    {
+        if (isset($data['results']['rate'])) {
+            return (float) $data['results']['rate'];
+        }
+
+        return (float) ($data['rate'] ?? ($data['results'][0]['rate'] ?? null));
+    }
+
+    /**
+     * API de secours (open.er-api.com)
+     */
+    private function getFallbackRate(string $from, string $to): ?float
     {
         try {
-            $backup = Http::withoutVerifying()->get("https://open.er-api.com/v6/latest/{$from}");
+            $backup = Http::withoutVerifying()
+                ->timeout(5)
+                ->get("https://open.er-api.com/v6/latest/{$from}");
+
             if ($backup->successful()) {
-                return $backup->json()['rates'][strtoupper($to)] ?? null;
+                $rates = $backup->json()['rates'] ?? [];
+                return isset($rates[strtoupper($to)]) ? (float) $rates[strtoupper($to)] : null;
             }
         } catch (\Exception $e) {
-            return null;
+            Log::warning('Fallback API failed: ' . $e->getMessage());
         }
 
         return null;
