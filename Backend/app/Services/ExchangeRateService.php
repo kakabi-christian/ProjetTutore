@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Log;
 class ExchangeRateService
 {
     protected $apiKey;
+
     protected $baseUrl;
 
     public function __construct()
     {
-        /** * SÉCURITÉ : On retire la clé en dur. 
+        /** * SÉCURITÉ : On retire la clé en dur.
          * La valeur doit être définie dans ton fichier .env sous MASSIVE_API_KEY.
          */
         $this->apiKey = env('MASSIVE_API_KEY');
@@ -25,13 +26,13 @@ class ExchangeRateService
      */
     public function getLiveRate(string $from, string $to): ?float
     {
-        $ticker = 'C:' . strtoupper($from) . strtoupper($to);
+        $ticker = 'C:'.strtoupper($from).strtoupper($to);
 
         try {
             $response = Http::withoutVerifying()
                 ->timeout(10)
                 ->withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Authorization' => 'Bearer '.$this->apiKey,
                     'Accept' => 'application/json',
                 ])
                 ->get("{$this->baseUrl}/market/forex/rate", [
@@ -42,10 +43,10 @@ class ExchangeRateService
                 return $this->extractRateFromResponse($response->json());
             }
 
-            Log::error("Massive API Error [{$response->status()}]: " . $response->body());
+            Log::error("Massive API Error [{$response->status()}]: ".$response->body());
 
         } catch (\Exception $e) {
-            Log::error('ExchangeRateService Exception: ' . $e->getMessage());
+            Log::error('ExchangeRateService Exception: '.$e->getMessage());
         }
 
         // --- SOLUTION DE SECOURS ---
@@ -77,10 +78,11 @@ class ExchangeRateService
 
             if ($backup->successful()) {
                 $rates = $backup->json()['rates'] ?? [];
+
                 return isset($rates[strtoupper($to)]) ? (float) $rates[strtoupper($to)] : null;
             }
         } catch (\Exception $e) {
-            Log::warning('Fallback API failed: ' . $e->getMessage());
+            Log::warning('Fallback API failed: '.$e->getMessage());
         }
 
         return null;

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-    MdClose, MdAccountCircle, MdVerified,
+    MdClose,
     MdPhoneAndroid, MdCreditCard, MdArrowForward, MdLock,
 } from "react-icons/md";
 import type { Listing } from "../models/Listing";
