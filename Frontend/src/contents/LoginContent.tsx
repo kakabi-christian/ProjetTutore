@@ -143,7 +143,8 @@ export default function LoginContent() {
                     className="btn w-100 mt-4 py-3 rounded-pill fw-bold shadow-lg d-flex align-items-center justify-content-center gap-2 btn-login-submit" 
                     disabled={loading}
                     style={{ 
-                      backgroundColor: '#FF6B2B', 
+                      // backgroundColor: '#FF6B2B', 
+                      backgroundColor: 'red', 
                       color: '#fff', 
                       border: 'none',
                       fontSize: '1rem',

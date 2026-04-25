@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service # Ce nom est CRUCIAL, il doit correspondre au DB_HOST de ta ConfigMap
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  # On ne met pas de type: NodePort car MySQL n'a pas besoin d'être vu par l'extérieur, 
+  # juste par ton backend à l'intérieur du cluster.

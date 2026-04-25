@@ -7,12 +7,12 @@ metadata:
     app: exchapay
     tier: backend
 spec:
-  replicas: 2  # On commence avec 2 copies pour la sécurité
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1        # Crée un nouveau pod avant de supprimer l'ancien
-      maxUnavailable: 0  # Garantit qu'il y a toujours des pods qui tournent
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: exchapay-backend
@@ -26,18 +26,27 @@ spec:
         image: kakabi88548/exchapay-backend:latest
         ports:
         - containerPort: 8000
+        
+        # --- INJECTION DES CONFIGURATIONS ET SECRETS ---
+        envFrom:
+        - configMapRef:
+            name: exchapay-backend-config
+        - secretRef:
+            name: exchapay-backend-secrets
+
         # --- SANTÉ DE L'APPLICATION ---
         livenessProbe:
           httpGet:
-            path: /api/health # Vérifie si l'app est en vie
+            path: /api/health
             port: 8000
-          initialDelaySeconds: 30
+          initialDelaySeconds: 45 # On laisse un peu plus de temps au démarrage
           periodSeconds: 10
-        # --- LIMITES DE RESSOURCES (Obligatoire pour l'Auto-scaling) ---
+
+        # --- LIMITES DE RESSOURCES ---
         resources:
           requests:
-            cpu: "100m"   # Réserve 1/10ème de processeur
+            cpu: "100m"
             memory: "128Mi"
           limits:
-            cpu: "500m"   # Ne peut pas dépasser la moitié d'un processeur
+            cpu: "500m"
             memory: "256Mi"
