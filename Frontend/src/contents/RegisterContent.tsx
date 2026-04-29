@@ -202,7 +202,7 @@ export default function RegisterContent() {
 
           <div data-aos="zoom-in" data-aos-delay="800">
             <button type="submit" className="btn btn-sm w-100 py-2 rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 btn-register-submit"
-                    style={{ backgroundColor: 'blue', color: '#fff', border: 'none', fontSize: '0.85rem' }} disabled={loading}>
+                    style={{ backgroundColor: '#FF6B2B', color: '#fff', border: 'none', fontSize: '0.85rem' }} disabled={loading}>
               {loading ? <span className="spinner-border spinner-border-sm"></span> : <>Créer mon compte <MdArrowForward /></>}
             </button>
           </div>
