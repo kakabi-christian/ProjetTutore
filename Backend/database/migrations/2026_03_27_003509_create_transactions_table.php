@@ -56,6 +56,14 @@ return new class extends Migration
             $table->enum('buyer_payment_method', ['MOBILE_MONEY', 'CARD'])
                 ->nullable();
 
+            $table->unsignedBigInteger('buyer_method_payment_id')
+                ->nullable();
+
+            $table->foreign('buyer_method_payment_id')
+                ->references('method_payment_id')
+                ->on('method_payments')
+                ->onDelete('set null');
+
             $table->timestamps();
         });
     }

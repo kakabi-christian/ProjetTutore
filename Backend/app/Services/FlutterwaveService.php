@@ -342,4 +342,96 @@ class FlutterwaveService
             ];
         }
     }
+
+    // ===========================================================
+    // 5. TRANSFERT (DISBURSEMENT) — Phase 3
+    // Ref: https://developer.flutterwave.com/reference/endpoints/transfers#create-a-transfer
+    // ===========================================================
+
+    /**
+     * Envoie des fonds depuis le wallet Flutterwave de la plateforme
+     * vers un compte Mobile Money ou bancaire.
+     *
+     * Utilisé pour :
+     *   - Envoyer les currency_from (USD) à l'acheteur
+     *   - Envoyer les currency_to (XAF) au vendeur
+     *
+     * @param array $data
+     *   - account_bank     : Code banque ou réseau MM (ex: 'MPS' pour MTN CM, 'BKCA' pour UBA)
+     *   - account_number   : Numéro de compte ou numéro de téléphone MM
+     *   - amount           : Montant à transférer
+     *   - currency         : Devise (ex: XAF, USD, GHS)
+     *   - narration        : Description affichée sur le relevé du bénéficiaire
+     *   - reference        : Référence unique de notre côté (pour idempotence)
+     *   - beneficiary_name : Nom complet du bénéficiaire
+     *
+     * @return array ['success' => bool, 'data' => array|null, 'message' => string]
+     */
+    public function createTransfer(array $data): array
+    {
+        Log::info('FlutterwaveService@createTransfer: Début', [
+            'reference'  => $data['reference'],
+            'amount'     => $data['amount'],
+            'currency'   => $data['currency'],
+            'account_bank' => $data['account_bank'],
+        ]);
+
+        try {
+            $payload = [
+                'account_bank'     => $data['account_bank'],
+                'account_number'   => $data['account_number'],
+                'amount'           => $data['amount'],
+                'currency'         => $data['currency'],
+                'narration'        => $data['narration'] ?? 'Paiement ExchaPay',
+                'reference'        => $data['reference'],
+                'beneficiary_name' => $data['beneficiary_name'],
+            ];
+
+            Log::debug('FlutterwaveService@createTransfer: Payload', $payload);
+
+            // POST /v3/transfers
+            // Ref: https://developer.flutterwave.com/reference/endpoints/transfers#create-a-transfer
+            $response     = $this->http()->post("{$this->baseUrl}/transfers", $payload);
+            $responseData = $response->json();
+
+            Log::debug('FlutterwaveService@createTransfer: Réponse', [
+                'http_status' => $response->status(),
+                'flw_status'  => $responseData['status'] ?? null,
+                'body'        => $responseData,
+            ]);
+
+            if ($response->failed() || ($responseData['status'] ?? '') !== 'success') {
+                Log::error('FlutterwaveService@createTransfer: Échec', [
+                    'reference' => $data['reference'],
+                    'body'      => $responseData,
+                ]);
+                return [
+                    'success' => false,
+                    'data'    => null,
+                    'message' => $responseData['message'] ?? 'Transfert échoué',
+                ];
+            }
+
+            Log::info('FlutterwaveService@createTransfer: OK', [
+                'reference'   => $data['reference'],
+                'transfer_id' => $responseData['data']['id'] ?? null,
+            ]);
+
+            return [
+                'success' => true,
+                'data'    => $responseData['data'],
+                'message' => 'Transfert initié avec succès',
+            ];
+        } catch (Exception $e) {
+            Log::emergency('FlutterwaveService@createTransfer: EXCEPTION', [
+                'message'   => $e->getMessage(),
+                'reference' => $data['reference'] ?? 'N/A',
+            ]);
+            return [
+                'success' => false,
+                'data'    => null,
+                'message' => 'Exception: ' . $e->getMessage(),
+            ];
+        }
+    }
 }
