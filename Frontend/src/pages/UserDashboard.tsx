@@ -5,36 +5,63 @@ import type { Variants } from 'framer-motion';
 import SidebarUser from '../contents/SidebarUser';
 import TopBarUser from '../components/TopBarUser';
 
-// ─── Animation Variants ───────────────────────────────────────────────────────
-
-const fadeSlideLeft: Variants = {
-  hidden:  { x: -40, opacity: 0 },
-  visible: { x: 0,   opacity: 1, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } },
-};
-
-const fadeSlideDown: Variants = {
-  hidden:  { y: -20, opacity: 0 },
-  visible: { y: 0,   opacity: 1, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] } },
-};
-
-const fadeSlideUp: Variants = {
-  hidden:  { y: 16, opacity: 0 },
-  visible: { y: 0,  opacity: 1, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] } },
-};
-
-const staggerContainer: Variants = {
-  hidden:  { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.12, delayChildren: 0.05 },
-  },
-};
-
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const MOBILE_BREAKPOINT = 768;
 const SIDEBAR_EXPANDED  = 280;
 const SIDEBAR_COLLAPSED = 80;
+
+// ─── Animation Variants ───────────────────────────────────────────────────────
+
+const sidebarVariant: Variants = {
+  hidden:  { x: -SIDEBAR_EXPANDED, opacity: 0 },
+  visible: {
+    x: 0,
+    opacity: 1,
+    transition: {
+      delay: 2,                // ← attend 2s
+      duration: 0.6,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
+};
+
+const topbarVariant: Variants = {
+  hidden:  { y: -30, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      delay: 2.7,              // ← après la sidebar
+      duration: 0.5,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
+};
+
+const contentVariant: Variants = {
+  hidden:  { y: 24, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      delay: 3.1,              // ← après le topbar
+      duration: 0.55,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
+};
+
+const footerVariant: Variants = {
+  hidden:  { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      delay: 3.5,
+      duration: 0.5,
+    },
+  },
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -42,8 +69,8 @@ export default function UserDashboard() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isMobile,    setIsMobile]    = useState(window.innerWidth <= MOBILE_BREAKPOINT);
 
-  const location   = useLocation();
-  const isMarket   = location.pathname.includes('/user/market');
+  const location = useLocation();
+  const isMarket = location.pathname.includes('/user/market');
 
   // ── Responsive handler ──
   const handleResize = useCallback(() => {
@@ -62,12 +89,8 @@ export default function UserDashboard() {
   const toggleSidebar = () => setIsCollapsed(prev => !prev);
 
   return (
-    <motion.div
-      className="dashboard-root"
-      initial="hidden"
-      animate="visible"
-      variants={staggerContainer}
-    >
+    <div className="dashboard-root">
+
       {/* ── Mobile Backdrop ── */}
       <AnimatePresence>
         {!isCollapsed && isMobile && (
@@ -86,7 +109,9 @@ export default function UserDashboard() {
       {/* ── Sidebar ── */}
       <motion.aside
         className={`sidebar-wrapper${isMobile ? ' is-mobile' : ''}`}
-        variants={fadeSlideLeft}
+        initial="hidden"
+        animate="visible"
+        variants={sidebarVariant}
         style={isMobile ? { left: isCollapsed ? -SIDEBAR_EXPANDED : 0 } : undefined}
       >
         <SidebarUser isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
@@ -102,14 +127,20 @@ export default function UserDashboard() {
       >
         {/* TopBar */}
         {!isMarket && (
-          <motion.div variants={fadeSlideDown}>
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={topbarVariant}
+          >
             <TopBarUser onMenuClick={toggleSidebar} />
           </motion.div>
         )}
 
-        {/* Content */}
+        {/* Content / Outlet */}
         <motion.main
-          variants={fadeSlideUp}
+          initial="hidden"
+          animate="visible"
+          variants={contentVariant}
           className={isMarket ? 'p-0' : 'main-content'}
         >
           <div className="container-fluid p-0">
@@ -121,9 +152,9 @@ export default function UserDashboard() {
         {!isMarket && (
           <motion.footer
             className="dashboard-footer"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9, duration: 0.5 }}
+            initial="hidden"
+            animate="visible"
+            variants={footerVariant}
           >
             &copy; {new Date().getFullYear()}{' '}
             <strong>ExchaPay</strong> — Plateforme sécurisée.
@@ -133,7 +164,6 @@ export default function UserDashboard() {
 
       {/* ── Scoped Styles ── */}
       <style>{`
-        /* Root */
         .dashboard-root {
           display: flex;
           min-height: 100vh;
@@ -141,7 +171,6 @@ export default function UserDashboard() {
           overflow-x: hidden;
         }
 
-        /* Backdrop */
         .backdrop {
           position: fixed;
           inset: 0;
@@ -152,7 +181,6 @@ export default function UserDashboard() {
           cursor: pointer;
         }
 
-        /* Sidebar wrapper */
         .sidebar-wrapper {
           position: fixed;
           top: 0;
@@ -160,14 +188,13 @@ export default function UserDashboard() {
           height: 100vh;
           z-index: 2000;
           transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          will-change: left;
+          will-change: left, transform;
         }
 
         .sidebar-wrapper.is-mobile > div {
           width: ${SIDEBAR_EXPANDED}px !important;
         }
 
-        /* Main area */
         .main-area {
           display: flex;
           flex-direction: column;
@@ -177,7 +204,6 @@ export default function UserDashboard() {
           will-change: margin-left;
         }
 
-        /* Main content padding */
         .main-content {
           flex: 1;
           padding: 1.25rem;
@@ -189,7 +215,6 @@ export default function UserDashboard() {
           }
         }
 
-        /* Footer */
         .dashboard-footer {
           padding: 0.85rem 1.5rem;
           text-align: center;
@@ -204,11 +229,10 @@ export default function UserDashboard() {
           font-weight: 600;
         }
 
-        /* Global */
         body {
           overflow-x: hidden;
         }
       `}</style>
-    </motion.div>
+    </div>
   );
 }

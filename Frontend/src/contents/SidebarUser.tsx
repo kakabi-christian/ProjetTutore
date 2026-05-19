@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom"; // ← AJOUTER
 import { NavLink, useNavigate } from "react-router-dom";
 import { 
   MdDescription, 
@@ -10,7 +11,7 @@ import {
   MdMenu,
   MdPublic,
   MdPayments,
-  MdClose // Import de l'icône de fermeture
+  MdClose
 } from "react-icons/md";
 import { authService } from "../services/authService";
 import notificationService from "../services/NotificationService";
@@ -72,6 +73,52 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
     position: 'relative' as const
   };
 
+  // ── Modal téléporté dans document.body ──
+  const logoutModal = showLogoutModal ? createPortal(
+    <div
+      className="modal fade show d-block"
+      tabIndex={-1}
+      style={{
+        backgroundColor: 'rgba(10, 37, 64, 0.6)',
+        backdropFilter: 'blur(4px)',
+        zIndex: 99999, // ← très élevé, au dessus de tout
+        position: 'fixed',
+        inset: 0,
+      }}
+    >
+      <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>
+        <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '20px' }}>
+          <div className="modal-body p-4 text-center">
+            <div className="mb-3">
+              <MdLogout size={50} className="text-excha-orange" />
+            </div>
+            <h5 className="fw-bold mb-3" style={{ color: 'var(--blue)' }}>Déconnexion</h5>
+            <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session ?</p>
+            <div className="d-flex gap-2 mt-4">
+              <button
+                type="button"
+                className="btn fw-bold w-50 py-2"
+                style={{ color: 'var(--gray)', borderRadius: '10px' }}
+                onClick={() => setShowLogoutModal(false)}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                className="btn btn-excha-orange fw-bold w-50 py-2 shadow-sm"
+                style={{ borderRadius: '10px' }}
+                onClick={confirmLogout}
+              >
+                Oui, quitter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body // ← téléporté hors du aside
+  ) : null;
+
   return (
     <>
       <div
@@ -82,8 +129,8 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
           backgroundColor: "var(--blue)", 
           transition: "all 0.3s ease",
           position: "fixed",
-          zIndex: 2000, // Z-index élevé pour passer devant le contenu mobile
-          left: isMobile && isCollapsed ? "-280px" : "0", // Sortie de l'écran sur mobile si réduit
+          zIndex: 2000,
+          left: isMobile && isCollapsed ? "-280px" : "0",
         }}
       >
         {/* Header Logo & Toggle Button */}
@@ -97,8 +144,6 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
               </div>
             </div>
           )}
-          
-          {/* Bouton Toggle : Devient un bouton "Fermer" sur mobile ouvert */}
           <button 
             className="btn text-excha-green p-0 border-0" 
             onClick={() => setIsCollapsed(!isCollapsed)}
@@ -110,7 +155,6 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
         <hr className="mx-2" style={{ backgroundColor: "rgba(255,255,255,0.1)", border: 'none', height: '1px' }} />
 
         <ul className="nav nav-pills flex-column mb-auto px-1">
-          {/* 🌐 RÉSEAU D'ÉCHANGES */}
           <li style={navItemStyle}>
             <NavLink to="/user/market" className={navLinkClasses} onClick={() => isMobile && setIsCollapsed(true)}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: (isCollapsed && !isMobile) ? '64px' : '64px', height: '100%' }}>
@@ -124,7 +168,6 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
             </NavLink>
           </li>
 
-          {/* 💳 MES COMPTES */}
           <li style={navItemStyle}>
             <NavLink to="/user/method-payment" className={navLinkClasses} onClick={() => isMobile && setIsCollapsed(true)}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
@@ -138,7 +181,6 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
             </NavLink>
           </li>
 
-          {/* KYC */}
           <li style={navItemStyle}>
             <NavLink to="/user/kyc" className={navLinkClasses} onClick={() => isMobile && setIsCollapsed(true)}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
@@ -152,7 +194,6 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
             </NavLink>
           </li>
 
-          {/* Notifications */}
           <li style={navItemStyle}>
             <NavLink to="/user/notifications-user" className={navLinkClasses} onClick={() => isMobile && setIsCollapsed(true)}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
@@ -179,7 +220,6 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
             </NavLink>
           </li>
 
-          {/* Feedback */}
           <li style={navItemStyle}>
             <NavLink to="/user/feedback" className={navLinkClasses} onClick={() => isMobile && setIsCollapsed(true)}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
@@ -193,7 +233,6 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
             </NavLink>
           </li>
 
-          {/* Profil */}
           <li style={navItemStyle}>
             <NavLink to="/user/profile-user" className={navLinkClasses} onClick={() => isMobile && setIsCollapsed(true)}>
               <div className="d-flex align-items-center justify-content-center" style={{ minWidth: '64px', height: '100%' }}>
@@ -210,10 +249,10 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
 
         <hr className="mx-2" style={{ backgroundColor: "rgba(255,255,255,0.1)", border: 'none', height: '1px' }} />
 
-        <div className="px-1 mb-3 logout-container" style={{ position: 'relative' }}>
+        <div className="px-1 mb-3" style={{ position: 'relative' }}>
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="btn w-100 d-flex align-items-center p-0 border-0 logout-btn-hover"
+            className="btn w-100 d-flex align-items-center p-0 border-0"
             style={{ 
               height: '56px',
               borderRadius: '12px', 
@@ -234,26 +273,8 @@ const SidebarUser: React.FC<SidebarUserProps> = ({ isCollapsed, setIsCollapsed }
         </div>
       </div>
 
-      {/* MODAL DE DÉCONNEXION */}
-      {showLogoutModal && (
-        <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(10, 37, 64, 0.6)', backdropFilter: 'blur(4px)', zIndex: 3000 }}>
-          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>
-            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '20px' }}>
-              <div className="modal-body p-4 text-center">
-                <div className="mb-3">
-                  <MdLogout size={50} className="text-excha-orange" />
-                </div>
-                <h5 className="fw-bold mb-3" style={{ color: 'var(--blue)' }}>Déconnexion</h5>
-                <p className="text-muted">Êtes-vous sûr de vouloir quitter votre session ?</p>
-                <div className="d-flex gap-2 mt-4">
-                  <button type="button" className="btn fw-bold w-50 py-2" style={{ color: 'var(--gray)', borderRadius: '10px' }} onClick={() => setShowLogoutModal(false)}>Annuler</button>
-                  <button type="button" className="btn btn-excha-orange fw-bold w-50 py-2 shadow-sm" style={{ borderRadius: '10px' }} onClick={confirmLogout}>Oui, quitter</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal téléporté dans document.body via Portal */}
+      {logoutModal}
     </>
   );
 };
