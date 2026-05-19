@@ -326,15 +326,141 @@ class TransactionController extends Controller
      * En cas d'échec d'un transfer → log critique + notif support.
      * On ne rollback pas la transaction COMPLETED : les fonds sont déjà reçus.
      */
+    // public function disburseFunds(Transaction $transaction): void
+    // {
+    //     $listing = $transaction->listing;
+
+    //     // --- Transfer 1 : Acheteur ← currency_from (ex: USD) ---
+    //     $buyerMethod = $transaction->buyerMethodPayment;
+
+    //     if (!$buyerMethod) {
+    //         Log::critical('TransactionController@disburseFunds: buyerMethodPayment manquant', [
+    //             'transaction_id' => $transaction->transaction_id,
+    //         ]);
+    //         $this->notificationService->notifyTransferFailed(
+    //             $transaction->buyer_id,
+    //             (float) $transaction->amount_from,
+    //             $listing->currency_from,
+    //             $transaction->transaction_id
+    //         );
+    //     } else {
+    //         $buyerTransferResult = $this->flwService->createTransfer([
+    //             // Ref: https://developer.flutterwave.com/reference/endpoints/transfers#create-a-transfer
+    //             'account_bank'     => $buyerMethod->bank_code ?? $buyerMethod->provider,
+    //             'account_number'   => $buyerMethod->account_number,
+    //             'amount'           => (float) $transaction->amount_from,      // USD
+    //             'currency'         => $listing->currency_from,                // USD
+    //             'narration'        => "ExchaPay — Échange #{$transaction->transaction_id}",
+    //             'reference'        => 'EXCHA-BUYER-' . $transaction->transaction_id . '-' . time(),
+    //             'beneficiary_name' => $buyerMethod->account_name,
+    //         ]);
+
+    //         if ($buyerTransferResult['success']) {
+    //             $accountInfo = strtoupper($buyerMethod->provider) . ' — ' . $buyerMethod->account_number;
+    //             $this->notificationService->notifyTransferSuccess(
+    //                 $transaction->buyer_id,
+    //                 (float) $transaction->amount_from,
+    //                 $listing->currency_from,
+    //                 $accountInfo
+    //             );
+    //             Log::info('TransactionController@disburseFunds: Transfer acheteur OK', [
+    //                 'transaction_id' => $transaction->transaction_id,
+    //                 'buyer_id'       => $transaction->buyer_id,
+    //                 'amount'         => $transaction->amount_from,
+    //                 'currency'       => $listing->currency_from,
+    //             ]);
+    //         } else {
+    //             Log::critical('TransactionController@disburseFunds: Transfer acheteur ÉCHOUÉ', [
+    //                 'transaction_id' => $transaction->transaction_id,
+    //                 'error'          => $buyerTransferResult['message'],
+    //             ]);
+    //             $this->notificationService->notifyTransferFailed(
+    //                 $transaction->buyer_id,
+    //                 (float) $transaction->amount_from,
+    //                 $listing->currency_from,
+    //                 $transaction->transaction_id
+    //             );
+    //         }
+    //     }
+
+    //     // --- Transfer 2 : Vendeur ← currency_to net de frais (ex: XAF) ---
+    //     $sellerMethod = $listing->paymentMethod; // Défini lors de la création de l'annonce
+
+    //     $sellerNetAmount = round((float) $transaction->amount_to - (float) $transaction->seller_fee, 2);
+
+    //     if (!$sellerMethod) {
+    //         Log::critical('TransactionController@disburseFunds: sellerMethodPayment manquant', [
+    //             'transaction_id' => $transaction->transaction_id,
+    //         ]);
+    //         $this->notificationService->notifyTransferFailed(
+    //             $transaction->seller_id,
+    //             $sellerNetAmount,
+    //             $listing->currency_to,
+    //             $transaction->transaction_id
+    //         );
+    //     } else {
+    //         $sellerTransferResult = $this->flwService->createTransfer([
+    //             'account_bank'     => $sellerMethod->bank_code ?? $sellerMethod->provider,
+    //             'account_number'   => $sellerMethod->account_number,
+    //             'amount'           => $sellerNetAmount,                 // XAF net
+    //             'currency'         => $listing->currency_to,            // XAF
+    //             'narration'        => "ExchaPay — Échange #{$transaction->transaction_id}",
+    //             'reference'        => 'EXCHA-SELLER-' . $transaction->transaction_id . '-' . time(),
+    //             'beneficiary_name' => $sellerMethod->account_name,
+    //         ]);
+
+    //         if ($sellerTransferResult['success']) {
+    //             $accountInfo = strtoupper($sellerMethod->provider) . ' — ' . $sellerMethod->account_number;
+    //             $this->notificationService->notifyTransferSuccess(
+    //                 $transaction->seller_id,
+    //                 $sellerNetAmount,
+    //                 $listing->currency_to,
+    //                 $accountInfo
+    //             );
+    //             Log::info('TransactionController@disburseFunds: Transfer vendeur OK', [
+    //                 'transaction_id' => $transaction->transaction_id,
+    //                 'seller_id'      => $transaction->seller_id,
+    //                 'amount'         => $sellerNetAmount,
+    //                 'currency'       => $listing->currency_to,
+    //             ]);
+    //         } else {
+    //             Log::critical('TransactionController@disburseFunds: Transfer vendeur ÉCHOUÉ', [
+    //                 'transaction_id' => $transaction->transaction_id,
+    //                 'error'          => $sellerTransferResult['message'],
+    //             ]);
+    //             $this->notificationService->notifyTransferFailed(
+    //                 $transaction->seller_id,
+    //                 $sellerNetAmount,
+    //                 $listing->currency_to,
+    //                 $transaction->transaction_id
+    //             );
+    //         }
+    //     }
+    // }
+
+    // ===========================================================
+    // PHASE 3 — Libération des fonds (SIMULATION DEV)
+    // Pas d'appel réel Flutterwave Transfer en mode sandbox.
+    // On simule un succès instantané et on notifie les deux parties.
+    // ===========================================================
+
+    /**
+     * Simule la libération des fonds après confirmation du paiement vendeur.
+     *
+     * Version DEV : bypasse createTransfer() de Flutterwave.
+     * Notifie directement acheteur et vendeur comme si le virement était initié.
+     *
+     * En production → décommenter disburseFunds() ci-dessus et supprimer cette méthode.
+     */
     public function disburseFunds(Transaction $transaction): void
     {
         $listing = $transaction->listing;
 
-        // --- Transfer 1 : Acheteur ← currency_from (ex: USD) ---
+        // --- Simulation Transfer 1 : Acheteur ← currency_from (ex: USD) ---
         $buyerMethod = $transaction->buyerMethodPayment;
 
-        if (!$buyerMethod) {
-            Log::critical('TransactionController@disburseFunds: buyerMethodPayment manquant', [
+        if (! $buyerMethod) {
+            Log::warning('disburseFunds[SIM]: buyerMethodPayment manquant — notif échec acheteur', [
                 'transaction_id' => $transaction->transaction_id,
             ]);
             $this->notificationService->notifyTransferFailed(
@@ -344,52 +470,30 @@ class TransactionController extends Controller
                 $transaction->transaction_id
             );
         } else {
-            $buyerTransferResult = $this->flwService->createTransfer([
-                // Ref: https://developer.flutterwave.com/reference/endpoints/transfers#create-a-transfer
-                'account_bank'     => $buyerMethod->bank_code ?? $buyerMethod->provider,
-                'account_number'   => $buyerMethod->account_number,
-                'amount'           => (float) $transaction->amount_from,      // USD
-                'currency'         => $listing->currency_from,                // USD
-                'narration'        => "ExchaPay — Échange #{$transaction->transaction_id}",
-                'reference'        => 'EXCHA-BUYER-' . $transaction->transaction_id . '-' . time(),
-                'beneficiary_name' => $buyerMethod->account_name,
-            ]);
+            $accountInfo = strtoupper($buyerMethod->provider ?? 'COMPTE')
+                . ' — ' . $buyerMethod->account_number;
 
-            if ($buyerTransferResult['success']) {
-                $accountInfo = strtoupper($buyerMethod->provider) . ' — ' . $buyerMethod->account_number;
-                $this->notificationService->notifyTransferSuccess(
-                    $transaction->buyer_id,
-                    (float) $transaction->amount_from,
-                    $listing->currency_from,
-                    $accountInfo
-                );
-                Log::info('TransactionController@disburseFunds: Transfer acheteur OK', [
-                    'transaction_id' => $transaction->transaction_id,
-                    'buyer_id'       => $transaction->buyer_id,
-                    'amount'         => $transaction->amount_from,
-                    'currency'       => $listing->currency_from,
-                ]);
-            } else {
-                Log::critical('TransactionController@disburseFunds: Transfer acheteur ÉCHOUÉ', [
-                    'transaction_id' => $transaction->transaction_id,
-                    'error'          => $buyerTransferResult['message'],
-                ]);
-                $this->notificationService->notifyTransferFailed(
-                    $transaction->buyer_id,
-                    (float) $transaction->amount_from,
-                    $listing->currency_from,
-                    $transaction->transaction_id
-                );
-            }
+            $this->notificationService->notifyTransferSuccess(
+                $transaction->buyer_id,
+                (float) $transaction->amount_from,
+                $listing->currency_from,
+                $accountInfo
+            );
+
+            Log::info('disburseFunds[SIM]: Acheteur notifié (transfert simulé)', [
+                'transaction_id' => $transaction->transaction_id,
+                'buyer_id'       => $transaction->buyer_id,
+                'amount'         => $transaction->amount_from,
+                'currency'       => $listing->currency_from,
+            ]);
         }
 
-        // --- Transfer 2 : Vendeur ← currency_to net de frais (ex: XAF) ---
-        $sellerMethod = $listing->paymentMethod; // Défini lors de la création de l'annonce
-
+        // --- Simulation Transfer 2 : Vendeur ← currency_to net de frais (ex: XAF) ---
+        $sellerMethod = $listing->paymentMethod;
         $sellerNetAmount = round((float) $transaction->amount_to - (float) $transaction->seller_fee, 2);
 
-        if (!$sellerMethod) {
-            Log::critical('TransactionController@disburseFunds: sellerMethodPayment manquant', [
+        if (! $sellerMethod) {
+            Log::warning('disburseFunds[SIM]: sellerMethodPayment manquant — notif échec vendeur', [
                 'transaction_id' => $transaction->transaction_id,
             ]);
             $this->notificationService->notifyTransferFailed(
@@ -399,42 +503,22 @@ class TransactionController extends Controller
                 $transaction->transaction_id
             );
         } else {
-            $sellerTransferResult = $this->flwService->createTransfer([
-                'account_bank'     => $sellerMethod->bank_code ?? $sellerMethod->provider,
-                'account_number'   => $sellerMethod->account_number,
-                'amount'           => $sellerNetAmount,                 // XAF net
-                'currency'         => $listing->currency_to,            // XAF
-                'narration'        => "ExchaPay — Échange #{$transaction->transaction_id}",
-                'reference'        => 'EXCHA-SELLER-' . $transaction->transaction_id . '-' . time(),
-                'beneficiary_name' => $sellerMethod->account_name,
-            ]);
+            $accountInfo = strtoupper($sellerMethod->provider ?? 'COMPTE')
+                . ' — ' . $sellerMethod->account_number;
 
-            if ($sellerTransferResult['success']) {
-                $accountInfo = strtoupper($sellerMethod->provider) . ' — ' . $sellerMethod->account_number;
-                $this->notificationService->notifyTransferSuccess(
-                    $transaction->seller_id,
-                    $sellerNetAmount,
-                    $listing->currency_to,
-                    $accountInfo
-                );
-                Log::info('TransactionController@disburseFunds: Transfer vendeur OK', [
-                    'transaction_id' => $transaction->transaction_id,
-                    'seller_id'      => $transaction->seller_id,
-                    'amount'         => $sellerNetAmount,
-                    'currency'       => $listing->currency_to,
-                ]);
-            } else {
-                Log::critical('TransactionController@disburseFunds: Transfer vendeur ÉCHOUÉ', [
-                    'transaction_id' => $transaction->transaction_id,
-                    'error'          => $sellerTransferResult['message'],
-                ]);
-                $this->notificationService->notifyTransferFailed(
-                    $transaction->seller_id,
-                    $sellerNetAmount,
-                    $listing->currency_to,
-                    $transaction->transaction_id
-                );
-            }
+            $this->notificationService->notifyTransferSuccess(
+                $transaction->seller_id,
+                $sellerNetAmount,
+                $listing->currency_to,
+                $accountInfo
+            );
+
+            Log::info('disburseFunds[SIM]: Vendeur notifié (transfert simulé)', [
+                'transaction_id' => $transaction->transaction_id,
+                'seller_id'      => $transaction->seller_id,
+                'amount'         => $sellerNetAmount,
+                'currency'       => $listing->currency_to,
+            ]);
         }
     }
 
