@@ -1,0 +1,21 @@
+# k8s/backend-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: exchapay-backend-config
+data:
+  APP_NAME: "ExchaPay"
+  APP_ENV: "production"   # Indispensable pour les performances en cluster
+  APP_DEBUG: "false"      # On désactive le debug pour la sécurité
+  APP_URL: "http://localhost"
+  DB_CONNECTION: "mysql"
+  DB_HOST: "mysql-service" # C'est le nom DNS interne qu'on donnera à MySQL plus tard
+  DB_PORT: "3306"
+  DB_DATABASE: "exchapay_db"
+  DB_USERNAME: "root"
+  LOG_CHANNEL: "stack"
+  MAIL_MAILER: "smtp"
+  MAIL_HOST: "smtp.gmail.com"
+  MAIL_PORT: "587"
+  MAIL_ENCRYPTION: "tls"
+  FLW_BASE_URL: "https://api.flutterwave.com/v3"

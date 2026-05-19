@@ -32,63 +32,63 @@ class ListingController extends Controller
      * @OA\Response(response=200, description="Liste des annonces")
      * )
      */
-   public function index(Request $request)
-{
-    try {
-        // 1. Initialisation de la requête avec les relations
-        $query = Listing::with([
-            'utilisateur:user_id,lastname,firstname,email',
-            'paymentMethod:method_payment_id,type,provider,currency',
-        ])->where('amount_available', '>', 0);
+    public function index(Request $request)
+    {
+        try {
+            // 1. Initialisation de la requête avec les relations
+            $query = Listing::with([
+                'utilisateur:user_id,lastname,firstname,email',
+                'paymentMethod:method_payment_id,type,provider,currency',
+            ])->where('amount_available', '>', 0);
 
-        // 2. EXCLUSION DES PROPRES ANNONCES DE L'UTILISATEUR
-        // Si l'utilisateur est connecté, on cache ses propres annonces de la liste globale
-        if (Auth::guard('sanctum')->check()) {
-            $query->where('user_id', '!=', Auth::guard('sanctum')->id());
+            // 2. EXCLUSION DES PROPRES ANNONCES DE L'UTILISATEUR
+            // Si l'utilisateur est connecté, on cache ses propres annonces de la liste globale
+            if (Auth::guard('sanctum')->check()) {
+                $query->where('user_id', '!=', Auth::guard('sanctum')->id());
+            }
+
+            // 3. FILTRE DE STATUT (Annonces actives uniquement)
+            $query->whereHas('histories.listingStatus', function ($q) {
+                $q->where('title', 'active');
+            });
+
+            // 4. Filtres de devises (currency_from / currency_to)
+            if ($request->filled('currency_from')) {
+                $query->where('currency_from', strtoupper($request->currency_from));
+            }
+
+            if ($request->filled('currency_to')) {
+                $query->where('currency_to', strtoupper($request->currency_to));
+            }
+
+            // 5. Tri sécurisé
+            $sort_by = $request->get('sort_by', 'created_at');
+            $sort_order = $request->get('sort_order', 'desc');
+            $allowed_sorts = ['user_rate', 'amount_available', 'created_at'];
+
+            if (in_array($sort_by, $allowed_sorts)) {
+                $query->orderBy($sort_by, $sort_order);
+            }
+
+            // 6. Pagination
+            $listings = $query->paginate(10);
+
+            // Ajout de l'attribut calculé pour le frontend
+            $listings->getCollection()->each(function ($listing) {
+                $listing->append('discount_percentage');
+            });
+
+            return response()->json($listings);
+
+        } catch (\Exception $e) {
+            Log::error('[ExchaPay] Erreur ListingController@index : '.$e->getMessage());
+
+            return response()->json([
+                'message' => 'Erreur lors du chargement des annonces.',
+                'debug' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
         }
-
-        // 3. FILTRE DE STATUT (Annonces actives uniquement)
-        $query->whereHas('histories.listingStatus', function ($q) {
-            $q->where('title', 'active');
-        });
-
-        // 4. Filtres de devises (currency_from / currency_to)
-        if ($request->filled('currency_from')) {
-            $query->where('currency_from', strtoupper($request->currency_from));
-        }
-
-        if ($request->filled('currency_to')) {
-            $query->where('currency_to', strtoupper($request->currency_to));
-        }
-
-        // 5. Tri sécurisé
-        $sort_by = $request->get('sort_by', 'created_at');
-        $sort_order = $request->get('sort_order', 'desc');
-        $allowed_sorts = ['user_rate', 'amount_available', 'created_at'];
-
-        if (in_array($sort_by, $allowed_sorts)) {
-            $query->orderBy($sort_by, $sort_order);
-        }
-
-        // 6. Pagination
-        $listings = $query->paginate(10);
-
-        // Ajout de l'attribut calculé pour le frontend
-        $listings->getCollection()->each(function ($listing) {
-            $listing->append('discount_percentage');
-        });
-
-        return response()->json($listings);
-
-    } catch (\Exception $e) {
-        Log::error('[ExchaPay] Erreur ListingController@index : '.$e->getMessage());
-
-        return response()->json([
-            'message' => 'Erreur lors du chargement des annonces.',
-            'debug' => config('app.debug') ? $e->getMessage() : null,
-        ], 500);
     }
-}
 
     /**
      * @OA\Post(

@@ -14,6 +14,7 @@ import {
   MdVerifiedUser,
   MdLock
 } from 'react-icons/md';
+import { Link } from 'react-router-dom';
 
 export default function AboutContent() {
   useEffect(() => {
@@ -37,7 +38,9 @@ export default function AboutContent() {
             ExchaPay rend l'échange de devises accessible et sécurisé pour tous, en connectant directement les utilisateurs à travers un réseau de confiance.
           </p>
           <div className="d-flex justify-content-center gap-3 mt-4">
-            <button className="btn btn-excha-orange px-4 py-2 rounded-pill fw-bold border-0">Démarrer l'expérience</button>
+            <button className="btn btn-excha-orange px-4 py-2 rounded-pill fw-bold border-0">
+              <Link to="/register" className="text-white text-decoration-none">Démarrer l'expérience</Link>
+            </button>
           </div>
         </div>
       </section>
