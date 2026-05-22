@@ -158,17 +158,43 @@ class TypeDocumentController extends Controller
      *     @OA\Response(response=401, description="Non authentifié")
      * )
      */
+    /**
+     * Créer un nouveau type de document avec son fichier.
+     */
     public function store(TypeDocumentRequest $request): JsonResponse
     {
         try {
-            $typeDocument = TypeDocument::create($request->validated());
+            // 1. Récupérer les données validées (le nom, etc.)
+            $data = $request->validated();
 
-            Log::info('Type de document créé.', ['type_document_id' => $typeDocument->type_document_id, 'name' => $typeDocument->name]);
+            // 2. Vérifier si un fichier est présent dans la requête
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                
+                // Générer un nom unique propre pour éviter les écrasements
+                $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                
+                // Stocker le fichier dans storage/app/public/documents
+                $filePath = $file->storeAs('documents', $fileName, 'public');
+                
+                // Ajouter le chemin du fichier aux données à enregistrer
+                $data['file_path'] = $filePath; 
+            }
+
+            // 3. Créer l'enregistrement en base de données
+            $typeDocument = TypeDocument::create($data);
+
+            Log::info('Type de document créé avec fichier.', [
+                'type_document_id' => $typeDocument->type_document_id, 
+                'name' => $typeDocument->name,
+                'file_path' => $data['file_path'] ?? null
+            ]);
 
             return response()->json([
                 'message' => 'Type de document créé avec succès.',
                 'data' => $typeDocument,
             ], 201);
+
         } catch (\Exception $e) {
             Log::error('Erreur lors de la création d\'un type de document.', [
                 'error' => $e->getMessage(),
@@ -181,7 +207,6 @@ class TypeDocumentController extends Controller
             ], 500);
         }
     }
-
     /**
      * Afficher un type de document spécifique.
      *
