@@ -1,17 +1,16 @@
-import axios from 'axios';
-
+import axios, { type InternalAxiosRequestConfig } from 'axios';
 /**
  * 💡 Note : En production, VITE_API_BASE_URL doit être "https://talla.cdwfs.net"
- * sans le slash final. On utilise une valeur par défaut vide pour éviter les erreurs.
+ * sans le slash final.
  */
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const api = axios.create({
-  // On s'assure que l'URL est bien construite
-  baseURL: `${API_BASE_URL}/api`,
+  // 🔄 En développement, on laisse Vite gérer le proxy via '/api'
+  // En production, on utilise l'URL absolue du .env
+  baseURL: import.meta.env.DEV ? '/api' : `${API_BASE_URL}/api`,
   
   // 🛡️ CRUCIAL : Permet d'envoyer et recevoir les cookies de session (Sanctum)
-  // Sans ça, le navigateur bloque la connexion même si le mot de passe est bon.
   withCredentials: true, 
   
   headers: {
@@ -20,14 +19,17 @@ const api = axios.create({
   },
 });
 
-// 🛡️ Intercepteur de requête : ajoute le token avant l'envoi
+// 🛡️ Intercepteur de requête : ajoute le token et les headers requis pour ngrok
 api.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('auth_token');
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // 💡 AJOUT : Force ngrok à contourner l'écran d'avertissement pour toutes les requêtes du dashboard
+    config.headers['ngrok-skip-browser-warning'] = 'true';
     
     return config;
   },

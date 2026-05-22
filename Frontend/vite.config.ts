@@ -3,45 +3,59 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  // Charge les variables d'environnement (VITE_API_URL, etc.)
+
+  // ✅ Charge les variables d'environnement (.env)
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    // 🚀 AJOUT CRUCIAL : Définit les chemins en relatif pour le déploiement
-    base: './', 
-    
+
+    base: './',
+
     plugins: [react()],
+
     server: {
-      host: '0.0.0.0', // Indispensable pour Docker
-      port: 5173,      
+
+      host: '0.0.0.0',
+
+      // ✅ Port du serveur Vite
+      port: 5173,
+
+      // ✅ Empêche Vite de changer automatiquement le port
       strictPort: true,
-      
-      // ✅ Configuration du Proxy dynamique
+
+      // ✅ Proxy API dynamique
       proxy: {
         '/api': {
-          target: env.VITE_API_URL,
+
+          // ✅ Utilise la variable du .env
+          target: env.VITE_API_BASE_URL,
+
+          // ✅ Modifie l'origine de la requête
           changeOrigin: true,
-          secure: false, 
+
+          // ✅ Ignore les problèmes SSL en développement
+          secure: false,
+
           headers: {
-            'ngrok-skip-browser-warning': 'true', 
+            'ngrok-skip-browser-warning': 'true',
             'Accept': 'application/json',
-          }
-        }
+          },
+        },
       },
 
-      // ✅ Hot Module Replacement (HMR) optimisé pour Docker
+      // ✅ Hot Reload optimisé pour Docker
       hmr: {
         clientPort: 5173,
       },
 
-      // ✅ Autorise tous les hosts
+      // ✅ Autorise les connexions externes
       allowedHosts: [
         'all',
         '.ngrok-free.app',
-        '.ngrok.io'
+        '.ngrok.io',
       ],
 
-      // Indispensable pour que Docker détecte les changements
+      // ✅ Docker détecte correctement les changements
       watch: {
         usePolling: true,
       },
