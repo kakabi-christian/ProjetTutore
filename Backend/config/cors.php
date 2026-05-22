@@ -8,22 +8,26 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => [
+        'api/*',
+        'sanctum/csrf-cookie',
+        'login',
+        'logout',
+    ],
 
-    'allowed_methods' => ['*', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    'allowed_methods' => ['*'],
 
     'allowed_origins' => [
         'http://localhost:5173',
         'http://127.0.0.1:5173',
-        'https://5982-102-244-223-207.ngrok-free.app',
         'https://talla.cdwfs.net',
     ],
 
+    // ✅ Autorise TOUS les sous-domaines ngrok
     'allowed_origins_patterns' => [
         '#^https://.*\.ngrok-free\.app$#',
+        '#^https://.*\.ngrok\.io$#',
     ],
-
-    'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
@@ -31,6 +35,7 @@ return [
 
     'max_age' => 86400,
 
+    // ✅ Important si tu utilises cookies / sanctum
     'supports_credentials' => true,
 
 ];
