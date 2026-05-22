@@ -93,6 +93,8 @@ export default function TransactionCard({
     isAwaiting
   });
 
+  /// counterpart affiche le nom de l'autre partie, ou "inconnu" si les données sont manquantes
+
   const counterpart = isBuyer
     ? (tx.seller ? `${tx.seller.firstname} ${tx.seller.lastname}` : 'Vendeur inconnu')
     : (tx.buyer  ? `${tx.buyer.firstname} ${tx.buyer.lastname}`   : 'Acheteur inconnu');
