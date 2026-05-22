@@ -69,6 +69,70 @@ Route::get('/listings/{listing_id}/reviews', [ReviewController::class, 'index'])
 Route::post('/webhooks/flutterwave', [WebhookController::class, 'handle'])
     ->name('webhooks.flutterwave');
 
+// -------------------------------------------------------
+// DEV ONLY — Simule les confirmations Flutterwave en local
+// Ces routes permettent de tester tout le flux sans webhook fonctionnel.
+// -------------------------------------------------------
+Route::post('/dev/simulate-buyer-payment/{id}', function ($id, \App\Services\NotificationService $notificationService) {
+    $transaction = \App\Models\Transaction::findOrFail($id);
+    
+    if ($transaction->status !== \App\Models\Transaction::STATUS_PENDING) {
+        return response()->json(['message' => 'La transaction doit être en PENDING'], 400);
+    }
+    
+    $payment = $transaction->payments()->first();
+    if ($payment) {
+        $payment->update([
+            'provider' => 'MOBILE_MONEY_DEV',
+            'flw_payment_id' => 'dev-buyer-payment-' . time(),
+            'paid_at' => now(),
+        ]);
+        
+        $successStatus = \App\Models\PaymentStatus::firstOrCreate(['title' => 'SUCCESS']);
+        \App\Models\PaymentHistory::create([
+            'payment_id' => $payment->payment_id,
+            'payment_status_id' => $successStatus->payment_status_id,
+            'date' => now(),
+        ]);
+    }
+    
+    $transaction->update([
+        'status' => \App\Models\Transaction::STATUS_AWAITING_SELLER,
+        'flw_tx_id' => 'dev-buyer-tx-' . time(),
+    ]);
+    
+    $notificationService->notifyBuyer($transaction);
+    $notificationService->notifySeller($transaction);
+    
+    return response()->json([
+        'message' => 'Paiement acheteur simulé avec succès !',
+        'status' => $transaction->status
+    ]);
+});
+
+Route::post('/dev/simulate-seller-payment/{id}', function ($id, \App\Services\NotificationService $notificationService, TransactionController $transactionController) {
+    $transaction = \App\Models\Transaction::findOrFail($id);
+    
+    if ($transaction->status !== \App\Models\Transaction::STATUS_AWAITING_SELLER_PAYMENT) {
+        return response()->json(['message' => 'La transaction doit être en AWAITING_SELLER_PAYMENT'], 400);
+    }
+    
+    $transaction->update([
+        'status' => \App\Models\Transaction::STATUS_COMPLETED,
+        'flw_seller_tx_id' => 'dev-seller-tx-' . time(),
+    ]);
+    
+    $notificationService->notifyBuyerSellerPaid($transaction);
+    
+    // Phase 3 disburse
+    $transactionController->disburseFunds($transaction);
+    
+    return response()->json([
+        'message' => 'Paiement vendeur simulé avec succès ! (Disbursement simulé)',
+        'status' => $transaction->status
+    ]);
+});
+
 // --- ROUTES PROTÉGÉES (auth:sanctum) ---
 Route::middleware('auth:sanctum')->group(function () {
 

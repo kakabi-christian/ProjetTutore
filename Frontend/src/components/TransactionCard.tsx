@@ -18,6 +18,11 @@ export const STATUS_CONFIG: Record<string, { label: string; badgeClass: string; 
     badgeClass: 'badge-status-awaiting',
     Icon: MdAccessTime,
   },
+  AWAITING_SELLER_PAYMENT: {
+    label: 'Paiement vendeur',
+    badgeClass: 'badge-status-awaiting',
+    Icon: MdAccessTime,
+  },
   COMPLETED: {
     label: 'Complété',
     badgeClass: 'badge-status-success',
@@ -66,14 +71,27 @@ export default function TransactionCard({
   actionLoading,
   innerRef,
 }: TransactionCardProps) {
-  const isBuyer   = tx.buyer_id === currentUserId;
-  const isSeller  = tx.seller_id === currentUserId;
+  // Number() sécurise la comparaison même si l'API retourne des IDs en string
+  const isBuyer   = Number(tx.buyer_id) === Number(currentUserId);
+  const isSeller  = Number(tx.seller_id) === Number(currentUserId);
   const cfg       = STATUS_CONFIG[tx.status] ?? STATUS_CONFIG.PENDING;
   const { Icon }  = cfg;
-  
+
   const currFrom  = tx.listing?.currency_from ?? '—';
   const currTo    = tx.listing?.currency_to   ?? '—';
+  // Boutons visibles quand l'acheteur a confirmé son paiement
   const isAwaiting = tx.status === 'AWAITING_SELLER';
+
+  console.log('[TransactionCard Debug]', {
+    transaction_id: tx.transaction_id,
+    buyer_id: tx.buyer_id,
+    seller_id: tx.seller_id,
+    currentUserId,
+    isBuyer,
+    isSeller,
+    status: tx.status,
+    isAwaiting
+  });
 
   const counterpart = isBuyer
     ? (tx.seller ? `${tx.seller.firstname} ${tx.seller.lastname}` : 'Vendeur inconnu')

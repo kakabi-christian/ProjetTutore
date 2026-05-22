@@ -102,6 +102,7 @@ class TransactionController extends Controller
                 'seller_fee'              => $sellerFee,
                 'buyer_payment_method'    => $validated['payment_method'],
                 'buyer_method_payment_id' => $validated['buyer_method_payment_id'], // ← Phase 3
+                'status'                  => Transaction::STATUS_AWAITING_SELLER, // ✅ Enregistre directement AWAITING_SELLER au lieu de PENDING
             ]);
 
             $flwTxRef = $transaction->generateFlwTxRef();
@@ -157,6 +158,11 @@ class TransactionController extends Controller
 
             return response()->json(['message' => "Impossible d'initialiser le paiement.", 'error' => $flwResult['message']], 502);
         }
+
+        // Charger les relations nécessaires pour les notifications
+        $transaction->load(['listing', 'buyer', 'seller']);
+        $this->notificationService->notifyBuyer($transaction);
+        $this->notificationService->notifySeller($transaction);
 
         return response()->json([
             'message' => 'Transaction initiée avec succès',
