@@ -170,21 +170,22 @@ class TransactionController extends Controller
             'date' => now(),
         ]);
 
-        Log::info('Enregistrements Payment et History initialisés en PENDING', [
-            'payment_id' => $payment->payment_id,
-            'status' => 'PENDING'
-        ]);
+        try {
+            DB::beginTransaction();
 
-        DB::commit();
-        Log::info('Commit de la transaction DB exécuté avec succès');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('TransactionController@initiate - Erreur critique DB (Rollback appliqué)', [
-            'buyer_id' => $buyer->user_id,
-            'listing_id' => $listing->listing_id,
-            'error_message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
+            $transaction = Transaction::create([
+                'buyer_id'                => $buyer->user_id,
+                'seller_id'               => $listing->user_id,
+                'listing_id'              => $listing->listing_id,
+                'amount_from'             => $amountFrom,
+                'amount_to'               => $amountTo,
+                'exchange_rate'           => $exchangeRate,
+                'buyer_fee'               => $buyerFee,
+                'seller_fee'              => $sellerFee,
+                'buyer_payment_method'    => $validated['payment_method'],
+                'buyer_method_payment_id' => $validated['buyer_method_payment_id'], // ← Phase 3
+                'status'                  => Transaction::STATUS_AWAITING_SELLER, // ✅ Enregistre directement AWAITING_SELLER au lieu de PENDING
+            ]);
 
         return response()->json(['message' => 'Erreur lors de la création.', 'error' => $e->getMessage()], 500);
     }
@@ -234,7 +235,26 @@ class TransactionController extends Controller
             ]);
         }
 
-        return response()->json(['message' => "Impossible d'initialiser le paiement.", 'error' => $flwResult['message']], 502);
+        // Charger les relations nécessaires pour les notifications
+        $transaction->load(['listing', 'buyer', 'seller']);
+        $this->notificationService->notifyBuyer($transaction);
+        $this->notificationService->notifySeller($transaction);
+
+        return response()->json([
+            'message' => 'Transaction initiée avec succès',
+            'payment_link' => $flwResult['payment_link'],
+            'transaction_id' => $transaction->transaction_id,
+            'flw_tx_ref' => $flwTxRef,
+            'summary' => [
+                'amount_from' => $amountFrom,
+                'currency_from' => $listing->currency_from,
+                'amount_to' => $amountTo,
+                'currency_to' => $listing->currency_to,
+                'buyer_fee' => $buyerFee,
+                'total_to_pay' => $totalChargedToBuyer,
+                'exchange_rate' => $exchangeRate,
+            ],
+        ], 201);
     }
 
     Log::info('--- Fin de l\'initialisation réussie ---', [
