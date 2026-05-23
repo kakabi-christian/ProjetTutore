@@ -13,11 +13,9 @@ class TypeDocumentSeeder extends Seeder
     public function run(): void
     {
         $types = [
-            ['name' => 'Carte d\'identité', 'description' => 'Carte nationale d\'identité'],
-            ['name' => 'Passeport', 'description' => 'Passeport en cours de validité'],
-            ['name' => 'Permis de conduire', 'description' => 'Permis de conduire valide'],
-            ['name' => 'Justificatif de domicile', 'description' => 'Facture ou attestation de domicile de moins de 3 mois'],
-            ['name' => 'Relevé bancaire', 'description' => 'Relevé de compte bancaire récent'],
+            ['name' => 'Carte d\'identit ou passeport', 'description' => 'Carte nationale d\'identité ou le passeport doit etre valide et lisible'],
+            ['name' => 'Photo de profil', 'description' => 'Photo de profil claire et récente'],
+
         ];
 
         foreach ($types as $type) {
