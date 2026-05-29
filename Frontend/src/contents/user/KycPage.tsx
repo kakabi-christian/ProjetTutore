@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import Select from 'react-select';
+import type { SingleValue } from 'react-select';
 import KycService from '../../services/KycService';
 import { typeDocumentService } from '../../services/TypeDocumentService';
 import type { Kyc } from '../../models/Kyc';
@@ -7,11 +9,15 @@ import { toast } from 'react-toastify';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { 
-    MdCloudUpload, MdCheckCircle, MdPublic, MdArrowForward, 
-    MdArrowBack, MdVerifiedUser, MdSecurity, MdShield, MdStars 
+    MdCloudUpload, MdCheckCircle, MdArrowForward, 
+    MdArrowBack, MdVerifiedUser, MdPhone, MdShield, MdStars 
 } from "react-icons/md";
 
-const COUNTRIES = ["Cameroun", "Gabon", "Congo", "Tchad", "Centrafrique", "Guinée Équatoriale", "France", "USA", "Autre"];
+interface CountryOption {
+    value: string;
+    fullCountryName: string;
+    label: React.JSX.Element;
+}
 
 // ─── Composant feux d'artifice (canvas plein écran, 2 secondes) ───────────────
 function FireworksCanvas() {
@@ -44,7 +50,6 @@ function FireworksCanvas() {
         const particles: Particle[] = [];
 
         const createBurst = (x: number, y: number) => {
-            // particules rondes
             for (let i = 0; i < 60; i++) {
                 const angle = (Math.PI * 2 / 60) * i;
                 const speed = 3 + Math.random() * 6;
@@ -59,7 +64,6 @@ function FireworksCanvas() {
                     decay: 0.018 + Math.random() * 0.01,
                 });
             }
-            // confettis rectangulaires
             for (let i = 0; i < 30; i++) {
                 const angle = Math.random() * Math.PI * 2;
                 const speed = 2 + Math.random() * 5;
@@ -81,7 +85,6 @@ function FireworksCanvas() {
             }
         };
 
-        // Séquence de tirs : 6 explosions étalées sur 1.4s
         const W = canvas.width;
         const H = canvas.height;
         const bursts: [number, number, number][] = [
@@ -164,24 +167,25 @@ function FireworksCanvas() {
 export default function KycPage() {
     const [kycStatus, setKycStatus] = useState<Kyc | null>(null);
     const [types, setTypes] = useState<TypeDocument[]>([]);
+    const [countries, setCountries] = useState<CountryOption[]>([]);
+    const [selectedCountry, setSelectedCountry] = useState<CountryOption | null>(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [showFireworks, setShowFireworks] = useState(false);
     
     const [currentStep, setCurrentStep] = useState(0);
-    const [country, setCountry] = useState('Cameroun');
     const [selectedFiles, setSelectedFiles] = useState<{ file: File; type_document_id: number; preview: string }[]>([]);
 
     useEffect(() => {
         AOS.init({ duration: 800, once: false });
         fetchInitialData();
+        fetchCountries();
     }, []);
 
     useEffect(() => {
         AOS.refresh();
     }, [currentStep]);
 
-    // Lance les feux d'artifice dès que le statut devient APPROVED
     useEffect(() => {
         if (kycStatus?.status === 'APPROVED') {
             setShowFireworks(true);
@@ -199,9 +203,43 @@ export default function KycPage() {
             setKycStatus(statusRes.data);
             setTypes(typesRes.data);
         } catch (error) {
-            console.error("Erreur", error);
+            console.error("Erreur initialisation:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchCountries = async () => {
+        try {
+            const response = await fetch("https://restcountries.com/v3.1/all?fields=name,flags,translations,cca2");
+            const data = await response.json();
+            const formatted = data.map((c: any) => {
+                const countryName = c.translations?.fra?.common || c.name.common;
+                return {
+                    value: c.cca2,
+                    fullCountryName: countryName,
+                    label: (
+                        <div className="d-flex align-items-center gap-2">
+                            <img src={c.flags.png} alt="" style={{ width: "18px", height: "12px", objectFit: 'cover', borderRadius: '2px' }} />
+                            <span>{countryName}</span>
+                        </div>
+                    ),
+                };
+            }).sort((a: any, b: any) => a.fullCountryName.localeCompare(b.fullCountryName));
+            
+            setCountries(formatted);
+            
+            // Cameroun par défaut si disponible
+            const defaultCountry = formatted.find((c: any) => c.fullCountryName === "Cameroun");
+            if (defaultCountry) setSelectedCountry(defaultCountry);
+        } catch (err) {
+            console.error("Erreur chargement pays:", err);
+        }
+    };
+
+    const handleCountryChange = (selectedOption: SingleValue<CountryOption>) => {
+        if (selectedOption) {
+            setSelectedCountry(selectedOption);
         }
     };
 
@@ -223,10 +261,14 @@ export default function KycPage() {
     };
 
     const handleSubmit = async () => {
+        if (!selectedCountry) {
+            toast.error("Veuillez sélectionner un pays d'émission.");
+            return;
+        }
         setSubmitting(true);
         try {
             await KycService.submitKyc({ 
-                country_of_issue: country, 
+                country_of_issue: selectedCountry.fullCountryName, 
                 documents: selectedFiles.map(({file, type_document_id}) => ({file, type_document_id})) 
             });
             toast.success("Dossier soumis avec succès !");
@@ -236,6 +278,21 @@ export default function KycPage() {
         } finally {
             setSubmitting(false);
         }
+    };
+
+    const customSelectStyles = {
+        control: (base: any) => ({
+            ...base,
+            background: "#F1F4F9",
+            border: "2px solid #E2E8F0",
+            borderRadius: "12px",
+            minHeight: "45px",
+            fontSize: "0.9rem",
+            boxShadow: "none",
+            '&:hover': { border: "2px solid #FF7A00" }
+        }),
+        menuPortal: (base: any) => ({ ...base, zIndex: 9999 }),
+        menu: (base: any) => ({ ...base, zIndex: 9999 }),
     };
 
     const renderContent = () => {
@@ -275,7 +332,7 @@ export default function KycPage() {
                             </div>
                         </div>
                         <button onClick={() => window.location.href = '/user/market'} className="btn btn-excha-orange btn-lg w-100 rounded-pill py-3 fw-bold">
-                            ACCÉDER AU Marché des echanges
+                            ACCÉDER AU MARCHÉ DES ÉCHANGES
                         </button>
                     </div>
                 </div>
@@ -343,16 +400,17 @@ export default function KycPage() {
 
                             {currentStep === 1 && (
                                 <div className="mb-4">
-                                    <label className="text-secondary mb-2 small fw-bold d-block text-uppercase">Pays d'émission</label>
-                                    <div className="row g-2">
-                                        {COUNTRIES.map(c => (
-                                            <div className="col-md-3 col-6" key={c}>
-                                                <div className={`country-pill ${country === c ? 'active' : ''}`} onClick={() => setCountry(c)}>
-                                                    {c}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                                    <label htmlFor="kyc-country-select" className="text-secondary mb-2 small fw-bold d-block text-uppercase">Pays d'émission du document</label>
+                                    <Select 
+                                        id="kyc-country-select"
+                                        inputId="kyc-country-select"
+                                        options={countries} 
+                                        value={selectedCountry}
+                                        onChange={handleCountryChange} 
+                                        styles={customSelectStyles} 
+                                        placeholder="Sélectionnez le pays..." 
+                                        menuPortalTarget={document.body}
+                                    />
                                 </div>
                             )}
 
@@ -397,7 +455,6 @@ export default function KycPage() {
 
     return (
         <div className="kyc-immersive-container light">
-            {/* ✅ Feux d'artifice : monté uniquement pendant 2s quand statut = APPROVED */}
             {showFireworks && <FireworksCanvas />}
 
             <nav className="navbar navbar-light py-3 px-md-5">
@@ -425,8 +482,6 @@ export default function KycPage() {
                 .kyc-hero-art { width: 280px; height: 280px; background: #fff; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #eee; }
                 .wizard-card { border: none; border-radius: 24px; }
                 .btn-icon-back { background: #f8f9fa; border: none; color: #333; width: 40px; height: 40px; border-radius: 10px; }
-                .country-pill { padding: 8px; background: #fff; border: 1px solid #eee; border-radius: 10px; text-align: center; cursor: pointer; font-size: 0.8rem; }
-                .country-pill.active { background: #FF7A00; border-color: #FF7A00; color: white; }
                 .mega-upload-box { background: #fafafa; border: 2px dashed #ddd; border-radius: 16px; }
                 .mega-upload-box.success { border: 2px solid #2ecc71; background: rgba(46, 204, 113, 0.02); }
                 .upload-trigger { width: 100%; padding: 20px; cursor: pointer; }

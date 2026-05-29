@@ -31,6 +31,8 @@ class Transaction extends Model
         'flw_tx_id',            // L'ID retourné par Flutterwave après paiement
         'buyer_payment_method', // MOBILE_MONEY | CARD
 
+        'buyer_method_payment_id', 
+
         // Paiement vendeur
         'flw_seller_tx_ref',
         'flw_seller_tx_id',
@@ -128,4 +130,14 @@ class Transaction extends Model
     {
         return $this->status === self::STATUS_AWAITING_SELLER;
     }
+
+     /**
+     * Compte de réception de l'acheteur.
+     * Chargé avec : ->with(['buyerMethodPayment'])
+     */
+    public function buyerMethodPayment(): BelongsTo
+    {
+        return $this->belongsTo(MethodPayment::class, 'buyer_method_payment_id', 'method_payment_id');
+    }
+ 
 }

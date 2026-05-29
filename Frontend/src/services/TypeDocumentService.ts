@@ -60,17 +60,51 @@ export const typeDocumentService = {
      * 3. Créer un type (Route Admin) ➕
      * POST /api/admin/type-documents
      */
-    create: async (data: CreateTypeDocument): Promise<TypeDocumentResponse<TypeDocument>> => {
-        const response = await api.post<TypeDocumentResponse<TypeDocument>>('/admin/type-documents', data);
+    create: async (data: CreateTypeDocument & { file?: File }): Promise<TypeDocumentResponse<TypeDocument>> => {
+        const formData = new FormData();
+        
+        // Ajout du nom du document
+        formData.append('name', data.name);
+        
+        // Ajout du fichier s'il est présent
+        if (data.file) {
+            formData.append('file', data.file);
+        }
+
+        const response = await api.post<TypeDocumentResponse<TypeDocument>>(
+            '/admin/type-documents', 
+            formData, 
+            {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            }
+        );
         return response.data;
     },
 
     /**
      * 4. Mettre à jour (Route Admin) ✏️
-     * PUT /api/admin/type-documents/{id}
+     * POST /api/admin/type-documents/{id} (Émulé en PUT via _method pour préserver le fichier)
      */
-    update: async (id: number, data: Partial<CreateTypeDocument>): Promise<TypeDocumentResponse<TypeDocument>> => {
-        const response = await api.put<TypeDocumentResponse<TypeDocument>>(`/admin/type-documents/${id}`, data);
+    update: async (id: number, data: Partial<CreateTypeDocument> & { file?: File }): Promise<TypeDocumentResponse<TypeDocument>> => {
+        const formData = new FormData();
+        
+        if (data.name) {
+            formData.append('name', data.name);
+        }
+        if (data.file) {
+            formData.append('file', data.file);
+        }
+        
+        // Spoofing de méthode indispensable pour que Laravel lise les fichiers binaires en PUT
+        formData.append('_method', 'PUT');
+
+        const response = await api.post<TypeDocumentResponse<TypeDocument>>(
+            `/admin/type-documents/${id}`, 
+            formData, 
+            {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            }
+        );
         return response.data;
     },
 

@@ -83,9 +83,9 @@ const MarketHeader: React.FC<MarketHeaderProps> = ({ activeTab, setActiveTab, on
         <ul className="navbar-nav d-flex flex-row gap-1 gap-md-4" style={{ flex: 2, justifyContent: 'center' }}>
           {[
             { id: 'accueil', icon: <MdHome size={24} />, label: 'Accueil' },
-            { id: 'reseau', icon: <MdPeople size={24} />, label: 'Réseau' },
-            { id: 'publications', icon: <MdCollectionsBookmark size={22} />, label: 'Annonces' },
-            { id: 'transactions', icon: <MdSwapHoriz size={26} />, label: 'Échanges' },
+            { id: 'reseau', icon: <MdPeople size={24} />, label: 'Mon Réseau' },
+            { id: 'publications', icon: <MdCollectionsBookmark size={22} />, label: 'Mes Annonces' },
+            { id: 'transactions', icon: <MdSwapHoriz size={26} />, label: 'Mes Transactions' },
           ].map((tab) => (
             <li key={tab.id} 
                 className={`nav-item text-center cursor-pointer px-2 px-md-3 pt-2 transition-all ${activeTab === tab.id ? "text-excha-orange border-bottom border-excha-orange border-3" : "text-muted opacity-75"}`}

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
+use App\Models\MethodPayment;
 use App\Models\Payment;
 use App\Models\PaymentHistory;
 use App\Models\PaymentStatus;
@@ -37,103 +38,189 @@ class TransactionController extends Controller
     /**
      * POST /api/transactions/initiate
      *
-     * Acheteur paie en currency_to (ex: XAF) à la plateforme via Flutterwave.
-     * Retourne un payment_link → frontend redirige l'acheteur.
+     * L'acheteur choisit son compte de réception (buyer_method_payment_id)
+     * en plus de sa méthode de paiement.
      */
-    public function initiate(Request $request)
-    {
-        $validated = $request->validate([
-            'listing_id' => 'required|integer|exists:listings,listing_id',
-            'amount_from' => 'required|numeric|min:0.01',
-            'payment_method' => 'required|in:MOBILE_MONEY,CARD',
+  public function initiate(Request $request)
+{
+    Log::info('--- Début de l\'initialisation d\'une transaction ---', [
+        'ip' => $request->ip(),
+        'payload' => $request->all()
+    ]);
+
+    $validated = $request->validate([
+        'listing_id'               => 'required|integer|exists:listings,listing_id',
+        'amount_from'              => 'required|numeric|min:0.01',
+        'payment_method'           => 'required|in:MOBILE_MONEY,CARD',
+        // Le compte sur lequel l'acheteur veut recevoir ses fonds (currency_from)
+        'buyer_method_payment_id'  => 'required|integer|exists:method_payments,method_payment_id',
+    ]);
+
+    /** @var Utilisateur $buyer */
+    $buyer = Auth::user();
+    Log::info('Acheteur authentifié', ['user_id' => $buyer->user_id, 'email' => $buyer->email]);
+
+    $listing = Listing::with(['utilisateur', 'paymentMethod'])->findOrFail($validated['listing_id']);
+    Log::info('Annonce récupérée pour la transaction', [
+        'listing_id' => $listing->listing_id,
+        'seller_id' => $listing->user_id,
+        'amount_available' => $listing->amount_available,
+        'currency_from' => $listing->currency_from
+    ]);
+
+    // Vérifier que ce compte appartient bien à l'acheteur
+    $buyerMethod = MethodPayment::where('method_payment_id', $validated['buyer_method_payment_id'])
+        ->where('user_id', $buyer->user_id)
+        ->first();
+
+    if (!$buyerMethod) {
+        // CORRIGÉ : Double guillemet extérieur pour utiliser l'apostrophe librement
+        Log::warning("Échec d'initialisation : Le compte de réception n'appartient pas à l'acheteur", [
+            'buyer_id' => $buyer->user_id,
+            'requested_method_id' => $validated['buyer_method_payment_id']
+        ]);
+        return response()->json(['message' => 'Ce compte de réception ne vous appartient pas.'], 403);
+    }
+
+    if ($listing->user_id === $buyer->user_id) {
+        Log::warning("Échec d'initialisation : Tentative d'achat de sa propre annonce", [
+            'user_id' => $buyer->user_id,
+            'listing_id' => $listing->listing_id
+        ]);
+        return response()->json(['message' => 'Vous ne pouvez pas acheter votre propre annonce.'], 422);
+    }
+
+    if ((float) $listing->amount_available < (float) $validated['amount_from']) {
+        Log::warning("Échec d'initialisation : Solde de l'annonce insuffisant", [
+            'listing_id' => $listing->listing_id,
+            'available' => $listing->amount_available,
+            'requested' => $validated['amount_from']
+        ]);
+        return response()->json([
+            'message' => 'Montant demandé supérieur au disponible sur cette annonce.',
+            'available' => $listing->amount_available,
+        ], 422);
+    }
+
+    if ($listing->min_amount > 0 && $validated['amount_from'] < $listing->min_amount) {
+        Log::warning("Échec d'initialisation : Montant inférieur au minimum requis par l'annonce", [
+            'listing_id' => $listing->listing_id,
+            'min_required' => $listing->min_amount,
+            'requested' => $validated['amount_from']
+        ]);
+        return response()->json([
+            'message' => "Le montant minimum est {$listing->min_amount} {$listing->currency_from}.",
+        ], 422);
+    }
+
+    // Calculs financiers
+    $exchangeRate = (float) $listing->user_rate;
+    $amountFrom = (float) $validated['amount_from'];        // ex: USD
+    $amountTo = round($amountFrom * $exchangeRate, 2);    // ex: XAF
+    $buyerFee = round($amountTo * 0.01, 2);
+    $sellerFee = round($amountFrom * 0.01, 2);
+    $totalChargedToBuyer = round($amountTo + $buyerFee, 2); // XAF total Flutterwave
+
+    Log::info('Calculs financiers terminés', [
+        'exchange_rate' => $exchangeRate,
+        'amount_from' => $amountFrom,
+        'amount_to' => $amountTo,
+        'buyer_fee' => $buyerFee,
+        'seller_fee' => $sellerFee,
+        'total_charged_to_buyer' => $totalChargedToBuyer
+    ]);
+
+    try {
+        Log::info('Ouverture de la transaction DB globale');
+        DB::beginTransaction();
+
+        $transaction = Transaction::create([
+            'buyer_id'                => $buyer->user_id,
+            'seller_id'               => $listing->user_id,
+            'listing_id'              => $listing->listing_id,
+            'amount_from'             => $amountFrom,
+            'amount_to'               => $amountTo,
+            'exchange_rate'           => $exchangeRate,
+            'buyer_fee'               => $buyerFee,
+            'seller_fee'              => $sellerFee,
+            'buyer_payment_method'    => $validated['payment_method'],
+            'buyer_method_payment_id' => $validated['buyer_method_payment_id'],
         ]);
 
-        /** @var Utilisateur $buyer */
-        $buyer = Auth::user();
-        $listing = Listing::with(['utilisateur', 'paymentMethod'])->findOrFail($validated['listing_id']);
+        $flwTxRef = $transaction->generateFlwTxRef();
+        $transaction->update(['flw_tx_ref' => $flwTxRef]);
+        
+        Log::info('Enregistrement Transaction DB créé', [
+            'transaction_id' => $transaction->transaction_id,
+            'flw_tx_ref' => $flwTxRef
+        ]);
 
-        if ($listing->user_id === $buyer->user_id) {
-            return response()->json(['message' => 'Vous ne pouvez pas acheter votre propre annonce.'], 422);
-        }
+        $payment = Payment::create([
+            'user_id' => $buyer->user_id,
+            'transaction_id' => $transaction->transaction_id,
+            'method_payment_id' => null,
+            'amount' => $totalChargedToBuyer,
+            'currency' => $listing->currency_to,
+        ]);
 
-        if ((float) $listing->amount_available < (float) $validated['amount_from']) {
-            return response()->json([
-                'message' => 'Montant demandé supérieur au disponible sur cette annonce.',
-                'available' => $listing->amount_available,
-            ], 422);
-        }
-
-        if ($listing->min_amount > 0 && $validated['amount_from'] < $listing->min_amount) {
-            return response()->json([
-                'message' => "Le montant minimum est {$listing->min_amount} {$listing->currency_from}.",
-            ], 422);
-        }
-
-        $exchangeRate = (float) $listing->user_rate;
-        $amountFrom = (float) $validated['amount_from'];        // USD
-        $amountTo = round($amountFrom * $exchangeRate, 2);    // XAF
-        $buyerFee = round($amountTo * 0.01, 2);
-        $sellerFee = round($amountFrom * 0.01, 2);
-        $totalChargedToBuyer = round($amountTo + $buyerFee, 2);          // XAF total Flutterwave
+        $pendingStatus = PaymentStatus::firstOrCreate(['title' => 'PENDING']);
+        PaymentHistory::create([
+            'payment_id' => $payment->payment_id,
+            'payment_status_id' => $pendingStatus->payment_status_id,
+            'date' => now(),
+        ]);
 
         try {
             DB::beginTransaction();
 
             $transaction = Transaction::create([
-                'buyer_id' => $buyer->user_id,
-                'seller_id' => $listing->user_id,
-                'listing_id' => $listing->listing_id,
-                'amount_from' => $amountFrom,
-                'amount_to' => $amountTo,
-                'exchange_rate' => $exchangeRate,
-                'buyer_fee' => $buyerFee,
-                'seller_fee' => $sellerFee,
-                'buyer_payment_method' => $validated['payment_method'],
+                'buyer_id'                => $buyer->user_id,
+                'seller_id'               => $listing->user_id,
+                'listing_id'              => $listing->listing_id,
+                'amount_from'             => $amountFrom,
+                'amount_to'               => $amountTo,
+                'exchange_rate'           => $exchangeRate,
+                'buyer_fee'               => $buyerFee,
+                'seller_fee'              => $sellerFee,
+                'buyer_payment_method'    => $validated['payment_method'],
+                'buyer_method_payment_id' => $validated['buyer_method_payment_id'], // ← Phase 3
+                'status'                  => Transaction::STATUS_AWAITING_SELLER, // ✅ Enregistre directement AWAITING_SELLER au lieu de PENDING
             ]);
 
-            $flwTxRef = $transaction->generateFlwTxRef();
-            $transaction->update(['flw_tx_ref' => $flwTxRef]);
+        return response()->json(['message' => 'Erreur lors de la création.', 'error' => $e->getMessage()], 500);
+    }
 
-            $payment = Payment::create([
-                'user_id' => $buyer->user_id,
-                'transaction_id' => $transaction->transaction_id,
-                'method_payment_id' => null,
-                'amount' => $totalChargedToBuyer,
-                'currency' => $listing->currency_to,
-            ]);
+    // Préparation de l'appel au service Flutterwave
+    $flwPayload = [
+        'tx_ref' => $flwTxRef,
+        'amount' => $totalChargedToBuyer,
+        'currency' => $listing->currency_to,
+        'customer_email' => $buyer->email,
+        'customer_name' => trim($buyer->firstname.' '.$buyer->lastname),
+        'payment_options' => $validated['payment_method'] === 'MOBILE_MONEY' ? 'mobilemoney' : 'card',
+        'redirect_url' => config('app.frontend_url').'/payment/callback?tx_ref='.$flwTxRef,
+        'description' => "Échange {$amountFrom} {$listing->currency_from} → {$amountTo} {$listing->currency_to}",
+        'meta' => [
+            'transaction_id' => $transaction->transaction_id,
+            'payment_id' => $payment->payment_id,
+            'role' => 'buyer',
+        ],
+    ];
 
-            $pendingStatus = PaymentStatus::firstOrCreate(['title' => 'PENDING']);
-            PaymentHistory::create([
-                'payment_id' => $payment->payment_id,
-                'payment_status_id' => $pendingStatus->payment_status_id,
-                'date' => now(),
-            ]);
+    Log::info('Envoi de la requête d\'initialisation à Flutterwave', ['flw_payload' => $flwPayload]);
 
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('TransactionController@initiate: Erreur DB', ['msg' => $e->getMessage()]);
+    $flwResult = $this->flwService->initializePayment($flwPayload);
 
-            return response()->json(['message' => 'Erreur lors de la création.', 'error' => $e->getMessage()], 500);
-        }
+    Log::info('Réponse reçue de Flutterwave', ['flw_result' => $flwResult]);
 
-        $flwResult = $this->flwService->initializePayment([
-            'tx_ref' => $flwTxRef,
-            'amount' => $totalChargedToBuyer,
-            'currency' => $listing->currency_to,
-            'customer_email' => $buyer->email,
-            'customer_name' => trim($buyer->firstname.' '.$buyer->lastname),
-            'payment_options' => $validated['payment_method'] === 'MOBILE_MONEY' ? 'mobilemoney' : 'card',
-            'redirect_url' => config('app.frontend_url').'/payment/callback?tx_ref='.$flwTxRef,
-            'description' => "Échange {$amountFrom} {$listing->currency_from} → {$amountTo} {$listing->currency_to}",
-            'meta' => [
-                'transaction_id' => $transaction->transaction_id,
-                'payment_id' => $payment->payment_id,
-                'role' => 'buyer',
-            ],
+    if (! $flwResult['success']) {
+        Log::error('Échec de l\'initialisation du paiement chez Flutterwave', [
+            'flw_tx_ref' => $flwTxRef,
+            'transaction_id' => $transaction->transaction_id,
+            'flw_message' => $flwResult['message'] ?? 'Aucun message retourné'
         ]);
 
-        if (! $flwResult['success']) {
+        try {
             $transaction->update(['status' => Transaction::STATUS_CANCELLED]);
             $failedStatus = PaymentStatus::firstOrCreate(['title' => 'FAILED']);
             PaymentHistory::create([
@@ -141,9 +228,17 @@ class TransactionController extends Controller
                 'payment_status_id' => $failedStatus->payment_status_id,
                 'date' => now(),
             ]);
-
-            return response()->json(['message' => "Impossible d'initialiser le paiement.", 'error' => $flwResult['message']], 502);
+            Log::info('Statuts mis à jour à CANCELLED / FAILED suite à l\'échec Flutterwave');
+        } catch (\Exception $updateEx) {
+            Log::error('Erreur lors de la mise à jour des statuts suite à l\'échec Flutterwave', [
+                'error' => $updateEx->getMessage()
+            ]);
         }
+
+        // Charger les relations nécessaires pour les notifications
+        $transaction->load(['listing', 'buyer', 'seller']);
+        $this->notificationService->notifyBuyer($transaction);
+        $this->notificationService->notifySeller($transaction);
 
         return response()->json([
             'message' => 'Transaction initiée avec succès',
@@ -162,20 +257,32 @@ class TransactionController extends Controller
         ], 201);
     }
 
+    Log::info('--- Fin de l\'initialisation réussie ---', [
+        'transaction_id' => $transaction->transaction_id,
+        'flw_tx_ref' => $flwTxRef,
+        'payment_link' => $flwResult['payment_link'] ?? 'Lien absent'
+    ]);
+
+    return response()->json([
+        'message' => 'Transaction initiée avec succès',
+        'payment_link' => $flwResult['payment_link'],
+        'transaction_id' => $transaction->transaction_id,
+        'flw_tx_ref' => $flwTxRef,
+        'summary' => [
+            'amount_from' => $amountFrom,
+            'currency_from' => $listing->currency_from,
+            'amount_to' => $amountTo,
+            'currency_to' => $listing->currency_to,
+            'buyer_fee' => $buyerFee,
+            'total_to_pay' => $totalChargedToBuyer,
+            'exchange_rate' => $exchangeRate,
+        ],
+    ], 201);
+}
     // ===========================================================
-    // PHASE 2 — Vendeur accepte → paie à son tour
+    // PHASE 2 — Vendeur accepte
     // ===========================================================
 
-    /**
-     * POST /api/transactions/{id}/accept
-     *
-     * Le vendeur accepte la transaction.
-     * → Génère un payment_link Flutterwave pour que le vendeur paie
-     *   ses currency_from (USD) à la plateforme.
-     * → Retourne le payment_link au frontend qui redirige le vendeur.
-     *
-     * Le webhook EXCHA-S-{id} finalise ensuite la transaction.
-     */
     public function accept(int $id)
     {
         /** @var Utilisateur $seller */
@@ -188,22 +295,15 @@ class TransactionController extends Controller
         }
 
         if ($transaction->status !== Transaction::STATUS_AWAITING_SELLER) {
-            return response()->json([
-                'message' => "Cette transaction ne peut pas être acceptée (statut : {$transaction->status}).",
-            ], 422);
+            return response()->json(['message' => "Statut invalide : {$transaction->status}."], 422);
         }
 
-        $listing = $transaction->listing;
+        $listing           = $transaction->listing;
+        $sellerFee         = (float) $transaction->seller_fee;
+        $amountFrom        = (float) $transaction->amount_from;
+        $totalSellerCharge = round($amountFrom + $sellerFee, 2);
+        $flwSellerTxRef    = $transaction->generateFlwSellerTxRef();
 
-        // Le vendeur paie amount_from (USD) + ses frais seller à la plateforme
-        $sellerFee = (float) $transaction->seller_fee;
-        $amountFrom = (float) $transaction->amount_from;
-        $totalSellerCharge = round($amountFrom + $sellerFee, 2); // USD total
-
-        // Générer la ref vendeur : préfixe EXCHA-S- pour distinguer dans le webhook
-        $flwSellerTxRef = $transaction->generateFlwSellerTxRef();
-
-        // Sauvegarder la ref + passer en AWAITING_SELLER_PAYMENT
         $transaction->update([
             'status' => Transaction::STATUS_AWAITING_SELLER_PAYMENT,
             'flw_seller_tx_ref' => $flwSellerTxRef,
@@ -217,8 +317,6 @@ class TransactionController extends Controller
             'flw_seller_tx_ref' => $flwSellerTxRef,
         ]);
 
-        // Appel Flutterwave — le vendeur paie en currency_from (USD)
-        // Ref: https://developer.flutterwave.com/reference/endpoints/payments#initiate-payment
         $flwResult = $this->flwService->initializePayment([
             'tx_ref' => $flwSellerTxRef,
             'amount' => $totalSellerCharge,
@@ -258,7 +356,6 @@ class TransactionController extends Controller
             ], 502);
         }
 
-        // Notifier l'acheteur que le vendeur a accepté et va payer
         $this->notificationService->notifyBuyerAccepted($transaction);
 
         return response()->json([
@@ -274,15 +371,9 @@ class TransactionController extends Controller
     }
 
     // ===========================================================
-    // ANNULATION — Vendeur refuse
+    // ANNULATION
     // ===========================================================
 
-    /**
-     * POST /api/transactions/{id}/cancel
-     *
-     * Le vendeur annule → remboursement automatique de l'acheteur via Flutterwave.
-     * Ref: https://developer.flutterwave.com/reference/endpoints/transactions#initiate-a-refund
-     */
     public function cancel(int $id)
     {
         /** @var Utilisateur $seller */
@@ -295,9 +386,7 @@ class TransactionController extends Controller
         }
 
         if ($transaction->status !== Transaction::STATUS_AWAITING_SELLER) {
-            return response()->json([
-                'message' => "Cette transaction ne peut pas être annulée (statut : {$transaction->status}).",
-            ], 422);
+            return response()->json(['message' => "Statut invalide : {$transaction->status}."], 422);
         }
 
         if (! $transaction->flw_tx_id) {
@@ -306,10 +395,7 @@ class TransactionController extends Controller
             return response()->json(['message' => 'Référence Flutterwave introuvable.'], 500);
         }
 
-        // Remboursement Flutterwave
-        // Ref: https://developer.flutterwave.com/reference/endpoints/transactions#initiate-a-refund
         $refundResult = $this->flwService->refundTransaction($transaction->flw_tx_id);
-
         $transaction->update(['status' => Transaction::STATUS_CANCELLED]);
         $this->notificationService->notifyBuyerCancelled($transaction);
 
@@ -324,24 +410,226 @@ class TransactionController extends Controller
             ], 207);
         }
 
-        Log::info('TransactionController@cancel: Annulée + remboursement initié', [
-            'transaction_id' => $id, 'seller_id' => $seller->user_id,
-        ]);
+        return response()->json(['message' => "Annulée. Remboursement sous 3–5 jours.", 'status' => Transaction::STATUS_CANCELLED]);
+    }
 
-        return response()->json([
-            'message' => "Transaction annulée. L'acheteur sera remboursé sous 3 à 5 jours ouvrés.",
-            'status' => Transaction::STATUS_CANCELLED,
-        ]);
+    // ===========================================================
+    // PHASE 3 — Libération des fonds (appelé par WebhookController)
+    // ===========================================================
+
+    /**
+     * Déclenche les deux transferts après confirmation du paiement vendeur :
+     *
+     *   Transfer 1 → Acheteur reçoit currency_from (ex: USD) sur son buyerMethodPayment
+     *   Transfer 2 → Vendeur reçoit currency_to (ex: XAF) sur son listing->paymentMethod
+     *
+     * Les frais sont déduits :
+     *   - Acheteur reçoit : amount_from (sans les frais — il les a déjà payés en phase 1)
+     *   - Vendeur reçoit  : amount_to - seller_fee (ses frais)
+     *
+     * En cas d'échec d'un transfer → log critique + notif support.
+     * On ne rollback pas la transaction COMPLETED : les fonds sont déjà reçus.
+     */
+    // public function disburseFunds(Transaction $transaction): void
+    // {
+    //     $listing = $transaction->listing;
+
+    //     // --- Transfer 1 : Acheteur ← currency_from (ex: USD) ---
+    //     $buyerMethod = $transaction->buyerMethodPayment;
+
+    //     if (!$buyerMethod) {
+    //         Log::critical('TransactionController@disburseFunds: buyerMethodPayment manquant', [
+    //             'transaction_id' => $transaction->transaction_id,
+    //         ]);
+    //         $this->notificationService->notifyTransferFailed(
+    //             $transaction->buyer_id,
+    //             (float) $transaction->amount_from,
+    //             $listing->currency_from,
+    //             $transaction->transaction_id
+    //         );
+    //     } else {
+    //         $buyerTransferResult = $this->flwService->createTransfer([
+    //             // Ref: https://developer.flutterwave.com/reference/endpoints/transfers#create-a-transfer
+    //             'account_bank'     => $buyerMethod->bank_code ?? $buyerMethod->provider,
+    //             'account_number'   => $buyerMethod->account_number,
+    //             'amount'           => (float) $transaction->amount_from,      // USD
+    //             'currency'         => $listing->currency_from,                // USD
+    //             'narration'        => "ExchaPay — Échange #{$transaction->transaction_id}",
+    //             'reference'        => 'EXCHA-BUYER-' . $transaction->transaction_id . '-' . time(),
+    //             'beneficiary_name' => $buyerMethod->account_name,
+    //         ]);
+
+    //         if ($buyerTransferResult['success']) {
+    //             $accountInfo = strtoupper($buyerMethod->provider) . ' — ' . $buyerMethod->account_number;
+    //             $this->notificationService->notifyTransferSuccess(
+    //                 $transaction->buyer_id,
+    //                 (float) $transaction->amount_from,
+    //                 $listing->currency_from,
+    //                 $accountInfo
+    //             );
+    //             Log::info('TransactionController@disburseFunds: Transfer acheteur OK', [
+    //                 'transaction_id' => $transaction->transaction_id,
+    //                 'buyer_id'       => $transaction->buyer_id,
+    //                 'amount'         => $transaction->amount_from,
+    //                 'currency'       => $listing->currency_from,
+    //             ]);
+    //         } else {
+    //             Log::critical('TransactionController@disburseFunds: Transfer acheteur ÉCHOUÉ', [
+    //                 'transaction_id' => $transaction->transaction_id,
+    //                 'error'          => $buyerTransferResult['message'],
+    //             ]);
+    //             $this->notificationService->notifyTransferFailed(
+    //                 $transaction->buyer_id,
+    //                 (float) $transaction->amount_from,
+    //                 $listing->currency_from,
+    //                 $transaction->transaction_id
+    //             );
+    //         }
+    //     }
+
+    //     // --- Transfer 2 : Vendeur ← currency_to net de frais (ex: XAF) ---
+    //     $sellerMethod = $listing->paymentMethod; // Défini lors de la création de l'annonce
+
+    //     $sellerNetAmount = round((float) $transaction->amount_to - (float) $transaction->seller_fee, 2);
+
+    //     if (!$sellerMethod) {
+    //         Log::critical('TransactionController@disburseFunds: sellerMethodPayment manquant', [
+    //             'transaction_id' => $transaction->transaction_id,
+    //         ]);
+    //         $this->notificationService->notifyTransferFailed(
+    //             $transaction->seller_id,
+    //             $sellerNetAmount,
+    //             $listing->currency_to,
+    //             $transaction->transaction_id
+    //         );
+    //     } else {
+    //         $sellerTransferResult = $this->flwService->createTransfer([
+    //             'account_bank'     => $sellerMethod->bank_code ?? $sellerMethod->provider,
+    //             'account_number'   => $sellerMethod->account_number,
+    //             'amount'           => $sellerNetAmount,                 // XAF net
+    //             'currency'         => $listing->currency_to,            // XAF
+    //             'narration'        => "ExchaPay — Échange #{$transaction->transaction_id}",
+    //             'reference'        => 'EXCHA-SELLER-' . $transaction->transaction_id . '-' . time(),
+    //             'beneficiary_name' => $sellerMethod->account_name,
+    //         ]);
+
+    //         if ($sellerTransferResult['success']) {
+    //             $accountInfo = strtoupper($sellerMethod->provider) . ' — ' . $sellerMethod->account_number;
+    //             $this->notificationService->notifyTransferSuccess(
+    //                 $transaction->seller_id,
+    //                 $sellerNetAmount,
+    //                 $listing->currency_to,
+    //                 $accountInfo
+    //             );
+    //             Log::info('TransactionController@disburseFunds: Transfer vendeur OK', [
+    //                 'transaction_id' => $transaction->transaction_id,
+    //                 'seller_id'      => $transaction->seller_id,
+    //                 'amount'         => $sellerNetAmount,
+    //                 'currency'       => $listing->currency_to,
+    //             ]);
+    //         } else {
+    //             Log::critical('TransactionController@disburseFunds: Transfer vendeur ÉCHOUÉ', [
+    //                 'transaction_id' => $transaction->transaction_id,
+    //                 'error'          => $sellerTransferResult['message'],
+    //             ]);
+    //             $this->notificationService->notifyTransferFailed(
+    //                 $transaction->seller_id,
+    //                 $sellerNetAmount,
+    //                 $listing->currency_to,
+    //                 $transaction->transaction_id
+    //             );
+    //         }
+    //     }
+    // }
+
+    // ===========================================================
+    // PHASE 3 — Libération des fonds (SIMULATION DEV)
+    // Pas d'appel réel Flutterwave Transfer en mode sandbox.
+    // On simule un succès instantané et on notifie les deux parties.
+    // ===========================================================
+
+    /**
+     * Simule la libération des fonds après confirmation du paiement vendeur.
+     *
+     * Version DEV : bypasse createTransfer() de Flutterwave.
+     * Notifie directement acheteur et vendeur comme si le virement était initié.
+     *
+     * En production → décommenter disburseFunds() ci-dessus et supprimer cette méthode.
+     */
+    public function disburseFunds(Transaction $transaction): void
+    {
+        $listing = $transaction->listing;
+
+        // --- Simulation Transfer 1 : Acheteur ← currency_from (ex: USD) ---
+        $buyerMethod = $transaction->buyerMethodPayment;
+
+        if (! $buyerMethod) {
+            Log::warning('disburseFunds[SIM]: buyerMethodPayment manquant — notif échec acheteur', [
+                'transaction_id' => $transaction->transaction_id,
+            ]);
+            $this->notificationService->notifyTransferFailed(
+                $transaction->buyer_id,
+                (float) $transaction->amount_from,
+                $listing->currency_from,
+                $transaction->transaction_id
+            );
+        } else {
+            $accountInfo = strtoupper($buyerMethod->provider ?? 'COMPTE')
+                . ' — ' . $buyerMethod->account_number;
+
+            $this->notificationService->notifyTransferSuccess(
+                $transaction->buyer_id,
+                (float) $transaction->amount_from,
+                $listing->currency_from,
+                $accountInfo
+            );
+
+            Log::info('disburseFunds[SIM]: Acheteur notifié (transfert simulé)', [
+                'transaction_id' => $transaction->transaction_id,
+                'buyer_id'       => $transaction->buyer_id,
+                'amount'         => $transaction->amount_from,
+                'currency'       => $listing->currency_from,
+            ]);
+        }
+
+        // --- Simulation Transfer 2 : Vendeur ← currency_to net de frais (ex: XAF) ---
+        $sellerMethod = $listing->paymentMethod;
+        $sellerNetAmount = round((float) $transaction->amount_to - (float) $transaction->seller_fee, 2);
+
+        if (! $sellerMethod) {
+            Log::warning('disburseFunds[SIM]: sellerMethodPayment manquant — notif échec vendeur', [
+                'transaction_id' => $transaction->transaction_id,
+            ]);
+            $this->notificationService->notifyTransferFailed(
+                $transaction->seller_id,
+                $sellerNetAmount,
+                $listing->currency_to,
+                $transaction->transaction_id
+            );
+        } else {
+            $accountInfo = strtoupper($sellerMethod->provider ?? 'COMPTE')
+                . ' — ' . $sellerMethod->account_number;
+
+            $this->notificationService->notifyTransferSuccess(
+                $transaction->seller_id,
+                $sellerNetAmount,
+                $listing->currency_to,
+                $accountInfo
+            );
+
+            Log::info('disburseFunds[SIM]: Vendeur notifié (transfert simulé)', [
+                'transaction_id' => $transaction->transaction_id,
+                'seller_id'      => $transaction->seller_id,
+                'amount'         => $sellerNetAmount,
+                'currency'       => $listing->currency_to,
+            ]);
+        }
     }
 
     // ===========================================================
     // UTILITAIRES
     // ===========================================================
 
-    /**
-     * GET /api/transactions/status?tx_ref=XXXX
-     * Vérifie le statut d'une transaction par sa référence (acheteur ou vendeur).
-     */
     public function status(Request $request)
     {
         $txRef = $request->query('tx_ref');
@@ -349,7 +637,6 @@ class TransactionController extends Controller
             return response()->json(['message' => 'La référence (tx_ref) est requise'], 400);
         }
 
-        // Cherche dans les deux refs (acheteur et vendeur)
         $tx = Transaction::where(function ($q) use ($txRef) {
             $q->where('flw_tx_ref', $txRef)
                 ->orWhere('flw_seller_tx_ref', $txRef);
@@ -371,10 +658,6 @@ class TransactionController extends Controller
         ]);
     }
 
-    /**
-     * GET /api/transactions/my
-     * Transactions de l'utilisateur (acheteur OU vendeur).
-     */
     public function myTransactions()
     {
         /** @var Utilisateur $user */
@@ -386,6 +669,7 @@ class TransactionController extends Controller
                 'listing:listing_id,currency_from,currency_to',
                 'buyer:user_id,firstname,lastname',
                 'seller:user_id,firstname,lastname',
+                'buyerMethodPayment:method_payment_id,type,provider,account_number',
             ])
             ->orderBy('created_at', 'desc')
             ->paginate(15);

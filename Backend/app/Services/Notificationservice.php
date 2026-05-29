@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
+    // ===========================================================
+    // PHASE 1 — Paiement acheteur confirmé
+    // ===========================================================
+
     public function notifyBuyer(Transaction $transaction): void
     {
         try {
@@ -58,6 +62,10 @@ class NotificationService
         }
     }
 
+    // ===========================================================
+    // PHASE 2 — Vendeur accepte
+    // ===========================================================
+
     public function notifyBuyerAccepted(Transaction $transaction): void
     {
         try {
@@ -100,6 +108,72 @@ class NotificationService
             Log::error('NotificationService@notifyBuyerSellerPaid', ['error' => $e->getMessage()]);
         }
     }
+
+    // ===========================================================
+    // PHASE 3 — Libération des fonds
+    // ===========================================================
+
+    /**
+     * Notifie un utilisateur que son transfert a été initié avec succès.
+     *
+     * @param int    $userId
+     * @param float  $amount
+     * @param string $currency
+     * @param string $accountInfo  Ex: "MTN - 677123456" ou "UBA - FR7614508..."
+     */
+    public function notifyTransferSuccess(int $userId, float $amount, string $currency, string $accountInfo): void
+    {
+        try {
+            $formatted = number_format($amount, 2);
+
+            Notification::create([
+                'user_id'      => $userId,
+                'is_broadcast' => false,
+                'type'         => Notification::TYPE_SUCCESS,
+                'title'        => 'Transfert initié — Fonds en route',
+                'message'      => "Un virement de {$formatted} {$currency} a été initié vers votre compte "
+                    . "{$accountInfo}. Le délai de traitement est généralement de quelques minutes à 24h "
+                    . "selon votre opérateur. Contactez le support si vous n'avez rien reçu sous 48h.",
+                'is_read'      => false,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('NotificationService@notifyTransferSuccess', ['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Notifie un utilisateur que le transfert vers son compte a échoué.
+     * Le support doit intervenir manuellement.
+     *
+     * @param int    $userId
+     * @param float  $amount
+     * @param string $currency
+     * @param int    $transactionId
+     */
+    public function notifyTransferFailed(int $userId, float $amount, string $currency, int $transactionId): void
+    {
+        try {
+            $formatted = number_format($amount, 2);
+
+            Notification::create([
+                'user_id'      => $userId,
+                'is_broadcast' => false,
+                'type'         => Notification::TYPE_ERROR,
+                'title'        => 'Transfert échoué — Support requis',
+                'message'      => "Le virement de {$formatted} {$currency} n'a pas pu être effectué "
+                    . "automatiquement (réf. transaction #{$transactionId}). "
+                    . "Notre équipe a été notifiée et va traiter votre dossier sous 24h. "
+                    . "Vous pouvez aussi contacter le support directement.",
+                'is_read'      => false,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('NotificationService@notifyTransferFailed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    // ===========================================================
+    // ANNULATION
+    // ===========================================================
 
     public function notifyBuyerCancelled(Transaction $transaction): void
     {

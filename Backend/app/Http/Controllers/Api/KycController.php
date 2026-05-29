@@ -39,28 +39,28 @@ class KycController extends Controller
      * Liste des dossiers KYC avec pagination (pour l'Admin).
      */
     public function index(): JsonResponse
-    {
-        try {
-            $perPage = request()->get('per_page', 10);
+{
+    try {
+        $perPage = request()->get('per_page', 10);
 
-            // On charge l'utilisateur et ses documents liés
-            $kycs = Kyc::with(['utilisateur', 'documents.typeDocument'])
-                ->latest()
-                ->paginate($perPage);
+        /** @var \Illuminate\Pagination\LengthAwarePaginator $kycs */
+        $kycs = Kyc::with(['utilisateur', 'documents.typeDocument'])
+            ->latest()
+            ->paginate($perPage);
 
-            return response()->json([
-                'message' => 'Liste des dossiers KYC récupérée.',
-                'data' => $kycs->items(),
-                'pagination' => [
-                    'total' => $kycs->total(),
-                    'current_page' => $kycs->currentPage(),
-                    'last_page' => $kycs->lastPage(),
-                ],
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Erreur lors de la récupération.'], 500);
-        }
+        return response()->json([
+            'message' => 'Liste des dossiers KYC récupérée.',
+            'data' => $kycs->items(),
+            'pagination' => [
+                'total' => $kycs->total(),
+                'current_page' => $kycs->currentPage(),
+                'last_page' => $kycs->lastPage(),
+            ],
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Erreur lors de la récupération.'], 500);
     }
+}
 
     /**
      * @OA\Post(

@@ -87,36 +87,35 @@ class TypeDocumentController extends Controller
      * )
      */
     public function index(): JsonResponse
-    {
-        try {
-            // On récupère le nombre d'éléments par page depuis la requête, sinon 10 par défaut
-            $perPage = request()->get('per_page', 10);
+{
+    try {
+        $perPage = request()->get('per_page', 10);
 
-            // paginate() gère automatiquement le paramètre ?page= dans l'URL
-            $typeDocuments = TypeDocument::paginate($perPage);
+        /** @var \Illuminate\Pagination\LengthAwarePaginator $typeDocuments */
+        $typeDocuments = TypeDocument::paginate($perPage);
 
-            return response()->json([
-                'message' => 'Liste des types de documents récupérée avec succès.',
-                'data' => $typeDocuments->items(), // Les données réelles
-                'pagination' => [
-                    'total' => $typeDocuments->total(),
-                    'current_page' => $typeDocuments->currentPage(),
-                    'per_page' => $typeDocuments->perPage(),
-                    'last_page' => $typeDocuments->lastPage(),
-                    'from' => $typeDocuments->firstItem(),
-                    'to' => $typeDocuments->lastItem(),
-                ],
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Erreur lors de la récupération des types de documents.', [
-                'error' => $e->getMessage(),
-            ]);
+        return response()->json([
+            'message' => 'Liste des types de documents récupérée avec succès.',
+            'data' => $typeDocuments->items(),
+            'pagination' => [
+                'total' => $typeDocuments->total(),
+                'current_page' => $typeDocuments->currentPage(),
+                'per_page' => $typeDocuments->perPage(),
+                'last_page' => $typeDocuments->lastPage(),
+                'from' => $typeDocuments->firstItem(),
+                'to' => $typeDocuments->lastItem(),
+            ],
+        ], 200);
+    } catch (\Exception $e) {
+        Log::error('Erreur lors de la récupération des types de documents.', [
+            'error' => $e->getMessage(),
+        ]);
 
-            return response()->json([
-                'message' => 'Une erreur est survenue lors de la récupération des types de documents.',
-            ], 500);
-        }
+        return response()->json([
+            'message' => 'Une erreur est survenue lors de la récupération des types de documents.',
+        ], 500);
     }
+}
 
     /**
      * Créer un nouveau type de document.
@@ -159,28 +158,45 @@ class TypeDocumentController extends Controller
      * )
      */
     public function store(TypeDocumentRequest $request): JsonResponse
-    {
-        try {
-            $typeDocument = TypeDocument::create($request->validated());
+{
+    Log::info('--- Début de la création d\'un type de document ---', [
+        'ip' => $request->ip(),
+        'all_input' => $request->all()
+    ]);
 
-            Log::info('Type de document créé.', ['type_document_id' => $typeDocument->type_document_id, 'name' => $typeDocument->name]);
+    try {
+        // Récupération des données validées (si ça échoue ici, le FormRequest renvoie un 422 automatiquement)
+        $validatedData = $request->validated();
+        Log::info('Données de TypeDocument validées avec succès', ['validated' => $validatedData]);
 
-            return response()->json([
-                'message' => 'Type de document créé avec succès.',
-                'data' => $typeDocument,
-            ], 201);
-        } catch (\Exception $e) {
-            Log::error('Erreur lors de la création d\'un type de document.', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'request_data' => $request->all(),
-            ]);
+        Log::info('Tentative d\'insertion du TypeDocument dans la base de données...');
+        $typeDocument = TypeDocument::create($validatedData);
 
-            return response()->json([
-                'message' => 'Une erreur est survenue lors de la création du type de document.',
-            ], 500);
-        }
+        Log::info('Type de document créé avec succès en base de données.', [
+            'type_document_id' => $typeDocument->type_document_id ?? 'ID non défini',
+            'name'             => $typeDocument->name ?? 'Nom non défini',
+            'created_at'       => $typeDocument->created_at
+        ]);
+
+        return response()->json([
+            'message' => 'Type de document créé avec succès.',
+            'data' => $typeDocument,
+        ], 201);
+
+    } catch (\Exception $e) {
+        Log::error('Erreur CRITIQUE lors de la création d\'un type de document.', [
+            'error_message' => $e->getMessage(),
+            'code'          => $e->getCode(),
+            'request_data'  => $request->all(),
+            'trace'         => $e->getTraceAsString(),
+        ]);
+
+        return response()->json([
+            'message' => 'Une erreur est survenue lors de la création du type de document.',
+            'error_details' => $e->getMessage() // Optionnel : retire ceci en production
+        ], 500);
     }
+}
 
     /**
      * Afficher un type de document spécifique.
