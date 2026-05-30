@@ -355,7 +355,7 @@ export default function KycPage() {
         // --- INTERFACE EN ATTENTE (PENDING) ---
         if (kycStatus && kycStatus.status === 'PENDING') {
             return (
-                <div className="status-hero text-center py-5" data-aos="fade-up">
+                <div className="status-hero text-center py-5">
                     <div className="icon-wrapper mb-4 d-flex justify-content-center">
                         <div className="spinner-glow" />
                     </div>
