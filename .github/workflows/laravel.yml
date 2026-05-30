@@ -134,7 +134,7 @@ jobs:
     needs: [frontend-build] 
     if: |
       github.event_name == 'push' && 
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/fix/flutterwave-v2')
     runs-on: ubuntu-latest
     
     steps:
