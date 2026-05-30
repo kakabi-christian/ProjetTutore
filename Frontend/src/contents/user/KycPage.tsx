@@ -18,7 +18,14 @@ interface CountryOption {
     fullCountryName: string;
     label: React.JSX.Element;
 }
-
+// Liste de secours en cas de problème API
+const DEFAULT_COUNTRIES: CountryOption[] = [
+    { value: 'CM', fullCountryName: 'Cameroun', label: <div className="d-flex align-items-center gap-2"><span>🇨🇲 Cameroun</span></div> },
+    { value: 'FR', fullCountryName: 'France', label: <div className="d-flex align-items-center gap-2"><span>🇫🇷 France</span></div> },
+    { value: 'TG', fullCountryName: 'Togo', label: <div className="d-flex align-items-center gap-2"><span>🇹🇬 Togo</span></div> },
+    { value: 'BJ', fullCountryName: 'Bénin', label: <div className="d-flex align-items-center gap-2"><span>🇧🇯 Bénin</span></div> },
+    { value: 'CI', fullCountryName: 'Côte d\'Ivoire', label: <div className="d-flex align-items-center gap-2"><span>🇨🇮 Côte d\'Ivoire</span></div> }
+];
 // ─── Composant feux d'artifice (canvas plein écran, 2 secondes) ───────────────
 function FireworksCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -209,33 +216,39 @@ export default function KycPage() {
         }
     };
 
-    const fetchCountries = async () => {
-        try {
-            const response = await fetch("https://restcountries.com/v3.1/all?fields=name,flags,translations,cca2");
-            const data = await response.json();
-            const formatted = data.map((c: any) => {
-                const countryName = c.translations?.fra?.common || c.name.common;
-                return {
-                    value: c.cca2,
-                    fullCountryName: countryName,
-                    label: (
-                        <div className="d-flex align-items-center gap-2">
-                            <img src={c.flags.png} alt="" style={{ width: "18px", height: "12px", objectFit: 'cover', borderRadius: '2px' }} />
-                            <span>{countryName}</span>
-                        </div>
-                    ),
-                };
-            }).sort((a: any, b: any) => a.fullCountryName.localeCompare(b.fullCountryName));
-            
-            setCountries(formatted);
-            
-            // Cameroun par défaut si disponible
-            const defaultCountry = formatted.find((c: any) => c.fullCountryName === "Cameroun");
-            if (defaultCountry) setSelectedCountry(defaultCountry);
-        } catch (err) {
-            console.error("Erreur chargement pays:", err);
-        }
-    };
+   const fetchCountries = async () => {
+    try {
+        const response = await fetch("https://restcountries.com/v3.1/all?fields=name,flags,translations,cca2");
+        if (!response.ok) throw new Error("Erreur réseau");
+        
+        const data = await response.json();
+        const formatted = data.map((c: any) => {
+            const countryName = c.translations?.fra?.common || c.name.common;
+            return {
+                value: c.cca2,
+                fullCountryName: countryName,
+                label: (
+                    <div className="d-flex align-items-center gap-2">
+                        <img src={c.flags.png} alt="" style={{ width: "18px", height: "12px", objectFit: 'cover', borderRadius: '2px' }} />
+                        <span>{countryName}</span>
+                    </div>
+                ),
+            };
+        }).sort((a: any, b: any) => a.fullCountryName.localeCompare(b.fullCountryName));
+        
+        setCountries(formatted);
+        
+        // Cameroun par défaut si disponible
+        const defaultCountry = formatted.find((c: any) => c.fullCountryName === "Cameroun");
+        if (defaultCountry) setSelectedCountry(defaultCountry);
+        
+    } catch (err) {
+        console.error("Erreur chargement pays, bascule sur la liste par défaut:", err);
+        setCountries(DEFAULT_COUNTRIES);
+        // Sélection par défaut sur Cameroun dans la liste de secours
+        setSelectedCountry(DEFAULT_COUNTRIES[0]);
+    }
+};
 
     const handleCountryChange = (selectedOption: SingleValue<CountryOption>) => {
         if (selectedOption) {
