@@ -9,8 +9,47 @@ import {
     MdCheck, 
     MdClose, 
     MdSearch,
-    MdFilterList 
-} from 'react-icons/md';
+    MdFilterList,
+    MdPictureAsPdf
+} from 'react-icons/md'; 
+
+// --- COMPOSANT COMPAGNON POUR LE PASSAGE NGROK ---
+function NgrokSafeImage({ src, alt, className, fallback }: { src: string; alt: string; className?: string; fallback: string }) {
+    const [imageBlobUrl, setImageBlobUrl] = useState<string>('');
+
+    useEffect(() => {
+        // On va chercher l'image manuellement en injectant le header qui saute la sécurité de ngrok
+        fetch(src, {
+            headers: {
+                'ngrok-skip-browser-warning': 'true'
+            }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Impossible de charger l'image");
+            return res.blob();
+        })
+        .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            setImageBlobUrl(blobUrl);
+        })
+        .catch(() => {
+            setImageBlobUrl(fallback);
+        });
+
+        return () => {
+            if (imageBlobUrl) URL.revokeObjectURL(imageBlobUrl);
+        };
+    }, [src, fallback]);
+
+    return (
+        <img 
+            src={imageBlobUrl || 'https://placehold.co/400x300?text=Chargement...'} 
+            alt={alt} 
+            className={className} 
+            onError={(e) => { (e.target as any).src = fallback; }}
+        />
+    );
+}
 
 export default function KycAdmin() {
     const [kycs, setKycs] = useState<Kyc[]>([]);
@@ -43,32 +82,42 @@ export default function KycAdmin() {
         fetchKycs();
     }, [fetchKycs]);
 
-    // --- LOGIQUE DE FILTRAGE ET PAGINATION ---
+    // --- LOGIQUE DE FILTRAGE ---
     const filteredKycs = useMemo(() => {
         return kycs.filter(kyc => {
             const matchesStatus = statusFilter === 'ALL' || kyc.status === statusFilter;
-            const fullName = `${kyc.utilisateur?.firstname} ${kyc.utilisateur?.lastname}`.toLowerCase();
+            const firstName = kyc.utilisateur?.firstname || '';
+            const lastName = kyc.utilisateur?.lastname || '';
+            const fullName = `${firstName} ${lastName}`.toLowerCase();
+            const email = kyc.utilisateur?.email || '';
+            
             const matchesSearch = fullName.includes(searchTerm.toLowerCase()) || 
-                                 kyc.utilisateur?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+                                 email.toLowerCase().includes(searchTerm.toLowerCase());
             return matchesStatus && matchesSearch;
         });
     }, [kycs, searchTerm, statusFilter]);
 
-    const totalPages = Math.ceil(filteredKycs.length / itemsPerPage);
+    // Calcul du nombre total de pages basé sur les résultats filtrés
+    const totalPages = useMemo(() => {
+        return Math.ceil(filteredKycs.length / itemsPerPage);
+    }, [filteredKycs.length, itemsPerPage]);
     
+    // Éléments de la page courante
     const currentItems = useMemo(() => {
         const lastIndex = currentPage * itemsPerPage;
         const firstIndex = lastIndex - itemsPerPage;
         return filteredKycs.slice(firstIndex, lastIndex);
     }, [filteredKycs, currentPage, itemsPerPage]);
 
-    // Reset de la page quand on filtre
+    // Réinitialisation de la page à 1 quand l'utilisateur change les filtres
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, statusFilter]);
 
     const handlePageChange = (page: number) => {
-        if (page >= 1 && page <= totalPages) setCurrentPage(page);
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
     };
 
     const handleApprove = async (id: number) => {
@@ -77,10 +126,7 @@ export default function KycAdmin() {
         try {
             await KycService.approveKyc(id);
             toast.success("Dossier approuvé !");
-            
-            // Notification pour mettre à jour le compteur dans la Sidebar
             window.dispatchEvent(new Event('kyc-status-changed'));
-            
             fetchKycs();
             setSelectedKyc(null);
         } catch (error) {
@@ -96,10 +142,7 @@ export default function KycAdmin() {
         try {
             await KycService.rejectKyc(id, rejectionReason);
             toast.info("Dossier rejeté");
-            
-            // Notification pour mettre à jour le compteur dans la Sidebar
             window.dispatchEvent(new Event('kyc-status-changed'));
-            
             fetchKycs();
             setSelectedKyc(null);
             setRejectionReason('');
@@ -111,7 +154,7 @@ export default function KycAdmin() {
     };
 
     const getStatusBadge = (status: string) => {
-        const styles: any = {
+        const styles: Record<string, { bg: string; color: string; label: string }> = {
             'PENDING': { bg: 'rgba(255, 107, 43, 0.1)', color: 'var(--orange)', label: 'En attente' },
             'APPROVED': { bg: 'rgba(0, 200, 150, 0.1)', color: 'var(--green)', label: 'Approuvé' },
             'REJECTED': { bg: 'rgba(220, 53, 69, 0.1)', color: '#dc3545', label: 'Rejeté' }
@@ -176,6 +219,7 @@ export default function KycAdmin() {
                 </div>
             </div>
 
+            {/* --- TABLEAU DES DEMANDES --- */}
             <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div className="table-responsive">
                     <table className="table table-hover align-middle mb-0">
@@ -196,7 +240,7 @@ export default function KycAdmin() {
                                             <div className="d-flex align-items-center">
                                                 <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm" 
                                                      style={{ width: '40px', height: '40px', backgroundColor: 'var(--green)', color: 'white' }}>
-                                                    {kyc.utilisateur?.firstname?.charAt(0) || 'U'}
+                                                    {kyc.utilisateur?.firstname?.charAt(0).toUpperCase() || 'U'}
                                                 </div>
                                                 <div>
                                                     <div className="fw-bold" style={{ color: 'var(--blue)' }}>
@@ -211,12 +255,15 @@ export default function KycAdmin() {
                                         </td>
                                         <td>{getStatusBadge(kyc.status)}</td>
                                         <td className="text-muted small">
-                                            {new Date(kyc.created_at).toLocaleDateString()}
+                                            {kyc.created_at ? new Date(kyc.created_at).toLocaleDateString() : 'N/A'}
                                         </td>
                                         <td className="text-end px-4">
                                             <button 
                                                 className="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold shadow-sm"
-                                                onClick={() => setSelectedKyc(kyc)}
+                                                onClick={() => {
+                                                    setRejectionReason('');
+                                                    setSelectedKyc(kyc);
+                                                }}
                                             >
                                                 <MdVisibility className="me-1" /> Examiner
                                             </button>
@@ -234,6 +281,7 @@ export default function KycAdmin() {
                     </table>
                 </div>
 
+                {/* --- FOOTER / PAGINATION --- */}
                 <div className="card-footer bg-white border-top-0 p-3 d-flex justify-content-between align-items-center">
                     <div className="text-muted small fw-medium">
                         Page {currentPage} sur {totalPages || 1}
@@ -274,9 +322,9 @@ export default function KycAdmin() {
                 </div>
             </div>
 
-            {/* --- MODAL D'EXAMEN --- */}
+            {/* --- MODAL D'EXAMEN DÉTAILLÉ --- */}
             {selectedKyc && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(10, 37, 64, 0.85)', backdropFilter: 'blur(4px)' }}>
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(10, 37, 64, 0.85)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered">
                         <div className="modal-content border-0 shadow-lg rounded-4">
                             <div className="modal-header border-0 p-4 pb-0">
@@ -287,38 +335,54 @@ export default function KycAdmin() {
                             </div>
                             <div className="modal-body p-4">
                                 <div className="row g-3 mb-4">
-                                    {selectedKyc.documents?.map((doc) => (
-                                        <div key={doc.document_id} className="col-md-6">
-                                            <div className="card h-100 border shadow-sm rounded-3 overflow-hidden">
-                                                <div className="card-header bg-light small fw-bold d-flex justify-content-between border-0">
-                                                    <span>{doc.type_document?.name || 'Document'}</span>
-                                                    <span className="text-primary">{doc.country_of_issue}</span>
+                                    {selectedKyc.documents?.map((doc) => {
+                                        const isPdf = doc.file_url?.toLowerCase().endsWith('.pdf');
+                                        const fileLink = `${import.meta.env.VITE_API_BASE_URL}/storage/${doc.file_url}`;
+
+                                        return (
+                                            <div key={doc.document_id} className="col-md-6">
+                                                <div className="card h-100 border shadow-sm rounded-3 overflow-hidden">
+                                                    <div className="card-header bg-light small fw-bold d-flex justify-content-between border-0">
+                                                        <span>{doc.type_document?.name || 'Document'}</span>
+                                                        <span className="text-primary">{doc.country_of_issue}</span>
+                                                    </div>
+                                                    
+                                                    {/* ZONE D'APERÇU ADAPTATIVE AVEC GESTION NGROK */}
+                                                    <div className="bg-dark d-flex align-items-center justify-content-center" style={{ height: '250px' }}>
+                                                        {isPdf ? (
+                                                            <div className="text-center text-white p-3">
+                                                                <MdPictureAsPdf size={48} className="text-danger mb-2" />
+                                                                <p className="small mb-0 fw-medium">Document au format PDF</p>
+                                                                <span className="badge bg-secondary mt-2">Cliquez en bas pour l'ouvrir</span>
+                                                            </div>
+                                                        ) : (
+                                                            <NgrokSafeImage 
+                                                                src={fileLink} 
+                                                                alt="KYC Doc"
+                                                                className="img-fluid h-100 object-fit-contain p-1"
+                                                                fallback="https://placehold.co/400x300?text=Image+Indisponible"
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <a href={fileLink} 
+                                                       target="_blank" rel="noreferrer" 
+                                                       className={`card-footer text-center text-decoration-none small fw-bold py-2 ${isPdf ? 'bg-primary text-white' : 'bg-white text-primary'}`}>
+                                                        {isPdf ? "OUVRIR LE DOCUMENT PDF" : "AGRANDIR L'IMAGE"}
+                                                    </a>
                                                 </div>
-                                                <div className="bg-dark d-flex align-items-center justify-content-center" style={{ height: '250px' }}>
-                                                    <img 
-                                                        src={`${import.meta.env.VITE_API_BASE_URL}/storage/${doc.file_url}`} 
-                                                        alt="KYC Doc"
-                                                        className="img-fluid h-100 object-fit-contain p-1"
-                                                        onError={(e) => { (e.target as any).src = 'https://placehold.co/400x300?text=Image+Indisponible'; }}
-                                                    />
-                                                </div>
-                                                <a href={`${import.meta.env.VITE_API_BASE_URL}/storage/${doc.file_url}`} 
-                                                   target="_blank" rel="noreferrer" 
-                                                   className="card-footer bg-white text-center text-decoration-none small fw-bold py-2">
-                                                    AGRANDIR L'IMAGE
-                                                </a>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
 
                                 {selectedKyc.status === 'PENDING' && (
                                     <div className="p-3 rounded-4" style={{ backgroundColor: '#f1f5f9' }}>
-                                        <label className="form-label fw-bold small text-muted text-uppercase">Motif du rejet</label>
+                                        <label className="form-label fw-bold small text-muted text-uppercase">Motif du rejet (obligatoire pour rejeter)</label>
                                         <textarea 
                                             className="form-control border-0 shadow-sm mb-3" 
                                             rows={2}
-                                            placeholder="Ex: Image floue ou document expiré..."
+                                            placeholder="Ex: Image floue, document expiré, informations discordantes..."
                                             value={rejectionReason}
                                             onChange={(e) => setRejectionReason(e.target.value)}
                                         ></textarea>
@@ -328,16 +392,22 @@ export default function KycAdmin() {
                                                 onClick={() => handleApprove(selectedKyc.kyc_id)}
                                                 disabled={processing}
                                             >
-                                                {processing ? '...' : <><MdCheck /> APPROUVER</>}
+                                                {processing ? 'Traitement...' : <><MdCheck className="me-1"/> APPROUVER</>}
                                             </button>
                                             <button 
                                                 className="btn btn-outline-danger flex-grow-1 py-2 fw-bold"
                                                 onClick={() => handleReject(selectedKyc.kyc_id)}
                                                 disabled={processing || !rejectionReason.trim()}
                                             >
-                                                <MdClose /> REJETER
+                                                <MdClose className="me-1" /> REJETER
                                             </button>
                                         </div>
+                                    </div>
+                                )}
+                                
+                                {selectedKyc.status !== 'PENDING' && (
+                                    <div className="text-center p-3 rounded-4 bg-light fw-medium text-muted">
+                                        Ce dossier a déjà été traité (Statut : {getStatusBadge(selectedKyc.status)}).
                                     </div>
                                 )}
                             </div>

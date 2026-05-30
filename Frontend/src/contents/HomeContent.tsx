@@ -84,7 +84,7 @@ const HomeContent: React.FC = () => {
 
               <div className="hero-stats d-flex align-items-center justify-content-center justify-content-lg-start gap-4">
                 <div className="stat-item" data-aos="zoom-in" data-aos-delay="200">
-                  <div className="stat-number fw-bold h2 text-excha-blue">50+</div>
+                  <div className="stat-number fw-bold h2 text-excha-blue">5+</div>
                   <div className="stat-label small text-muted">Devises</div>
                 </div>
                 <div className="divider-vr bg-gray opacity-25" style={{width: '1px', height: '40px'}}></div>
