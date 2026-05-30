@@ -2,9 +2,9 @@ name: CI-CD ExchaPay (Full Pipeline FTP)
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "fix/flutterwave-v2", ]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "fix/flutterwave-v2", ]
 
 jobs:
   # --- PARTIE 1 : QUALITÉ, TESTS & SONARQUBE ---
